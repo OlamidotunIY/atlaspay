@@ -1,0 +1,7 @@
+rootProject.name = 'atlaspay'
+include 'atlaspay-core'
+include 'atlaspay-persistence'
+include 'atlaspay-messaging'
+include 'atlaspay-simulators'
+include 'atlaspay-api'
+include 'atlaspay-app'
