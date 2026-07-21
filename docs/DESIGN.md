@@ -154,12 +154,14 @@ customer.*
 ```java
 public final class KycCase extends AggregateRoot<KycCaseId> {
     private final CustomerId customerId;
+    private final KycTier targetTier;                 // tier this case attempts to unlock; determines which checks are required (see KycRequirementPolicy)
     private final List<KycCheckResult> checkResults; // private, exposed only via unmodifiable view
     private KycStatus status;
 
-    public KycCase(KycCaseId id, CustomerId customerId);   // invariant enforcement; raises KycCaseOpened
+    public KycCase(KycCaseId id, CustomerId customerId, KycTier targetTier);   // invariant enforcement; raises KycCaseOpened
     public void recordCheckResult(KycCheckResult result);   // appends result; recalculates status; raises KycCheckResultRecorded
     public List<KycCheckResult> checkResults();              // returns unmodifiable copy
+    public KycTier targetTier();                              // accessor
 }
 ```
 *Resolved as its own **Aggregate Root**, not an Entity of `Customer` (this
@@ -175,6 +177,18 @@ unrelated writes to the `Customer` aggregate. `Customer` only needs to be
 `CustomerKycDecided` domain event (published once the case concludes) provides —
 consistent with `KycCaseRepository` already being modeled as a first-class
 repository in this document.*
+
+*`targetTier` was added because tier requirements are not one-shot: a `Customer`
+starts at `TIER_0` and advances one tier at a time, each transition gated behind
+its **own** set of required evidence (e.g. NG `TIER_1` needs personal
+details + address, `TIER_2` adds BVN + NIN, `TIER_3` adds company registration
+documents — and this document set varies by country). Rather than one `KycCase`
+trying to represent every tier at once, each tier advancement opens a **new**
+`KycCase` scoped to the tier being attempted (`targetTier`); `KycRuleEngine`
+resolves country + `targetTier` to a required-checks set via
+`KycRequirementPolicy` (below) and only evaluates once *that* case's checks are
+complete. This keeps `KycCase` simple (one case = one verification attempt = one
+tier outcome) instead of overloading it with cross-tier state.*
 
 ### Value Objects
 
@@ -200,9 +214,12 @@ public record CompanySuspended(UUID eventId, Instant occurredOn, CompanyId compa
 public record CustomerOnboarded(UUID eventId, Instant occurredOn, CustomerId customerId, CompanyId companyId) implements DomainEvent {}
 public record CustomerKycTierChanged(UUID eventId, Instant occurredOn, CustomerId customerId, KycTier oldTier, KycTier newTier) implements DomainEvent {}
 public record CustomerKycDecided(UUID eventId, Instant occurredOn, CustomerId customerId, KycStatus status) implements DomainEvent {}
-public record KycCaseOpened(UUID eventId, Instant occurredOn, KycCaseId kycCaseId, CustomerId customerId) implements DomainEvent {}
+public record KycCaseOpened(UUID eventId, Instant occurredOn, KycCaseId kycCaseId, CustomerId customerId, KycTier targetTier) implements DomainEvent {}
 public record KycCheckResultRecorded(UUID eventId, Instant occurredOn, KycCaseId kycCaseId, String checkName, boolean passed) implements DomainEvent {}
 ```
+*`KycCaseOpened` carries `targetTier` so downstream consumers (notably
+`KycEvaluationSaga`, via `KycRequirementPolicy`) know which country-specific
+check set applies to this particular case without re-deriving it.*
 
 ### Repository Interfaces
 
@@ -239,10 +256,25 @@ public interface KycRuleEngine {
 public interface KycRule extends Specification<KycCase> {
     String ruleName(); // identifies the rule for audit/reporting
 }
+
+public interface KycRequirementPolicy {
+    Set<String> requiredChecks(String countryCode, KycTier targetTier); // e.g. NG + TIER_1 -> {PERSONAL_DETAILS, ADDRESS}; NG + TIER_2 -> {BVN, NIN}; NG + TIER_3 -> {COMPANY_REGISTRATION_DOCS}
+}
 ```
 *`KycRuleEngine` composes pluggable `KycRule` specifications (Specification
 pattern) so new compliance rules can be added without modifying the engine —
 Open/Closed Principle applied to a domain service.*
+
+*`KycRequirementPolicy` is a separate port from `KycRuleEngine` because it
+answers a different question: not "does the evidence pass compliance rules?"
+but "which evidence is even required for this country and tier?". Required
+documents are a product/regulatory configuration that changes per jurisdiction
+and over time (e.g. Nigeria requiring BVN + NIN for `TIER_2` is a local
+regulatory choice, not a universal rule), so it is resolved via a port — backed
+by a config table/feature-flag service in `atlaspay-persistence` — rather than
+hardcoded as a constant inside any aggregate or saga. The orchestrator resolves
+`requiredChecks` once, when opening a `KycCase`/starting its `KycEvaluationSaga`,
+using the customer's `Address.countryCode()` and the case's `targetTier`.*
 
 ### Saga / Process Manager
 
@@ -261,11 +293,13 @@ stateDiagram-v2
 ```java
 public final class KycEvaluationSaga extends AggregateRoot<KycCaseId> {
     private final CustomerId customerId;      // the Customer this case's outcome will ultimately be applied to
+    private final Set<String> requiredChecks; // resolved once via KycRequirementPolicy for this case's country + targetTier; never a hardcoded constant
+    private final Set<String> completedChecks; // check names recorded so far (passed only); tracked against requiredChecks to determine readiness
     private KycEvaluationSagaState state;       // current process-manager state
 
     public void onKycCaseOpened(KycCaseOpened event);                                // starts the saga in AwaitingChecks
-    public void onKycCheckResultRecorded(KycCheckResultRecorded event);               // re-evaluates readiness; stays in AwaitingChecks, or transitions to Evaluating and invokes KycRuleEngine.evaluate
-    public void onEvaluationCompleted(Result<KycTier, List<String>> result);          // Ok(tier): calls Customer.recordKycDecision(APPROVED), then Customer.applyKycTier(tier); Err(reasons): calls Customer.recordKycDecision(REJECTED) — compensating outcome, no tier change
+    public void onKycCheckResultRecorded(KycCheckResultRecorded event);               // re-evaluates readiness against requiredChecks; stays in AwaitingChecks, or transitions to Evaluating [orchestrator then invokes KycRuleEngine.evaluate]
+    public void onEvaluationCompleted(Result<KycTier, List<String>> result);          // Ok(tier): transitions to TierApproved [orchestrator then calls Customer.recordKycDecision(APPROVED), then Customer.applyKycTier(tier)]; Err(reasons): transitions to Rejected [orchestrator calls Customer.recordKycDecision(REJECTED)] — compensating outcome, no tier change
 }
 ```
 *EIP **Process Manager**, following the same shape as `TransferSaga` and
@@ -290,6 +324,21 @@ collapsing them into one call would make that ordering invisible. Extends
 `AggregateRoot<KycCaseId>` for the same optimistic-locking reason as the other
 two sagas: concurrent/duplicate delivery of `KycCheckResultRecorded` events must
 not silently lose a transition.*
+
+*The saga holds no reference to `KycRequirementPolicy`, `KycRuleEngine`, or
+`Customer`/`KycCase` — per this document's convention, aggregates never hold
+injected service/repository dependencies as fields. Its event handlers are pure
+state transitions on its own `state`/`completedChecks`. The **orchestrator**
+(an application-layer event handler in `atlaspay-app`, outside `core`) is what
+actually: (1) resolves `requiredChecks` via `KycRequirementPolicy` and supplies
+them when constructing the saga alongside a `KycCase` opened with the desired
+`targetTier`; (2) calls `KycRuleEngine.evaluate(customer, kycCase)` once the saga
+reports `Evaluating`; (3) loads `Customer` by `customerId()` to call
+`recordKycDecision`/`applyKycTier` once the saga reports `TierApproved`/
+`Rejected`. This is also why upgrading tiers is multi-case, not multi-tier-in-
+one-case: a `Customer` moving `TIER_0 -> TIER_1 -> TIER_2 -> TIER_3` opens a new
+`KycCase` (and a new `KycEvaluationSaga`) for each attempted tier, each scoped to
+exactly the country-specific evidence that tier requires.*
 
 ---
 

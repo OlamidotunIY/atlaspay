@@ -15,17 +15,18 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class KycEvaluationSaga extends AggregateRoot<KycCaseId> {
-    private static final Set<String> REQUIRED_CHECKS = Set.of("IDENTITY", "SANCTIONS", "ADDRESS");
 
     private final CustomerId customerId;      // the Customer this case's outcome will ultimately be applied to
+    private final Set<String> requiredChecks; // resolved once, per country/targetTier, via KycRequirementPolicy — never hardcoded here
+    private final Set<String> completedChecks; // check names recorded so far (passed only), used to determine readiness
     private KycEvaluationSagaState state;
-    private final Set<String> completedChecks;
 
-    KycEvaluationSaga(KycCaseId kycCaseId, CustomerId customerId) {
+    KycEvaluationSaga(KycCaseId kycCaseId, CustomerId customerId, Set<String> requiredChecks) {
         super(kycCaseId);
-        this.customerId = customerId;
-        this.state = KycEvaluationSagaState.AWAITING_CHECKS;
+        this.customerId = Objects.requireNonNull(customerId);
+        this.requiredChecks = Set.copyOf(Objects.requireNonNull(requiredChecks, "requiredChecks must not be null"));
         this.completedChecks = new HashSet<>();
+        this.state = KycEvaluationSagaState.AWAITING_CHECKS;
     }
 
 
@@ -46,13 +47,20 @@ public final class KycEvaluationSaga extends AggregateRoot<KycCaseId> {
             throw new IllegalStateException("Unexpected check result in state: " + state);
         }
 
+        if (!requiredChecks.contains(event.checkName())) {
+            throw new IllegalArgumentException("Unrecognized check for this case: " + event.checkName());
+        }
+
         if (event.passed()) {
             completedChecks.add(event.checkName());
         }
 
-        boolean ready = completedChecks.containsAll(REQUIRED_CHECKS);
+        boolean ready = completedChecks.containsAll(requiredChecks);
 
         state = ready ? KycEvaluationSagaState.EVALUATING : KycEvaluationSagaState.AWAITING_CHECKS;
+        // Transition alone signals readiness; the orchestrator watches for
+        // EVALUATING and then calls KycRuleEngine.evaluate(...) itself,
+        // since this aggregate holds no service/repository references.
     }
 
     public void onEvaluationCompleted(Result<KycTier, List<String>> result) {
