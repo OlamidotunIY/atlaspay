@@ -16,11 +16,11 @@ public final class OutboundExternalTransfer extends Transfer {
         this.beneficiaryParty = beneficiaryParty;
     }
 
-    public AccountId getSourceAccountId() {
+    public AccountId sourceAccountId() {
         return sourceAccountId;
     }
 
-    public ExternalPartyReference getBeneficiaryParty() {
+    public ExternalPartyReference beneficiaryParty() {
         return beneficiaryParty;
     }
 }

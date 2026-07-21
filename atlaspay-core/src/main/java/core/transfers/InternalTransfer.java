@@ -19,11 +19,11 @@ public final class InternalTransfer extends Transfer {
         this.destinationAccountId = destinationAccountId;
     }
 
-    public AccountId getSourceAccountId() {
+    public AccountId sourceAccountId() {
         return sourceAccountId;
     }
 
-    public AccountId getDestinationAccountId() {
+    public AccountId destinationAccountId() {
         return destinationAccountId;
     }
 }

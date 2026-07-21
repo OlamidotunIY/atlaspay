@@ -36,6 +36,8 @@ public class TransferSaga extends AggregateRoot<TransferId> {
     }
 
     public void onLimitsCheckResult(Result<Void, List<String>> result, LimitPolicyId policyId) {
+        Objects.requireNonNull(result, "result must not be null");
+        Objects.requireNonNull(policyId, "policyId must not be null");
         if (this.state != TransferSagaState.INITIATED) {
             throw new IllegalStateException("Cannot process limits check result in state: " + this.state);
         }
@@ -49,7 +51,7 @@ public class TransferSaga extends AggregateRoot<TransferId> {
     }
 
     public void onLedgerPostingSucceeded(JournalEntryId entryId) {
-        Objects.requireNonNull(entryId);
+        Objects.requireNonNull(entryId, "entryId must not be null");
         if (this.state != TransferSagaState.VALIDATED) {
             throw new IllegalStateException("Cannot process ledger posting result in state: " + this.state);
         }
@@ -59,7 +61,7 @@ public class TransferSaga extends AggregateRoot<TransferId> {
     }
 
     public void onLedgerPostingFailed(String reason) {
-        Objects.requireNonNull(reason);
+        Objects.requireNonNull(reason, "reason must not be null");
         if (this.state != TransferSagaState.VALIDATED) {
             throw new IllegalStateException("Cannot process ledger posting result in state: " + this.state);
         }
@@ -67,7 +69,7 @@ public class TransferSaga extends AggregateRoot<TransferId> {
     }
 
     public void onExternalConfirmationReceived(ExternalPartyReference ref) {
-        Objects.requireNonNull(ref);
+        Objects.requireNonNull(ref, "ref must not be null");
         if (state != TransferSagaState.POSTED) {
             throw new IllegalStateException("Cannot process external confirmation in state: " + state);
         }
@@ -75,10 +77,15 @@ public class TransferSaga extends AggregateRoot<TransferId> {
     }
 
     public void onReversalRequested(String reason) {
-        Objects.requireNonNull(reason);
+        Objects.requireNonNull(reason, "reason must not be null");
         if (state != TransferSagaState.POSTED) {
             throw new IllegalStateException("Cannot process reversal request in state: " + state);
         }
+        Objects.requireNonNull(entryId, "Cannot reverse a transfer with no posted journal entry");
         state = TransferSagaState.REVERSED;
+    }
+
+    public JournalEntryId entryId() {
+        return entryId;
     }
 }
