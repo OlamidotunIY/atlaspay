@@ -2,6 +2,36 @@
 
 > Test doubles for external bank/card-network integrations. Complements docs/DESIGN.md (core domain model).
 
+## Module Structure
+
+Organized by external integration type:
+
+```
+simulators/
+  bank/                        # Banking/ACH simulation
+    InMemoryBankSimulator
+    BankSimulatorConfig
+    InboundTransferResult
+    OutboundTransferResult
+  cardnetwork/                 # Card network (Visa/MC) simulation
+    InMemoryCardNetworkSimulator
+    CardNetworkSimulatorConfig
+    AuthorizationResult
+    CaptureResult
+    RefundResult
+    ReversalResult
+  issuing/                     # Card issuing bank simulation
+    InMemoryIssuingBankSimulator
+    IssuingBankSimulatorConfig
+    CardIssuanceResult
+    CardStatusResult
+  config/                      # Shared configuration primitives
+    CannedResponse
+    SimulatedLatency
+```
+
+*Each top-level package represents one external integration point, containing its simulator implementation, result DTOs, and configuration builders.*
+
 ## Result/DTO Types
 
 ```java

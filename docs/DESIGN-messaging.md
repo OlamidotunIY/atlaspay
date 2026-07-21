@@ -2,6 +2,41 @@
 
 > Infrastructure adapter for Kafka-based event publishing and consumption. Complements docs/DESIGN.md (core domain model).
 
+## Module Structure
+
+Package-by-feature mirroring `atlaspay-core` domains:
+
+```
+messaging/
+  publisher/              # Event publishing infrastructure
+    KafkaEventPublisher
+    TopicResolver
+  consumers/
+    identity/             # Identity events consumer
+      IdentityEventsConsumer
+    accounts/             # Accounts events consumer
+      AccountsEventsConsumer
+    ledger/               # Ledger events consumer
+      LedgerEventsConsumer
+    transfers/            # Transfers events consumer
+      TransfersEventsConsumer
+    cards/                # Cards events consumer
+      CardsEventsConsumer
+    limits/               # Limits events consumer
+      LimitsEventsConsumer
+    access/               # Access events consumer
+      AccessEventsConsumer
+  sagas/                  # Saga event routing
+    SagaEventRouter
+  config/                 # Kafka configuration
+    KafkaProducerConfig
+    KafkaConsumerConfig
+  dlq/                    # Dead letter queue handling
+    DeadLetterHandler
+```
+
+*Each consumer package corresponds to one Kafka topic and handles events from its domain. The `publisher/`, `sagas/`, and `dlq/` packages are cross-cutting concerns.*
+
 ## Topic-to-Event Mapping
 
 ### `atlaspay.identity.events`

@@ -2,6 +2,53 @@
 
 > REST controllers and DTOs for external/admin HTTP access. Extracted and extended from docs/DESIGN.md § API Layer.
 
+## Module Structure
+
+Package-by-feature plus cross-cutting infrastructure:
+
+```
+api/
+  identity/                    # Identity & Onboarding API
+    CompanyController
+    CustomerController
+    KycController
+    [DTOs: RegisterCompanyRequest, OnboardCustomerRequest, etc.]
+  accounts/                    # Accounts API
+    AccountController
+    [DTOs: OpenAccountRequest, AccountResponse, etc.]
+  ledger/                      # Ledger API (internal-admin only)
+    LedgerController
+    [DTOs: LedgerEntryResponse, etc.]
+  transfers/                   # Transfers API
+    TransferController
+    [DTOs: InitiateTransferRequest, TransferResponse, etc.]
+  cards/                       # Cards API
+    CardController
+    DisputeController
+    [DTOs: IssueCardRequest, FileDisputeRequest, etc.]
+  limits/                      # Limits API
+    LimitController
+    [DTOs: CreateLimitPolicyRequest, LimitPolicyResponse, etc.]
+  access/                      # Platform Access API
+    ApiKeyController
+    WebhookController
+    [DTOs: IssueApiKeyRequest, CreateWebhookSubscriptionRequest, etc.]
+  security/                    # Security infrastructure
+    ExternalApiSecurityConfig
+    InternalAdminSecurityConfig
+    ApiKeyAuthenticationFilter
+    CompanyIdScopingFilter
+  idempotency/                 # Idempotency-Key enforcement
+    IdempotencyKeyFilter
+    IdempotencyCache
+    CachedResponse
+  errors/                      # Error handling
+    ErrorResponse
+    GlobalExceptionHandler
+```
+
+*Each feature package mirrors a core domain. The `security/`, `idempotency/`, and `errors/` packages are cross-cutting API infrastructure.*
+
 ## Access Boundaries
 
 Every controller below is tagged **`[External]`** or **`[Internal-Admin]`**:

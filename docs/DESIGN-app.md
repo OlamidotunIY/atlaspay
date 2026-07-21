@@ -2,6 +2,28 @@
 
 > Spring Boot entrypoint, dependency injection wiring, scheduled jobs, configuration properties. Complements docs/DESIGN.md (core domain model).
 
+## Module Structure
+
+Single package at the root (this is the wiring/composition layer):
+
+```
+app/
+  AtlasPayApplication         # @SpringBootApplication entrypoint
+  RepositoryWiringConfig      # Wires core repository interfaces to JPA adapters
+  DomainServicesWiringConfig  # Wires domain services to simulators/real implementations
+  SecurityWiringConfig        # Wires security filters and authentication providers
+  SchedulingConfig            # Configures scheduled jobs (OutboxRelay, webhook retry)
+  OutboxRelayScheduler        # Scheduled polling trigger for outbox
+  WebhookRetryScheduler       # Scheduled polling trigger for webhook retries
+  DatabaseProperties          # @ConfigurationProperties for DB connection
+  KafkaProperties             # @ConfigurationProperties for Kafka
+  SimulatorProperties         # @ConfigurationProperties for simulator behavior
+  WebhookProperties           # @ConfigurationProperties for webhook retry policy
+  OutboxProperties            # @ConfigurationProperties for outbox polling
+```
+
+*Flat structure — this module's only job is dependency injection and scheduled job triggers. All logic lives in the modules it wires together. This is the hexagonal architecture's composition root and the only module allowed to import from every other module.*
+
 ## Main Application Class
 
 ```java

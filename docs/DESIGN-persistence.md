@@ -10,6 +10,79 @@
 - Outbox pattern for guaranteed domain event delivery
 - Flyway for schema migrations
 
+## Module Structure
+
+Package-by-feature mirroring `atlaspay-core`:
+
+```
+persistence/
+  identity/           # Identity & Onboarding domain persistence
+    CompanyJpaEntity
+    CompanyMapper
+    JpaCompanyRepository
+    CustomerJpaEntity
+    CustomerMapper
+    JpaCustomerRepository
+    KycCaseJpaEntity
+    KycCaseMapper
+    JpaKycCaseRepository
+    KycEvaluationSagaJpaEntity
+    KycEvaluationSagaMapper
+    JpaKycEvaluationSagaRepository
+  accounts/           # Accounts domain persistence
+    AccountJpaEntity
+    AccountMapper
+    JpaAccountRepository
+  ledger/             # Ledger domain persistence
+    JournalEntryJpaEntity
+    JournalEntryMapper
+    JpaJournalEntryRepository
+    LedgerLineJpaEntity      # embedded collection within JournalEntry
+  transfers/          # Transfers domain persistence
+    TransferJpaEntity        # sealed hierarchy base
+    InternalTransferJpaEntity
+    InboundExternalTransferJpaEntity
+    OutboundExternalTransferJpaEntity
+    TransferMapper
+    JpaTransferRepository
+    TransferSagaJpaEntity
+    TransferSagaMapper
+    JpaTransferSagaRepository
+  cards/              # Cards domain persistence
+    CardJpaEntity
+    CardMapper
+    JpaCardRepository
+    DisputeJpaEntity
+    DisputeMapper
+    JpaDisputeRepository
+    ChargebackSagaJpaEntity
+    ChargebackSagaMapper
+    JpaChargebackSagaRepository
+  limits/             # Limits domain persistence
+    LimitPolicyJpaEntity
+    LimitPolicyMapper
+    JpaLimitPolicyRepository
+  access/             # Platform Access domain persistence
+    ApiKeyJpaEntity
+    ApiKeyMapper
+    JpaApiKeyRepository
+    WebhookSubscriptionJpaEntity
+    WebhookSubscriptionMapper
+    JpaWebhookSubscriptionRepository
+    WebhookDeliveryJpaEntity
+    WebhookDeliveryMapper
+    JpaWebhookDeliveryRepository
+  outbox/             # Transactional outbox infrastructure
+    OutboxEntryJpaEntity
+    OutboxRelay
+    OutboxWriter
+  processed/          # Idempotent event processing
+    ProcessedEventJpaEntity
+    JpaProcessedEventRepository
+```
+
+*Each feature package contains JPA entities, mappers, and repository adapters for that domain. The `outbox/` and `processed/` packages are cross-cutting infrastructure concerns.*
+
 ## JPA Entities
 
 ```java
