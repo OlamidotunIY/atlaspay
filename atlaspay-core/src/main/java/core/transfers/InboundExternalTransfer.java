@@ -1,7 +1,6 @@
 package core.transfers;
 
 import core.accounts.valueobjects.AccountId;
-import core.ledger.valueobjects.JournalEntryId;
 import core.ledger.valueobjects.Money;
 import core.transfers.valueobjects.ExternalPartyReference;
 import core.transfers.valueobjects.TransferId;
@@ -17,13 +16,11 @@ public final class InboundExternalTransfer extends Transfer {
         this.originatingParty = originatingParty;
     }
 
-    @Override
-    public void markPosted(JournalEntryId entryId) {
-
+    public ExternalPartyReference getOriginatingParty() {
+        return originatingParty;
     }
 
-    @Override
-    public void markFailed(String reason) {
-
+    public AccountId getDestinationAccountId() {
+        return destinationAccountId;
     }
 }

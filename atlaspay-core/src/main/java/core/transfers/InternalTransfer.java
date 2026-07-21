@@ -1,7 +1,6 @@
 package core.transfers;
 
 import core.accounts.valueobjects.AccountId;
-import core.ledger.valueobjects.JournalEntryId;
 import core.ledger.valueobjects.Money;
 import core.transfers.valueobjects.TransferId;
 
@@ -12,17 +11,19 @@ public final class InternalTransfer extends Transfer {
 
     public InternalTransfer(TransferId id, Money amount, AccountId sourceAccountId, AccountId destinationAccountId) {
         super(id, amount);
+
+        if (sourceAccountId.equals(destinationAccountId)) {
+            throw new IllegalArgumentException("Source and destination accounts must be different");
+        }
         this.sourceAccountId = sourceAccountId;
         this.destinationAccountId = destinationAccountId;
     }
 
-    @Override
-    public void markPosted(JournalEntryId entryId) {
-
+    public AccountId getSourceAccountId() {
+        return sourceAccountId;
     }
 
-    @Override
-    public void markFailed(String reason) {
-
+    public AccountId getDestinationAccountId() {
+        return destinationAccountId;
     }
 }

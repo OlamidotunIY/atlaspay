@@ -3,8 +3,13 @@ package core.transfers;
 import core.ledger.valueobjects.JournalEntryId;
 import core.ledger.valueobjects.Money;
 import core.shared.AggregateRoot;
+import core.transfers.events.TransferFailed;
+import core.transfers.events.TransferPosted;
 import core.transfers.valueobjects.TransferId;
 import core.transfers.valueobjects.TransferStatus;
+
+import java.time.Instant;
+import java.util.UUID;
 
 public sealed abstract class Transfer extends AggregateRoot<TransferId> permits InternalTransfer, InboundExternalTransfer, OutboundExternalTransfer {
 
@@ -22,6 +27,19 @@ public sealed abstract class Transfer extends AggregateRoot<TransferId> permits 
         return status;
     }
 
-    public abstract void markPosted(JournalEntryId entryId); // records successful ledger posting; raises TransferPosted
-    public abstract void markFailed(String reason);
+    public void markPosted(JournalEntryId entryId) {
+        if (status != TransferStatus.INITIATED) {
+            throw new IllegalStateException("Transfer can only be marked as posted if it is in the INITIATED state");
+        }
+        this.status = TransferStatus.POSTED;
+        register(new TransferPosted(UUID.randomUUID(), Instant.now(), this.id(), entryId));
+    }
+
+    public void markFailed(String reason) {
+        if (status != TransferStatus.INITIATED) {
+            throw new IllegalStateException("Transfer can only be marked as failed if it is in the INITIATED state");
+        }
+        this.status = TransferStatus.FAILED;
+        register(new TransferFailed(UUID.randomUUID(), Instant.now(), this.id(), reason));
+    }
 }
