@@ -1,0 +1,16 @@
+# Normalize line endings for all text files to LF in the repository.
+* text=auto eol=lf
+
+# Windows-specific scripts must keep CRLF so they run correctly on Windows.
+*.bat text eol=crlf
+
+# Java sources always LF.
+*.java text eol=lf
+*.gradle text eol=lf
+*.kts text eol=lf
+
+# Binary files must never be modified by line-ending conversion.
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
