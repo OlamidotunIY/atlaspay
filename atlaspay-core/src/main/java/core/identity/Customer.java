@@ -26,6 +26,18 @@ public final class Customer extends AggregateRoot<CustomerId> {
         register(new CustomerOnboarded(UUID.randomUUID(), Instant.now(), id, companyId));
     }
 
+    public Customer(CustomerId id, CompanyId companyId, PersonalDetails personalDetails, KycTier kycTier, KycStatus kycStatus) {
+        super(id);
+        this.companyId = companyId;
+        this.personalDetails = personalDetails;
+        this.kycTier = kycTier;
+        this.kycStatus = kycStatus;
+    }
+
+    public static Customer rehydrate(CustomerId id, CompanyId companyId, PersonalDetails personalDetails, KycTier kycTier, KycStatus kycStatus) {
+        return new Customer(id, companyId, personalDetails, kycTier, kycStatus);
+    }
+
     public void applyKycTier(KycTier newTier) {
         if (this.kycStatus == KycStatus.APPROVED) {
             if (newTier.ordinal() > this.kycTier.ordinal()) {
@@ -50,5 +62,21 @@ public final class Customer extends AggregateRoot<CustomerId> {
 
     public KycTier kycTier() {
         return this.kycTier;
+    }
+
+    public CompanyId getCompanyId() {
+        return companyId;
+    }
+
+    public PersonalDetails getPersonalDetails() {
+        return personalDetails;
+    }
+
+    public KycTier getKycTier() {
+        return kycTier;
+    }
+
+    public KycStatus getKycStatus() {
+        return kycStatus;
     }
 }
