@@ -26,6 +26,36 @@ public final class Company extends AggregateRoot<CompanyId> {
         register(new CompanyRegistered(UUID.randomUUID(), Instant.now(), id, name));
     }
 
+    private Company(
+            CompanyId id,
+            CompanyName name,
+            RegistrationNumber registrationNumber,
+            CompanyStatus status,
+            Instant onboardedAt
+    ) {
+        super(id);
+        this.name = name;
+        this.registrationNumber = registrationNumber;
+        this.status = status;
+        this.onboardedAt = onboardedAt;
+    }
+
+    public static Company rehydrate(
+            CompanyId id,
+            CompanyName name,
+            RegistrationNumber registrationNumber,
+            CompanyStatus status,
+            Instant onboardedAt
+    ) {
+        return new Company(
+                id,
+                name,
+                registrationNumber,
+                status,
+                onboardedAt
+        );
+    }
+
     public void verify(VerificationDecision decision) {
         if (this.status == CompanyStatus.PENDING) {
             if (decision.approved()) {
@@ -44,5 +74,21 @@ public final class Company extends AggregateRoot<CompanyId> {
 
     public CompanyStatus status() {
         return this.status;
+    }
+
+    public CompanyName getName() {
+        return name;
+    }
+
+    public RegistrationNumber getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public CompanyStatus getStatus() {
+        return status;
+    }
+
+    public Instant getOnboardedAt() {
+        return onboardedAt;
     }
 }
