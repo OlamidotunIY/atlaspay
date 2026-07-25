@@ -59,4 +59,16 @@ public class Account extends AggregateRoot<AccountId> {
     public AccountStatus status() {
         return status;
     }
+
+    public AccountNumber getAccountNumber() {
+        return accountNumber;
+    }
+
+    public CustomerId getOwnerId() {
+        return ownerId;
+    }
+
+    public AccountType getType() {
+        return type;
+    }
 }
