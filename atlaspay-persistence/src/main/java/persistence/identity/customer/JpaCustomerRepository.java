@@ -1,7 +1,7 @@
 package persistence.identity.customer;
 
-import core.identity.Customer;
-import core.identity.CustomerRepository;
+import core.identity.entities.Customer;
+import core.identity.repository.CustomerRepository;
 import core.identity.valueobject.CompanyId;
 import core.identity.valueobject.CustomerId;
 import core.shared.PageResult;

@@ -1,5 +1,6 @@
 package core.cards;
 
+import core.cards.entities.Card;
 import core.cards.valueobjects.AuthorizationDecision;
 import core.ledger.valueobjects.Money;
 import core.shared.Result;
