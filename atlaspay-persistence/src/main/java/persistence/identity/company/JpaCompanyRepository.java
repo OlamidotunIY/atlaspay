@@ -1,7 +1,7 @@
 package persistence.identity.company;
 
-import core.identity.Company;
-import core.identity.CompanyRepository;
+import core.identity.entities.Company;
+import core.identity.repository.CompanyRepository;
 import core.identity.valueobject.CompanyId;
 import core.identity.valueobject.RegistrationNumber;
 import core.shared.PageResult;

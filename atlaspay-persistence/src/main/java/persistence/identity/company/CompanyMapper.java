@@ -1,6 +1,6 @@
 package persistence.identity.company;
 
-import core.identity.Company;
+import core.identity.entities.Company;
 import core.identity.valueobject.CompanyId;
 import core.identity.valueobject.CompanyName;
 import core.identity.valueobject.RegistrationNumber;

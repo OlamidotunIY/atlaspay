@@ -1,6 +1,6 @@
 package persistence.identity.customer;
 
-import core.identity.Customer;
+import core.identity.entities.Customer;
 import core.identity.valueobject.*;
 
 public final class CustomerMapper {
