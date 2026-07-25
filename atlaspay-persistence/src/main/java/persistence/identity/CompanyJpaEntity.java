@@ -1,4 +1,4 @@
-package persistence.identity.company;
+package persistence.identity;
 
 import core.identity.valueobject.CompanyStatus;
 import jakarta.persistence.*;

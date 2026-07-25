@@ -1,4 +1,4 @@
-package persistence.identity.company;
+package persistence.identity;
 
 import core.identity.entities.Company;
 import core.identity.repository.CompanyRepository;

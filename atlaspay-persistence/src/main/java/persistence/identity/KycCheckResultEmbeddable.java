@@ -1,4 +1,4 @@
-package persistence.identity.kyc;
+package persistence.identity;
 
 import core.identity.valueobject.KycCheckResult;
 import jakarta.persistence.Embeddable;

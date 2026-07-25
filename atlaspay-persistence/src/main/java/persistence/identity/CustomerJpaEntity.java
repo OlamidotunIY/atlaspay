@@ -1,4 +1,4 @@
-package persistence.identity.customer;
+package persistence.identity;
 
 import core.identity.valueobject.KycStatus;
 import core.identity.valueobject.KycTier;
