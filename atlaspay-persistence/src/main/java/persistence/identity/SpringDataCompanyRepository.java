@@ -1,4 +1,4 @@
-package persistence.identity.company;
+package persistence.identity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

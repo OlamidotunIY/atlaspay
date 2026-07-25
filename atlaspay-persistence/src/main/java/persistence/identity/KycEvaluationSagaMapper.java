@@ -1,4 +1,4 @@
-package persistence.identity.kyc;
+package persistence.identity;
 
 import core.identity.entities.KycEvaluationSaga;
 import core.identity.valueobject.CustomerId;

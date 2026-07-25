@@ -1,4 +1,4 @@
-package persistence.identity.kyc;
+package persistence.identity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
