@@ -1,0 +1,85 @@
+package com.atlaspay.identity.application.usecase;
+
+import com.atlaspay.identity.application.dto.ApiKeyPairResult;
+import com.atlaspay.identity.domain.exception.IdentityErrorCode;
+import com.atlaspay.identity.domain.model.ApiEnvironment;
+import com.atlaspay.identity.domain.model.ApiKey;
+import com.atlaspay.identity.domain.model.KeyType;
+import com.atlaspay.identity.domain.model.Merchant;
+import com.atlaspay.identity.domain.repository.ApiKeyRepository;
+import com.atlaspay.identity.domain.repository.MerchantRepository;
+import com.atlaspay.shared.domain.id.ApiKeyId;
+import com.atlaspay.shared.event.DomainEvent;
+import com.atlaspay.shared.event.DomainEventPublisher;
+import com.atlaspay.shared.event.EnvelopedDomainEvent;
+import com.atlaspay.shared.exception.BusinessRuleException;
+import com.atlaspay.shared.exception.NotFoundException;
+import com.atlaspay.identity.application.port.out.PasswordEncoder;
+
+import java.util.UUID;
+
+public class GenerateLiveApiKeyPairUseCase {
+
+    private final MerchantRepository merchantRepository;
+    private final ApiKeyRepository apiKeyRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final DomainEventPublisher eventPublisher;
+
+    public GenerateLiveApiKeyPairUseCase(
+            MerchantRepository merchantRepository,
+            ApiKeyRepository apiKeyRepository,
+            PasswordEncoder passwordEncoder,
+            DomainEventPublisher eventPublisher) {
+        this.merchantRepository = merchantRepository;
+        this.apiKeyRepository = apiKeyRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public ApiKeyPairResult execute(GenerateLiveApiKeyPairCommand command) {
+        Merchant merchant = merchantRepository.findById(command.merchantId())
+                .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
+
+        if (merchant.getComplianceStatus() != com.atlaspay.identity.domain.model.ComplianceStatus.APPROVED) {
+            throw new BusinessRuleException(IdentityErrorCode.LIVE_KEYS_REQUIRE_COMPLIANCE_APPROVED, "Live keys require compliance to be approved");
+        }
+
+        String rawPublicKey = "pk_live_" + UUID.randomUUID().toString().replace("-", "");
+        String rawSecretKey = "sk_live_" + UUID.randomUUID().toString().replace("-", "");
+
+        ApiKey publicKey = new ApiKey(
+                ApiKeyId.generate(),
+                command.merchantId(),
+                KeyType.PUBLIC,
+                ApiEnvironment.LIVE,
+                rawPublicKey,
+                rawPublicKey,
+                "pk_live_"
+        );
+
+        String secretHash = passwordEncoder.encode(rawSecretKey);
+        String secretDisplay = "sk_live_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
+
+        ApiKey secretKey = new ApiKey(
+                ApiKeyId.generate(),
+                command.merchantId(),
+                KeyType.SECRET,
+                ApiEnvironment.LIVE,
+                secretHash,
+                secretDisplay,
+                "sk_live_"
+        );
+
+        apiKeyRepository.save(publicKey);
+        apiKeyRepository.save(secretKey);
+
+        publicKey.pullDomainEvents().forEach(this::publishEvent);
+        secretKey.pullDomainEvents().forEach(this::publishEvent);
+
+        return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
+    }
+
+    private <T> void publishEvent(DomainEvent<T> event) {
+        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
+    }
+}

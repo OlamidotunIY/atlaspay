@@ -128,6 +128,31 @@ public class Merchant extends AggregateRoot<MerchantId> {
         ));
     }
 
+    public void updateComplianceProfile(String description, StaffSize staffSize, String industry, String category, java.math.BigDecimal annualProjectedSalesVolume, String annualProjectedSalesCurrency) {
+        this.compliance.updateProfileStep(description, staffSize, industry, category, annualProjectedSalesVolume, annualProjectedSalesCurrency);
+        this.completeComplianceStep(ComplianceStep.PROFILE);
+    }
+
+    public void updateComplianceContact(EmailAddress supportEmail, EmailAddress disputeEmail, PhoneNumber whatsappPhone, String whatsappName, String websiteUrl, String twitterHandle, String facebookUsername, String instagramHandle, String businessState, String businessLga, String businessCity, String businessStreet) {
+        this.compliance.updateContactStep(supportEmail, disputeEmail, whatsappPhone, whatsappName, websiteUrl, twitterHandle, facebookUsername, instagramHandle, businessState, businessLga, businessCity, businessStreet);
+        this.completeComplianceStep(ComplianceStep.CONTACT);
+    }
+
+    public void updateComplianceOwner(String ownerBvn, String ownerNin, java.time.LocalDate ownerDateOfBirth, String ownerAddress, GovernmentIdType ownerIdType, String ownerIdNumber, String rcNumber) {
+        this.compliance.updateOwnerStep(ownerBvn, ownerNin, ownerDateOfBirth, ownerAddress, ownerIdType, ownerIdNumber, rcNumber);
+        this.completeComplianceStep(ComplianceStep.OWNER);
+    }
+
+    public void updateComplianceAccount(String settlementBankCode, String settlementAccountNumber, String settlementAccountName) {
+        this.compliance.updateAccountStep(settlementBankCode, settlementAccountNumber, settlementAccountName);
+        this.completeComplianceStep(ComplianceStep.ACCOUNT);
+    }
+
+    public void acceptServiceAgreement() {
+        this.compliance.acceptServiceAgreement(ZonedDateTime.now());
+        this.completeComplianceStep(ComplianceStep.SERVICE_AGREEMENT);
+    }
+
     public void submitCompliance() {
         if (this.complianceStep != ComplianceStep.SERVICE_AGREEMENT || !this.compliance.isAgreedToTerms()) {
             throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_ALL_STEPS_COMPLETE, "All 5 compliance steps must be completed before submission");
@@ -203,6 +228,10 @@ public class Merchant extends AggregateRoot<MerchantId> {
             id.value(),
             ZonedDateTime.now()
         ));
+    }
+
+    public ComplianceStatus getComplianceStatus() {
+        return complianceStatus;
     }
 
     @Override

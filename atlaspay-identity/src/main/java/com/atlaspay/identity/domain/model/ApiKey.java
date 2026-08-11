@@ -82,6 +82,10 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
         ));
     }
 
+    public MerchantId getMerchantId() {
+        return merchantId;
+    }
+
     @Override
     public ApiKeyId getId() {
         return id;
