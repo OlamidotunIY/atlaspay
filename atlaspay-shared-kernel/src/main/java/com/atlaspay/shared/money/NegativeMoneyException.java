@@ -1,10 +1,15 @@
 package com.atlaspay.shared.money;
 
-import com.atlaspay.shared.exception.AtlasPayException;
+import com.atlaspay.shared.exception.ValidationException;
 import java.math.BigDecimal;
 
-public class NegativeMoneyException extends AtlasPayException {
+/**
+ * Thrown when a Money amount is negative.
+ * Maps to HTTP 400 Bad Request via ValidationException.
+ */
+public class NegativeMoneyException extends ValidationException {
+
     public NegativeMoneyException(BigDecimal amount) {
-        super("Money amount cannot be negative: " + amount);
+        super("MONEY_NEGATIVE_AMOUNT", "Money amount cannot be negative: " + amount);
     }
 }
