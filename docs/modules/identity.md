@@ -1317,11 +1317,16 @@ All defined in `IdentityErrorCode` enum (`atlaspay-identity`, `domain/exception/
 
 ---
 
-## 10. Open Questions / Decisions Pending
+## 10. Architecture Decisions (Resolved)
 
-- [ ] Should password hashing / login live in `atlaspay-identity` or `atlaspay-app`? Current lean: `atlaspay-app` (Spring Security layer) with `atlaspay-identity` owning only the profile/registration side.
-- [ ] Do Customers need their own login (i.e., can a Customer authenticate to the AtlasPay API), or are they purely data records managed by the Merchant via API keys?
-- [ ] Should SubAccount deactivation cascade to remove them from active `SplitConfiguration`s in `atlaspay-transaction-splits`, or is that enforced at split-time?
-- [ ] Should the 5 compliance steps be separate use case classes or handled by a single polymorphic `CompleteComplianceStepUseCase` with a step-specific command?
-- [ ] Should `merchant_compliance` be a JPA `@Embedded` or a separate `@OneToOne` entity?
-- [ ] Email verification: redirect to dashboard URL or return JSON? (API vs browser flow)
+> All questions below have been decided. This section is kept for audit trail.
+
+| # | Question | Decision | Rationale |
+|---|---|---|---|
+| 1 | Where does password hashing / login live? | **`atlaspay-app`** | Spring Security configuration belongs at the composition root. `atlaspay-identity` owns registration and profile only — it stores the `hashedPassword` field but never performs authentication itself. |
+| 2 | Do Customers need their own login? | **No — records only** | Customers are data records managed by the Merchant via API key. They have no login, no JWT, and no direct API access. |
+| 3 | SubAccount deactivation cascade to SplitConfigurations? | **Yes — auto-removed** | When a SubAccount is deactivated, `atlaspay-transaction-splits` must remove it from any active `SplitConfiguration`. The identity module publishes `SubAccountDeactivated`; the splits module listens and handles cleanup. |
+| 4 | Separate use case classes per compliance step? | **Yes — one class per step** | `CompleteProfileStepUseCase`, `CompleteContactStepUseCase`, `CompleteOwnerStepUseCase`, `CompleteAccountStepUseCase`, `CompleteServiceAgreementStepUseCase`. Each has its own command, validation rules, and external port calls. Easier to test and extend. |
+| 5 | `merchant_compliance` — `@Embedded` or `@OneToOne`? | **`@OneToOne` separate entity** | 27 compliance columns in the `merchants` table would make it very wide. A separate `merchant_compliance` table with a lazy-loaded `@OneToOne` keeps `Merchant` lean and avoids loading compliance data on every merchant read. |
+| 6 | Email verification — redirect or JSON? | **Redirect to dashboard URL** | The verification link is clicked by a human in a browser from their email client. Returning JSON is useless. The endpoint redirects to `{dashboardBaseUrl}/email-verified?status=success` on success, or `?status=error&code={errorCode}` on failure. |
+
