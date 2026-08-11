@@ -403,8 +403,7 @@ public record RegisterMerchantCommand(
     String email,
     String phone,
     String password,
-    BusinessType businessType,
-    String rcNumber    // required if businessType == REGISTERED
+    BusinessType businessType
 ) {}
 ```
 
@@ -428,7 +427,6 @@ public record RegisterMerchantCommand(
 | Email already registered | `ConflictException` | `MERCHANT_EMAIL_ALREADY_EXISTS` |
 | Invalid email format | `ValidationException` | `INVALID_EMAIL_FORMAT` |
 | Invalid phone format | `ValidationException` | `INVALID_PHONE_FORMAT` |
-| `rcNumber` missing for `REGISTERED` type | `ValidationException` | `RC_NUMBER_REQUIRED_FOR_REGISTERED_BUSINESS` |
 
 ---
 
@@ -774,8 +772,7 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
   "email": "admin@acmecorp.com",
   "phone": "+2348012345678",
   "password": "securePassword123!",
-  "businessType": "REGISTERED",
-  "rcNumber": "RC123456"
+  "businessType": "REGISTERED"
 }
 ```
 
@@ -796,7 +793,6 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 |---|---|---|
 | `400` | `INVALID_EMAIL_FORMAT` | Malformed email |
 | `400` | `INVALID_PHONE_FORMAT` | Malformed phone |
-| `400` | `RC_NUMBER_REQUIRED_FOR_REGISTERED_BUSINESS` | businessType is REGISTERED but rcNumber not supplied |
 | `409` | `MERCHANT_EMAIL_ALREADY_EXISTS` | Email already registered |
 
 ---
@@ -903,7 +899,8 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
   "dateOfBirth": "1990-05-15",
   "address": "5 Allen Avenue, Ikeja, Lagos",
   "idType": "PASSPORT",
-  "idNumber": "A12345678"
+  "idNumber": "A12345678",
+  "rcNumber": "RC123456"
 }
 ```
 
@@ -1156,7 +1153,6 @@ Flyway prefix: `V1__identity__*.sql`
 | `phone` | `VARCHAR(20)` | No | E.164 |
 | `hashed_password` | `VARCHAR(60)` | No | BCrypt output is always 60 chars |
 | `business_type` | `ENUM('STARTER','REGISTERED')` | No | — |
-| `rc_number` | `VARCHAR(50)` | Yes | Required for REGISTERED type |
 | `email_verified` | `TINYINT(1)` | No | Default `0` |
 | `email_verification_token` | `CHAR(36)` | Yes | UUID; cleared after use |
 | `email_verification_token_expires_at` | `DATETIME(6)` | Yes | UTC |
@@ -1213,6 +1209,7 @@ Flyway prefix: `V1__identity__*.sql`
 | `owner_address` | `VARCHAR(500)` | Yes | Owner step |
 | `owner_id_type` | `ENUM('PASSPORT','DRIVERS_LICENSE','VOTERS_CARD','NIN_SLIP')` | Yes | Owner step |
 | `owner_id_number` | `VARCHAR(50)` | Yes | Owner step (encrypted at rest) |
+| `rc_number` | `VARCHAR(50)` | Yes | Owner step; Required if BusinessType is REGISTERED |
 | `settlement_bank_code` | `VARCHAR(10)` | Yes | Account step |
 | `settlement_account_number` | `VARCHAR(10)` | Yes | Account step |
 | `settlement_account_name` | `VARCHAR(200)` | Yes | Account step (NIP-resolved, read-only after set) |

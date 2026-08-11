@@ -7,7 +7,6 @@ import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.exception.BusinessRuleException;
-import com.atlaspay.shared.exception.ValidationException;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -23,7 +22,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
     private PhoneNumber phone;
     private String hashedPassword;
     private final BusinessType businessType;
-    private String rcNumber;
     private boolean emailVerified;
     private String emailVerificationToken;
     private ZonedDateTime emailVerificationTokenExpiresAt;
@@ -34,10 +32,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
     private ZonedDateTime updatedAt;
 
     public Merchant(MerchantId id, String country, String businessName, String firstName, String lastName,
-                    EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType, String rcNumber) {
-        if (businessType == BusinessType.REGISTERED && (rcNumber == null || rcNumber.isBlank())) {
-            throw new ValidationException(IdentityErrorCode.RC_NUMBER_REQUIRED_FOR_REGISTERED_BUSINESS, "RC Number is required for REGISTERED businesses");
-        }
+                    EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType) {
         
         this.id = id;
         this.country = country;
@@ -48,7 +43,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
         this.phone = phone;
         this.hashedPassword = hashedPassword;
         this.businessType = businessType;
-        this.rcNumber = rcNumber;
         this.emailVerified = false;
         
         this.emailVerificationToken = UUID.randomUUID().toString();
@@ -63,7 +57,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantRegistered(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null, // correlationId would be injected in production
             this.businessName,
@@ -91,7 +85,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantEmailVerified(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null
         ));
@@ -108,7 +102,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantEmailVerificationResent(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null
         ));
@@ -132,7 +126,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantComplianceStepCompleted(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null,
             step
@@ -149,7 +143,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceSubmitted(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null
         ));
@@ -165,7 +159,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceApproved(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null
         ));
@@ -181,7 +175,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceRejected(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null,
             reason
@@ -195,7 +189,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantProfileUpdated(
             UUID.randomUUID().toString(),
-            id.value().toString(),
+            id.value(),
             ZonedDateTime.now(),
             null
         ));

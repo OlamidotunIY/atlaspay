@@ -45,6 +45,7 @@ public class MerchantCompliance {
     private String ownerAddress;
     private GovernmentIdType ownerIdType;
     private String ownerIdNumber;
+    private String rcNumber;
 
     // Step 4 - Account fields
     private String settlementBankCode;
@@ -86,13 +87,14 @@ public class MerchantCompliance {
         this.businessStreet = businessStreet;
     }
 
-    public void updateOwnerStep(String ownerBvn, String ownerNin, LocalDate ownerDateOfBirth, String ownerAddress, GovernmentIdType ownerIdType, String ownerIdNumber) {
+    public void updateOwnerStep(String ownerBvn, String ownerNin, LocalDate ownerDateOfBirth, String ownerAddress, GovernmentIdType ownerIdType, String ownerIdNumber, String rcNumber) {
         this.ownerBvn = ownerBvn;
         this.ownerNin = ownerNin;
         this.ownerDateOfBirth = ownerDateOfBirth;
         this.ownerAddress = ownerAddress;
         this.ownerIdType = ownerIdType;
         this.ownerIdNumber = ownerIdNumber;
+        this.rcNumber = rcNumber;
     }
 
     public void updateAccountStep(String settlementBankCode, String settlementAccountNumber, String settlementAccountName) {
