@@ -4,9 +4,24 @@ import java.time.ZonedDateTime;
 
 /**
  * Base interface for all domain events.
- * A domain event is a record of something that has already happened in the domain.
+ *
+ * <p>A domain event is a record of something that has already happened in the domain.
+ * Events are <em>raised inside the aggregate</em> (via {@code registerEvent}) and
+ * <em>published by the application layer</em> after a successful transaction commit.</p>
+ *
+ * <p>Implementors should be immutable records. Example:</p>
+ * <pre>{@code
+ * public record UserRegistered(
+ *     String eventId,
+ *     String aggregateId,
+ *     ZonedDateTime occurredAt,
+ *     String correlationId,
+ *     String email
+ * ) implements DomainEvent {}
+ * }</pre>
  */
 public interface DomainEvent {
+
     /**
      * Unique identifier for this specific event instance.
      */
@@ -21,4 +36,11 @@ public interface DomainEvent {
      * The time the event occurred.
      */
     ZonedDateTime occurredAt();
+
+    /**
+     * The correlation ID inherited from the originating request.
+     * Used to trace a chain of events across aggregates and services.
+     * Captured from {@link com.atlaspay.shared.tracing.CorrelationId} at event creation time.
+     */
+    String correlationId();
 }
