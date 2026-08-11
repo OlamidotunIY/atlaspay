@@ -1,5 +1,9 @@
 package com.atlaspay.shared.usecase;
 
+import com.atlaspay.shared.domain.AggregateRoot;
+import com.atlaspay.shared.event.DomainEventPublisher;
+import com.atlaspay.shared.event.EnvelopedDomainEvent;
+
 /**
  * Base abstract class for all application use cases.
  * I - Input Port (Command or Query)
@@ -17,9 +21,9 @@ public abstract class BaseUseCase<I, O> {
     /**
      * Helper method to publish all domain events from an aggregate root.
      */
-    protected void publishEvents(com.atlaspay.shared.domain.AggregateRoot<?> aggregate, com.atlaspay.shared.event.DomainEventPublisher publisher) {
+    protected void publishEvents(AggregateRoot<?> aggregate, DomainEventPublisher publisher) {
         aggregate.pullDomainEvents().forEach(event -> 
-            publisher.publish(com.atlaspay.shared.event.EnvelopedDomainEvent.wrap(event))
+            publisher.publish(EnvelopedDomainEvent.wrap(event))
         );
     }
 }

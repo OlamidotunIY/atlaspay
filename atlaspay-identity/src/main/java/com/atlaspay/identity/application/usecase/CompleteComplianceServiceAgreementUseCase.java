@@ -1,6 +1,6 @@
 package com.atlaspay.identity.application.usecase;
 
-import com.atlaspay.shared.usecase.BaseCommandUseCase;
+import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Merchant;
@@ -9,7 +9,7 @@ import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
 
-public class CompleteComplianceServiceAgreementUseCase extends BaseCommandUseCase<CompleteComplianceServiceAgreementCommand> {
+public class CompleteComplianceServiceAgreementUseCase extends BaseUseCase<CompleteComplianceServiceAgreementCommand, Void> {
 
     private final MerchantRepository merchantRepository;
     private final DomainEventPublisher eventPublisher;
@@ -20,7 +20,7 @@ public class CompleteComplianceServiceAgreementUseCase extends BaseCommandUseCas
     }
 
     @Override
-    public void execute(CompleteComplianceServiceAgreementCommand command) {
+    public Void execute(CompleteComplianceServiceAgreementCommand command) {
         if (!command.agreed()) {
             throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_ALL_STEPS_COMPLETE, "Must agree to service agreement");
         }
@@ -32,5 +32,7 @@ public class CompleteComplianceServiceAgreementUseCase extends BaseCommandUseCas
 
         merchantRepository.save(merchant);
         publishEvents(merchant, eventPublisher);
+    
+        return null;
     }
 }

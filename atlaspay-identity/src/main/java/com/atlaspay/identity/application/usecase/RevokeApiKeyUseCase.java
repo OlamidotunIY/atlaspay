@@ -1,6 +1,6 @@
 package com.atlaspay.identity.application.usecase;
 
-import com.atlaspay.shared.usecase.BaseCommandUseCase;
+import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.ApiKey;
@@ -8,7 +8,7 @@ import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
-public class RevokeApiKeyUseCase extends BaseCommandUseCase<RevokeApiKeyCommand> {
+public class RevokeApiKeyUseCase extends BaseUseCase<RevokeApiKeyCommand, Void> {
 
     private final ApiKeyRepository apiKeyRepository;
     private final DomainEventPublisher eventPublisher;
@@ -19,7 +19,7 @@ public class RevokeApiKeyUseCase extends BaseCommandUseCase<RevokeApiKeyCommand>
     }
 
     @Override
-    public void execute(RevokeApiKeyCommand command) {
+    public Void execute(RevokeApiKeyCommand command) {
         ApiKey apiKey = apiKeyRepository.findById(command.keyId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.API_KEY_NOT_FOUND, "API Key not found"));
 
@@ -31,5 +31,7 @@ public class RevokeApiKeyUseCase extends BaseCommandUseCase<RevokeApiKeyCommand>
 
         apiKeyRepository.save(apiKey);
         publishEvents(apiKey, eventPublisher);
+    
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 package com.atlaspay.identity.application.usecase;
 
-import com.atlaspay.shared.usecase.BaseCommandUseCase;
+import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.port.out.AccountResolutionService;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
@@ -9,7 +9,7 @@ import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
-public class CompleteComplianceAccountUseCase extends BaseCommandUseCase<CompleteComplianceAccountCommand> {
+public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteComplianceAccountCommand, Void> {
 
     private final MerchantRepository merchantRepository;
     private final AccountResolutionService accountResolutionService;
@@ -25,7 +25,7 @@ public class CompleteComplianceAccountUseCase extends BaseCommandUseCase<Complet
     }
 
     @Override
-    public void execute(CompleteComplianceAccountCommand command) {
+    public Void execute(CompleteComplianceAccountCommand command) {
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
 
@@ -40,5 +40,7 @@ public class CompleteComplianceAccountUseCase extends BaseCommandUseCase<Complet
 
         merchantRepository.save(merchant);
         publishEvents(merchant, eventPublisher);
+    
+        return null;
     }
 }
