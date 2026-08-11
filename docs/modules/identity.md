@@ -262,6 +262,51 @@ Phase 2 — Compliance (unlocks live mode):
 
 ---
 
+#### `ApiKey`
+
+**Identity:** `ApiKeyId` (defined in `atlaspay-shared-kernel`, `com.atlaspay.shared.domain.id`)
+
+> An `ApiKey` is a credential that allows a Merchant (or their applications) to authenticate to the
+> AtlasPay API without a session-based JWT. Merchants receive two key pairs — one for `TEST` mode
+> and one for `LIVE` mode. The `LIVE` pair is only generated once the Merchant's compliance is `APPROVED`.
+> The **public key** (`pk_`) is safe to embed in frontend code. The **secret key** (`sk_`) must
+> never be exposed — it is shown only once at generation time and stored as an HMAC-SHA256 hash.
+
+**Fields:**
+
+| Field | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | `ApiKeyId` | No | UUID |
+| `merchantId` | `MerchantId` | No | Owner |
+| `keyType` | `KeyType` | No | `PUBLIC` or `SECRET` |
+| `environment` | `ApiEnvironment` | No | `TEST` or `LIVE` |
+| `keyHash` | `String` | No | HMAC-SHA256(rawKey, serverSecret) — used for lookup. Only meaningful for `SECRET` keys. For `PUBLIC` keys this holds the full value. |
+| `displayValue` | `String` | No | Full value for `PUBLIC` keys. For `SECRET` keys: prefix + `****` + last 4 chars (e.g., `sk_live_****Ab3x`). Shown after creation. |
+| `prefix` | `String` | No | Key prefix: `pk_live_`, `sk_live_`, `pk_test_`, `sk_test_` |
+| `active` | `boolean` | No | `false` means revoked. Revoked keys are rejected at auth filter. |
+| `createdAt` | `ZonedDateTime` | No | UTC |
+| `revokedAt` | `ZonedDateTime` | Yes | Set when `revoke()` is called |
+
+**Invariants:**
+- A `LIVE` environment key can only be created after the Merchant's `ComplianceStatus` is `APPROVED`.
+- A revoked key (`active = false`) cannot be reactivated — a new key must be generated.
+- Each Merchant has exactly one active `PUBLIC` key and one active `SECRET` key per environment at any time.
+
+**Domain Methods:**
+
+| Method | Parameters | Returns | Throws | Description |
+|---|---|---|---|---|
+| `revoke()` | — | `void` | `BusinessRuleException(API_KEY_ALREADY_REVOKED)` | Sets `active = false`, sets `revokedAt`; raises `ApiKeyRevoked` |
+
+**Domain Events Raised:**
+
+| Event | Raised When |
+|---|---|
+| `ApiKeyGenerated` | On creation |
+| `ApiKeyRevoked` | On `revoke()` |
+
+---
+
 ### 2.2 Value Objects
 
 #### `EmailAddress`
