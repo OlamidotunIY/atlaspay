@@ -1,4 +1,4 @@
-package com.atlaspay.identity.application.usecase;
+package com.atlaspay.identity.application.command;
 
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.KeyType;

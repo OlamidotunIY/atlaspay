@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.identity.application.command.RegenerateApiKeyCommand;
+
 import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.port.out.PasswordEncoder;

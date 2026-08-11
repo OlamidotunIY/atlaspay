@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.identity.application.command.RegisterMerchantCommand;
+import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
+
 import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
