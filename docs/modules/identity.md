@@ -98,8 +98,8 @@ Phase 2 — Compliance (unlocks live mode):
 
 | Method | Parameters | Returns | Throws | Description |
 |---|---|---|---|---|
-| `verifyEmail(String token)` | `token` | `void` | `BusinessRuleException(EMAIL_ALREADY_VERIFIED)`, `BusinessRuleException(EMAIL_TOKEN_INVALID_OR_EXPIRED)` | Validates token and expiry; sets `emailVerified = true`; clears token; raises `MerchantEmailVerified` |
-| `regenerateEmailVerificationToken()` | — | `void` | `BusinessRuleException(EMAIL_ALREADY_VERIFIED)` | Generates a new token + expiry; raises `MerchantEmailVerificationResent` |
+| `verifyEmail(String code)` | `code` | `void` | `BusinessRuleException` (Already verified, Invalid/Expired code) | Validates code, sets `emailVerified = true`; raises `MerchantEmailVerified` |
+| `regenerateEmailVerificationCode()` | — | `void` | `BusinessRuleException` (Already verified) | Generates new 6-digit code; raises `MerchantEmailVerificationResent` |
 | `completeComplianceStep(ComplianceStep step, ...)` | Step-specific data | `void` | `BusinessRuleException(COMPLIANCE_STEP_OUT_OF_ORDER)` | Saves step data onto `MerchantCompliance`; advances `complianceStep`; raises `MerchantComplianceStepCompleted` |
 | `submitCompliance()` | — | `void` | `BusinessRuleException(COMPLIANCE_NOT_ALL_STEPS_COMPLETE)` | Moves `complianceStatus` to `SUBMITTED`; raises `MerchantComplianceSubmitted` |
 | `approveCompliance()` | — | `void` | `BusinessRuleException(COMPLIANCE_NOT_SUBMITTED)` | Moves status to `APPROVED`; raises `MerchantComplianceApproved` |
@@ -113,7 +113,7 @@ Phase 2 — Compliance (unlocks live mode):
 |---|---|
 | `MerchantRegistered` | On first creation |
 | `MerchantEmailVerified` | On `verifyEmail()` |
-| `MerchantEmailVerificationResent` | On `regenerateEmailVerificationToken()` |
+| `MerchantEmailVerificationResent` | On `regenerateEmailVerificationCode()` |
 | `MerchantComplianceStepCompleted` | On `completeComplianceStep()` |
 | `MerchantComplianceSubmitted` | On `submitCompliance()` |
 | `MerchantComplianceApproved` | On `approveCompliance()` |
@@ -142,17 +142,14 @@ Phase 2 — Compliance (unlocks live mode):
 
 | Field | Type | Nullable | Notes |
 |---|---|---|---|
-| `generalEmail` | `EmailAddress` | Yes | Merchant's general email |
 | `supportEmail` | `EmailAddress` | Yes | Merchant's customer support email |
 | `disputeEmail` | `EmailAddress` | Yes | Merchant's dispute resolution email |
-| `supportPhone` | `PhoneNumber` | Yes | Merchant's customer support phone |
 | `whatsappPhone` | `PhoneNumber` | Yes | Trusted WhatsApp phone number |
 | `whatsappName` | `String` | Yes | Name to easily identify the WhatsApp number |
 | `websiteUrl` | `String` | Yes | Optional. If supplied, must be a valid URL |
 | `twitterHandle` | `String` | Yes | Twitter username |
 | `facebookUsername` | `String` | Yes | Facebook username |
 | `instagramHandle` | `String` | Yes | Instagram handle |
-| `businessCountry` | `String` | Yes | ISO 3166-1 alpha-2 (non-editable, copied from Merchant) |
 | `businessState` | `String` | Yes | State / region |
 | `businessLga` | `String` | Yes | Local Government Area |
 | `businessCity` | `String` | Yes | City |
@@ -309,7 +306,7 @@ All events implement `DomainEvent` (shared-kernel). All are Java `record`s.
 |---|---|---|---|
 | `MerchantRegistered` | `Merchant` (constructor) | `businessName`, `email`, `country`, `businessType` | `atlaspay.identity.merchant.registered` |
 | `MerchantEmailVerified` | `Merchant.verifyEmail()` | — | `atlaspay.identity.merchant.email.verified` |
-| `MerchantEmailVerificationResent` | `Merchant.regenerateEmailVerificationToken()` | — | `atlaspay.identity.merchant.email.verification.resent` |
+| `MerchantEmailVerificationResent` | `Merchant.regenerateEmailVerificationCode()` | — | `atlaspay.identity.merchant.email.verification.resent` |
 | `MerchantComplianceStepCompleted` | `Merchant.completeComplianceStep()` | `step` (ComplianceStep) | `atlaspay.identity.merchant.compliance.step.completed` |
 | `MerchantComplianceSubmitted` | `Merchant.submitCompliance()` | — | `atlaspay.identity.merchant.compliance.submitted` |
 | `MerchantComplianceApproved` | `Merchant.approveCompliance()` | — | `atlaspay.identity.merchant.compliance.approved` |
@@ -416,7 +413,7 @@ public record RegisterMerchantCommand(
 1. Validate all input fields via Value Object constructors.
 2. Check `MerchantRepository.findByEmail()` — throw `ConflictException` if taken.
 3. Hash password using BCrypt.
-4. Generate `emailVerificationToken` (UUID) and `emailVerificationTokenExpiresAt` (now + 24h).
+4. Generate `emailVerificationCode` (6-digit) and `emailVerificationCodeExpiresAt` (now + 24h).
 5. Create `Merchant` aggregate (raises `MerchantRegistered`).
 6. `merchantRepository.save(merchant)`.
 7. Publish domain events.
@@ -439,22 +436,23 @@ public record RegisterMerchantCommand(
 
 **Input:**
 ```java
-public record VerifyMerchantEmailCommand(String token) {}
+public record VerifyMerchantEmailCommand(String merchantId, String code) {}
 ```
 
 **Output:** `void`
 
 **Happy Path:**
-1. Find Merchant by `emailVerificationToken` — throw `NotFoundException` if not found.
-2. Delegate to `merchant.verifyEmail(token)` — validates expiry and clears token.
+1. Load merchant — throw `NotFoundException` if absent.
+2. Delegate to `merchant.verifyEmail(code)` — validates expiry and clears code.
 3. `merchantRepository.save(merchant)` → publish `MerchantEmailVerified`.
 
 **Failure Cases:**
 
 | Condition | Exception | Error Code |
 |---|---|---|
-| Token not found | `NotFoundException` | `EMAIL_TOKEN_NOT_FOUND` |
-| Token expired | `BusinessRuleException` | `EMAIL_TOKEN_INVALID_OR_EXPIRED` |
+| Merchant not found | `NotFoundException` | `MERCHANT_NOT_FOUND` |
+| Code not found | `BusinessRuleException` | `EMAIL_CODE_NOT_FOUND` |
+| Code expired | `BusinessRuleException` | `EMAIL_CODE_INVALID_OR_EXPIRED` |
 | Email already verified | `BusinessRuleException` | `EMAIL_ALREADY_VERIFIED` |
 
 ---
@@ -471,8 +469,8 @@ public record ResendEmailVerificationCommand(MerchantId merchantId) {}
 **Output:** `void`
 
 **Happy Path:**
-1. Load merchant — throw `NotFoundException` if absent.
-2. Call `merchant.regenerateEmailVerificationToken()`.
+1. Calls `merchant.regenerateEmailVerificationCode()`.
+2. Sends `merchant.getEmailVerificationCode().getCode()` to merchant via external NotificationService (implementation out of scope for identity module).
 3. Save → publish `MerchantEmailVerificationResent`.
 4. Trigger email send.
 
@@ -800,22 +798,27 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 
 ---
 
-#### `GET /merchants/verify-email?token={token}` — Verify email address
+#### `POST /merchants/verify-email` — Verify email address
 
-**Auth:** Public (no token required — user clicks the link in their email)
+**Auth:** Public
 
-**Response `200 OK`:**
+**Request Body:**
 ```json
-{ "message": "Email verified successfully. You may now sign in." }
+{
+  "code": "123456",
+  "merchantId": "uuid"
+}
 ```
+
+**Response `200 OK`:** Empty body.
 
 **Error Responses:**
 
 | Status | Error Code | Condition |
 |---|---|---|
-| `404` | `EMAIL_TOKEN_NOT_FOUND` | Token not found |
-| `422` | `EMAIL_TOKEN_INVALID_OR_EXPIRED` | Token expired |
-| `422` | `EMAIL_ALREADY_VERIFIED` | Already verified |
+| `422` | `EMAIL_CODE_INVALID_OR_EXPIRED` | Code does not match or is expired |
+| `422` | `EMAIL_CODE_NOT_FOUND` | No code was generated for this merchant |
+| `422` | `EMAIL_ALREADY_VERIFIED` | Merchant is already verified |
 
 ---
 
@@ -873,20 +876,18 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 **Request Body:**
 ```json
 {
-  "generalEmail": "hello@acmecorp.com",
   "supportEmail": "support@acmecorp.com",
   "disputeEmail": "disputes@acmecorp.com",
-  "supportPhone": "+2348022222222",
-  "whatsappPhone": "+2348022222222",
-  "whatsappName": "Acme Support Team",
+  "whatsappPhone": "+2348012345678",
+  "whatsappName": "Acme Support",
   "websiteUrl": "https://acmecorp.com",
-  "twitterHandle": "acmecorp",
-  "facebookUsername": "acmecorporation",
+  "twitterHandle": "@acmecorp",
+  "facebookUsername": "acmecorp",
   "instagramHandle": "acmecorp_official",
-  "state": "Lagos",
-  "lga": "Ikeja",
-  "city": "Ikeja",
-  "street": "14 Broad Street"
+  "businessState": "Lagos",
+  "businessLga": "Ikeja",
+  "businessCity": "Ikeja",
+  "businessStreet": "5 Allen Avenue"
 }
 ```
 
@@ -1157,8 +1158,8 @@ Flyway prefix: `V1__identity__*.sql`
 | `hashed_password` | `VARCHAR(60)` | No | BCrypt output is always 60 chars |
 | `business_type` | `ENUM('STARTER','REGISTERED')` | No | — |
 | `email_verified` | `TINYINT(1)` | No | Default `0` |
-| `email_verification_token` | `CHAR(36)` | Yes | UUID; cleared after use |
-| `email_verification_token_expires_at` | `DATETIME(6)` | Yes | UTC |
+| `email_verification_code` | `VARCHAR(10)` | Yes | 6-digit numeric code; cleared after use |
+| `email_verification_code_expires_at` | `DATETIME(6)` | Yes | UTC |
 | `compliance_status` | `ENUM('NOT_STARTED','IN_PROGRESS','SUBMITTED','UNDER_REVIEW','APPROVED','REJECTED')` | No | Default `NOT_STARTED` |
 | `compliance_step` | `ENUM('PROFILE','CONTACT','OWNER','ACCOUNT','SERVICE_AGREEMENT')` | Yes | Current step in progress |
 | `created_at` | `DATETIME(6)` | No | UTC |
@@ -1171,7 +1172,7 @@ Flyway prefix: `V1__identity__*.sql`
 |---|---|---|---|
 | `PRIMARY` | `id` | — | — |
 | `uq_merchants_email` | `email` | UNIQUE | One account per email |
-| `uq_merchants_email_verification_token` | `email_verification_token` | UNIQUE | Fast token lookup for verification |
+| `uq_merchants_email_verification_code` | `email_verification_code` | UNIQUE | Fast code lookup for verification |
 | `idx_merchants_compliance_status` | `compliance_status` | B-tree | Filter/batch merchants by compliance state |
 
 **Migration:** `V1__identity__create_merchants.sql`
@@ -1191,17 +1192,14 @@ Flyway prefix: `V1__identity__*.sql`
 | `category` | `VARCHAR(100)` | Yes | Profile step |
 | `annual_projected_sales_volume` | `DECIMAL(19,4)` | Yes | Profile step |
 | `annual_projected_sales_currency` | `CHAR(3)` | Yes | Profile step |
-| `general_email` | `VARCHAR(254)` | Yes | Contact step |
-| `support_email` | `VARCHAR(254)` | Yes | Contact step |
-| `dispute_email` | `VARCHAR(254)` | Yes | Contact step |
-| `support_phone` | `VARCHAR(20)` | Yes | Contact step |
+| `support_email` | `VARCHAR(100)` | Yes | Contact step |
+| `dispute_email` | `VARCHAR(100)` | Yes | Contact step |
 | `whatsapp_phone` | `VARCHAR(20)` | Yes | Contact step |
 | `whatsapp_name` | `VARCHAR(100)` | Yes | Contact step |
-| `website_url` | `VARCHAR(255)` | Yes | Contact step (optional) |
-| `twitter_handle` | `VARCHAR(50)` | Yes | Contact step |
-| `facebook_username` | `VARCHAR(50)` | Yes | Contact step |
-| `instagram_handle` | `VARCHAR(50)` | Yes | Contact step |
-| `business_country` | `CHAR(2)` | Yes | Contact step (non-editable) |
+| `website_url` | `VARCHAR(200)` | Yes | Contact step (optional) |
+| `twitter_handle` | `VARCHAR(100)` | Yes | Contact step |
+| `facebook_username` | `VARCHAR(100)` | Yes | Contact step |
+| `instagram_handle` | `VARCHAR(100)` | Yes | Contact step |
 | `business_state` | `VARCHAR(100)` | Yes | Contact step |
 | `business_lga` | `VARCHAR(100)` | Yes | Contact step |
 | `business_city` | `VARCHAR(100)` | Yes | Contact step |

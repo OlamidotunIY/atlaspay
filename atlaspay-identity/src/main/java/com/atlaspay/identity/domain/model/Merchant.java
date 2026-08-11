@@ -26,8 +26,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
     private String hashedPassword;
     private final BusinessType businessType;
     private boolean emailVerified;
-    private String emailVerificationToken;
-    private ZonedDateTime emailVerificationTokenExpiresAt;
+    private EmailVerificationCode emailVerificationCode;
     private ComplianceStatus complianceStatus;
     private ComplianceStep complianceStep;
     private MerchantCompliance compliance;
@@ -47,9 +46,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         this.hashedPassword = hashedPassword;
         this.businessType = businessType;
         this.emailVerified = false;
-        
-        this.emailVerificationToken = UUID.randomUUID().toString();
-        this.emailVerificationTokenExpiresAt = ZonedDateTime.now().plusHours(24);
+        this.emailVerificationCode = new EmailVerificationCode();
         
         this.complianceStatus = ComplianceStatus.NOT_STARTED;
         this.complianceStep = null;
@@ -70,20 +67,18 @@ public class Merchant extends AggregateRoot<MerchantId> {
         ));
     }
 
-    public void verifyEmail(String token) {
+    public void verifyEmail(String code) {
         if (this.emailVerified) {
             throw new BusinessRuleException(IdentityErrorCode.EMAIL_ALREADY_VERIFIED, "Email is already verified");
         }
-        if (this.emailVerificationToken == null || !this.emailVerificationToken.equals(token)) {
-            throw new BusinessRuleException(IdentityErrorCode.EMAIL_TOKEN_INVALID_OR_EXPIRED, "Invalid verification token");
-        }
-        if (this.emailVerificationTokenExpiresAt != null && ZonedDateTime.now().isAfter(this.emailVerificationTokenExpiresAt)) {
-            throw new BusinessRuleException(IdentityErrorCode.EMAIL_TOKEN_INVALID_OR_EXPIRED, "Verification token has expired");
+        if (this.emailVerificationCode == null) {
+            throw new BusinessRuleException(IdentityErrorCode.EMAIL_CODE_NOT_FOUND, "No verification code pending");
         }
         
+        this.emailVerificationCode.validate(code);
+        
         this.emailVerified = true;
-        this.emailVerificationToken = null;
-        this.emailVerificationTokenExpiresAt = null;
+        this.emailVerificationCode = null;
         this.updatedAt = ZonedDateTime.now();
 
         registerEvent(new MerchantEmailVerified(
@@ -94,13 +89,12 @@ public class Merchant extends AggregateRoot<MerchantId> {
         ));
     }
 
-    public void regenerateEmailVerificationToken() {
+    public void regenerateEmailVerificationCode() {
         if (this.emailVerified) {
             throw new BusinessRuleException(IdentityErrorCode.EMAIL_ALREADY_VERIFIED, "Email is already verified");
         }
         
-        this.emailVerificationToken = UUID.randomUUID().toString();
-        this.emailVerificationTokenExpiresAt = ZonedDateTime.now().plusHours(24);
+        this.emailVerificationCode = new EmailVerificationCode();
         this.updatedAt = ZonedDateTime.now();
 
         registerEvent(new MerchantEmailVerificationResent(
