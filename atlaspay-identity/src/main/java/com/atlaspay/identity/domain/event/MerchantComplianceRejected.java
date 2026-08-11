@@ -8,7 +8,6 @@ public record MerchantComplianceRejected(
     String eventId,
     String aggregateId,
     ZonedDateTime occurredAt,
-    String correlationId,
     Payload payload
 ) implements DomainEvent<MerchantComplianceRejected.Payload> {
     public record Payload(String reason) {}

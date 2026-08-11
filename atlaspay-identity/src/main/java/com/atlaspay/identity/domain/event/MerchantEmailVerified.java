@@ -7,8 +7,7 @@ import java.time.ZonedDateTime;
 public record MerchantEmailVerified(
     String eventId,
     String aggregateId,
-    ZonedDateTime occurredAt,
-    String correlationId
+    ZonedDateTime occurredAt
 ) implements DomainEvent<Void> {
     @Override
     public Void payload() {

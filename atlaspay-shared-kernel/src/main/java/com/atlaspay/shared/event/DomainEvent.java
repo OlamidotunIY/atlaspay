@@ -38,13 +38,6 @@ public interface DomainEvent<T> {
     ZonedDateTime occurredAt();
 
     /**
-     * The correlation ID inherited from the originating request.
-     * Used to trace a chain of events across aggregates and services.
-     * Captured from {@link com.atlaspay.shared.tracing.CorrelationId} at event creation time.
-     */
-    String correlationId();
-
-    /**
      * The domain-specific payload of the event.
      * Null if the event has no payload.
      */

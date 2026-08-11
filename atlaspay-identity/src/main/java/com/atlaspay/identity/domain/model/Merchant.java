@@ -59,7 +59,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),
-            null, // correlationId would be injected in production
             new MerchantRegistered.Payload(
                 this.businessName,
                 this.email.value(),
@@ -86,8 +85,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantEmailVerified(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now(),
-            null
+            ZonedDateTime.now()
         ));
     }
 
@@ -102,8 +100,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantEmailVerificationResent(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now(),
-            null
+            ZonedDateTime.now()
         ));
     }
     
@@ -127,7 +124,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),
-            null,
             new MerchantComplianceStepCompleted.Payload(step)
         ));
     }
@@ -143,8 +139,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantComplianceSubmitted(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now(),
-            null
+            ZonedDateTime.now()
         ));
     }
 
@@ -159,8 +154,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantComplianceApproved(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now(),
-            null
+            ZonedDateTime.now()
         ));
     }
 
@@ -176,7 +170,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),
-            null,
             new MerchantComplianceRejected.Payload(reason)
         ));
     }
@@ -192,7 +185,6 @@ public class Merchant extends AggregateRoot<MerchantId> {
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),
-            null,
             new MerchantProfileUpdated.Payload(
                 this.firstName,
                 this.lastName,
@@ -209,8 +201,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantPasswordChanged(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now(),
-            null
+            ZonedDateTime.now()
         ));
     }
 

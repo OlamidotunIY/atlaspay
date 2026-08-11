@@ -9,7 +9,6 @@ public record MerchantRegistered(
     String eventId,
     String aggregateId,
     ZonedDateTime occurredAt,
-    String correlationId,
     Payload payload
 ) implements DomainEvent<MerchantRegistered.Payload> {
     public record Payload(
