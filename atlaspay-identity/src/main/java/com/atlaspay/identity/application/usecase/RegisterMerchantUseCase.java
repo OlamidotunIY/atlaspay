@@ -53,12 +53,14 @@ public class RegisterMerchantUseCase {
 
         merchantRepository.save(merchant);
 
-        merchant.pullDomainEvents().forEach(event -> 
-            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
-        );
+        merchant.pullDomainEvents().forEach(this::publishEvent);
 
         ApiKeyPairResult keys = generateTestApiKeyPairUseCase.execute(new GenerateTestApiKeyPairCommand(merchant.getId()));
 
         return new RegisterMerchantResult(merchant.getId(), keys.publicKey(), keys.secretKey());
+    }
+
+    private <T> void publishEvent(DomainEvent<T> event) {
+        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }

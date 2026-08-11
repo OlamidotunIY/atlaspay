@@ -55,13 +55,13 @@ public class GenerateTestApiKeyPairUseCase {
         apiKeyRepository.save(publicKey);
         apiKeyRepository.save(secretKey);
 
-        publicKey.pullDomainEvents().forEach(event -> 
-            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
-        );
-        secretKey.pullDomainEvents().forEach(event -> 
-            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
-        );
+        publicKey.pullDomainEvents().forEach(this::publishEvent);
+        secretKey.pullDomainEvents().forEach(this::publishEvent);
 
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
+    }
+
+    private <T> void publishEvent(DomainEvent<T> event) {
+        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }
