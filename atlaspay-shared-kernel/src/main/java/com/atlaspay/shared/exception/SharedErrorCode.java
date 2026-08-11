@@ -5,5 +5,6 @@ package com.atlaspay.shared.exception;
  */
 public enum SharedErrorCode implements ErrorCode {
     MONEY_NEGATIVE_AMOUNT,
-    INVALID_ID
+    INVALID_ID,
+    INVALID_EMAIL_FORMAT
 }
