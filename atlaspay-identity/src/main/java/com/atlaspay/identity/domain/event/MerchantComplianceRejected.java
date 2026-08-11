@@ -9,5 +9,7 @@ public record MerchantComplianceRejected(
     String aggregateId,
     ZonedDateTime occurredAt,
     String correlationId,
-    String reason
-) implements DomainEvent {}
+    Payload payload
+) implements DomainEvent<MerchantComplianceRejected.Payload> {
+    public record Payload(String reason) {}
+}

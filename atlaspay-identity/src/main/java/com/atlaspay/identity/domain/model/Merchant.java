@@ -60,10 +60,12 @@ public class Merchant extends AggregateRoot<MerchantId> {
             id.value(),
             ZonedDateTime.now(),
             null, // correlationId would be injected in production
-            this.businessName,
-            this.email.value(),
-            this.country,
-            this.businessType
+            new MerchantRegistered.Payload(
+                this.businessName,
+                this.email.value(),
+                this.country,
+                this.businessType
+            )
         ));
     }
 
@@ -126,7 +128,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
             id.value(),
             ZonedDateTime.now(),
             null,
-            step
+            new MerchantComplianceStepCompleted.Payload(step)
         ));
     }
 
@@ -175,7 +177,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
             id.value(),
             ZonedDateTime.now(),
             null,
-            reason
+            new MerchantComplianceRejected.Payload(reason)
         ));
     }
 
@@ -190,7 +192,13 @@ public class Merchant extends AggregateRoot<MerchantId> {
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),
-            null
+            null,
+            new MerchantProfileUpdated.Payload(
+                this.firstName,
+                this.lastName,
+                this.businessName,
+                this.phone.value()
+            )
         ));
     }
     

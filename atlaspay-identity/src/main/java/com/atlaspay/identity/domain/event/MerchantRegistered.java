@@ -10,8 +10,12 @@ public record MerchantRegistered(
     String aggregateId,
     ZonedDateTime occurredAt,
     String correlationId,
-    String businessName,
-    String email,
-    String country,
-    BusinessType businessType
-) implements DomainEvent {}
+    Payload payload
+) implements DomainEvent<MerchantRegistered.Payload> {
+    public record Payload(
+        String businessName,
+        String email,
+        String country,
+        BusinessType businessType
+    ) {}
+}

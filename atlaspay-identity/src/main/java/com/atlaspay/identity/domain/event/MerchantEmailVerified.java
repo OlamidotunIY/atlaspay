@@ -9,4 +9,9 @@ public record MerchantEmailVerified(
     String aggregateId,
     ZonedDateTime occurredAt,
     String correlationId
-) implements DomainEvent {}
+) implements DomainEvent<Void> {
+    @Override
+    public Void payload() {
+        return null;
+    }
+}

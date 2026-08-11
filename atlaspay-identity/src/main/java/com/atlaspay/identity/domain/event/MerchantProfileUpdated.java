@@ -8,5 +8,13 @@ public record MerchantProfileUpdated(
     String eventId,
     String aggregateId,
     ZonedDateTime occurredAt,
-    String correlationId
-) implements DomainEvent {}
+    String correlationId,
+    Payload payload
+) implements DomainEvent<MerchantProfileUpdated.Payload> {
+    public record Payload(
+        String firstName,
+        String lastName,
+        String businessName,
+        String phone
+    ) {}
+}

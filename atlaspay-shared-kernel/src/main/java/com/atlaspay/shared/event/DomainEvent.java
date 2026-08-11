@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
  * ) implements DomainEvent {}
  * }</pre>
  */
-public interface DomainEvent {
+public interface DomainEvent<T> {
 
     /**
      * Unique identifier for this specific event instance.
@@ -43,4 +43,10 @@ public interface DomainEvent {
      * Captured from {@link com.atlaspay.shared.tracing.CorrelationId} at event creation time.
      */
     String correlationId();
+
+    /**
+     * The domain-specific payload of the event.
+     * Null if the event has no payload.
+     */
+    T payload();
 }

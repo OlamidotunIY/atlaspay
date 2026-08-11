@@ -10,5 +10,7 @@ public record MerchantComplianceStepCompleted(
     String aggregateId,
     ZonedDateTime occurredAt,
     String correlationId,
-    ComplianceStep step
-) implements DomainEvent {}
+    Payload payload
+) implements DomainEvent<MerchantComplianceStepCompleted.Payload> {
+    public record Payload(ComplianceStep step) {}
+}
