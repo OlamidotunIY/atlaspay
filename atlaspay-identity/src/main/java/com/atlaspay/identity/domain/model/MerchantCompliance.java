@@ -7,10 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
+import lombok.Getter;
+import lombok.AccessLevel;
+
 /**
  * Child entity holding all compliance data; populated as steps are completed.
  * Kept separate to ensure Merchant aggregate doesn't get bloated.
  */
+@Getter(AccessLevel.PACKAGE)
 public class MerchantCompliance {
 
     // Step 1 - Profile fields

@@ -10,7 +10,10 @@ import com.atlaspay.shared.exception.BusinessRuleException;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.AccessLevel;
 
+@Getter(AccessLevel.PACKAGE)
 public class Merchant extends AggregateRoot<MerchantId> {
 
     private final MerchantId id;
