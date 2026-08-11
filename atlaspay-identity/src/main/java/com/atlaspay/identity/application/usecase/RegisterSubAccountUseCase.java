@@ -1,19 +1,19 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseUseCase;
+
 import com.atlaspay.identity.application.dto.RegisterSubAccountResult;
 import com.atlaspay.identity.application.port.out.AccountResolutionService;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.SubAccount;
 import com.atlaspay.identity.domain.repository.SubAccountRepository;
 import com.atlaspay.shared.domain.id.SubAccountId;
-import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.ConflictException;
 import com.atlaspay.shared.exception.NotFoundException;
 
-public class RegisterSubAccountUseCase {
+public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCommand, RegisterSubAccountResult> {
 
     private final SubAccountRepository subAccountRepository;
     private final AccountResolutionService accountResolutionService;
@@ -28,6 +28,7 @@ public class RegisterSubAccountUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public RegisterSubAccountResult execute(RegisterSubAccountCommand command) {
         if (subAccountRepository.findByMerchantIdAndBankCodeAndAccountNumber(
                 command.merchantId(), command.bankCode(), command.accountNumber()).isPresent()) {
@@ -48,12 +49,8 @@ public class RegisterSubAccountUseCase {
 
         subAccountRepository.save(subAccount);
 
-        subAccount.pullDomainEvents().forEach(this::publishEvent);
+        publishEvents(subAccount, eventPublisher);
 
         return new RegisterSubAccountResult(subAccount.getId(), accountName);
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }

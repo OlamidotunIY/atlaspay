@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseUseCase;
+
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
@@ -9,16 +11,14 @@ import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.domain.id.ApiKeyId;
-import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
 import com.atlaspay.identity.application.port.out.PasswordEncoder;
 
 import java.util.UUID;
 
-public class GenerateLiveApiKeyPairUseCase {
+public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKeyPairCommand, ApiKeyPairResult> {
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
@@ -36,6 +36,7 @@ public class GenerateLiveApiKeyPairUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public ApiKeyPairResult execute(GenerateLiveApiKeyPairCommand command) {
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
@@ -73,13 +74,9 @@ public class GenerateLiveApiKeyPairUseCase {
         apiKeyRepository.save(publicKey);
         apiKeyRepository.save(secretKey);
 
-        publicKey.pullDomainEvents().forEach(this::publishEvent);
-        secretKey.pullDomainEvents().forEach(this::publishEvent);
+        publishEvents(publicKey, eventPublisher);
+        publishEvents(secretKey, eventPublisher);
 
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }

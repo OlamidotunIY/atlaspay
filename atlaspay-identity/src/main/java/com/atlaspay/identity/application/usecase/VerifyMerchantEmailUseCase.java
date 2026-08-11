@@ -1,14 +1,14 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseCommandUseCase;
+
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
-import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.NotFoundException;
 
-public class VerifyMerchantEmailUseCase {
+public class VerifyMerchantEmailUseCase extends BaseCommandUseCase<VerifyMerchantEmailCommand> {
 
     private final MerchantRepository merchantRepository;
     private final DomainEventPublisher eventPublisher;
@@ -18,6 +18,7 @@ public class VerifyMerchantEmailUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public void execute(VerifyMerchantEmailCommand command) {
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
@@ -25,10 +26,6 @@ public class VerifyMerchantEmailUseCase {
         merchant.verifyEmail(command.verificationCode());
         merchantRepository.save(merchant);
 
-        merchant.pullDomainEvents().forEach(this::publishEvent);
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
+        publishEvents(merchant, eventPublisher);
     }
 }

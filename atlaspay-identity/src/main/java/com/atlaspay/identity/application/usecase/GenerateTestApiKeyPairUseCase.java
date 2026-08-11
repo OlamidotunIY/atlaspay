@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseUseCase;
+
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
 import com.atlaspay.identity.application.port.out.PasswordEncoder;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
@@ -8,12 +10,10 @@ import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
-import com.atlaspay.shared.event.DomainEvent;
 
 import java.util.UUID;
 
-public class GenerateTestApiKeyPairUseCase {
+public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKeyPairCommand, ApiKeyPairResult> {
 
     private final ApiKeyRepository apiKeyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -25,6 +25,7 @@ public class GenerateTestApiKeyPairUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public ApiKeyPairResult execute(GenerateTestApiKeyPairCommand command) {
         String rawPublicKey = "pk_test_" + UUID.randomUUID().toString().replace("-", "");
         String rawSecretKey = "sk_test_" + UUID.randomUUID().toString().replace("-", "");
@@ -55,13 +56,9 @@ public class GenerateTestApiKeyPairUseCase {
         apiKeyRepository.save(publicKey);
         apiKeyRepository.save(secretKey);
 
-        publicKey.pullDomainEvents().forEach(this::publishEvent);
-        secretKey.pullDomainEvents().forEach(this::publishEvent);
+        publishEvents(publicKey, eventPublisher);
+        publishEvents(secretKey, eventPublisher);
 
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }

@@ -1,18 +1,16 @@
 package com.atlaspay.shared.usecase;
 
 /**
- * Base abstract class for all application use cases.
- * I - Input Port (Command or Query)
- * O - Output Type
+ * Base abstract class for command use cases that do not return a result.
+ * I - Input Command
  */
-public abstract class BaseUseCase<I, O> {
-    
+public abstract class BaseCommandUseCase<I> {
+
     /**
-     * Executes the use case.
-     * @param input The input command or query
-     * @return The result of the use case
+     * Executes the command use case.
+     * @param input The input command
      */
-    public abstract O execute(I input);
+    public abstract void execute(I input);
 
     /**
      * Helper method to publish all domain events from an aggregate root.

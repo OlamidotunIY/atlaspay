@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseUseCase;
+
 import com.atlaspay.identity.application.port.out.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
@@ -9,15 +11,13 @@ import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.domain.id.ApiKeyId;
-import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
 
 import java.util.UUID;
 
-public class RegenerateApiKeyUseCase {
+public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand, String> {
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
@@ -35,6 +35,7 @@ public class RegenerateApiKeyUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public String execute(RegenerateApiKeyCommand command) {
         if (command.environment() == ApiEnvironment.LIVE) {
             Merchant merchant = merchantRepository.findById(command.authenticatedMerchantId())
@@ -50,7 +51,7 @@ public class RegenerateApiKeyUseCase {
         ).ifPresent(existingKey -> {
             existingKey.revoke();
             apiKeyRepository.save(existingKey);
-            existingKey.pullDomainEvents().forEach(this::publishEvent);
+            publishEvents(existingKey, eventPublisher);
         });
 
         String envPrefix = command.environment() == ApiEnvironment.LIVE ? "live_" : "test_";
@@ -81,12 +82,8 @@ public class RegenerateApiKeyUseCase {
         );
 
         apiKeyRepository.save(newKey);
-        newKey.pullDomainEvents().forEach(this::publishEvent);
+        publishEvents(newKey, eventPublisher);
 
         return rawKey;
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }

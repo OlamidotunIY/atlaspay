@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import com.atlaspay.shared.usecase.BaseUseCase;
+
 import com.atlaspay.identity.application.dto.CreateCustomerResult;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Customer;
@@ -7,12 +9,10 @@ import com.atlaspay.identity.domain.repository.CustomerRepository;
 import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
-import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
-import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.ConflictException;
 
-public class CreateCustomerUseCase {
+public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, CreateCustomerResult> {
 
     private final CustomerRepository customerRepository;
     private final DomainEventPublisher eventPublisher;
@@ -22,6 +22,7 @@ public class CreateCustomerUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    @Override
     public CreateCustomerResult execute(CreateCustomerCommand command) {
         if (customerRepository.findByMerchantIdAndEmail(command.merchantId(), command.email()).isPresent()) {
             throw new ConflictException(IdentityErrorCode.CUSTOMER_EMAIL_ALREADY_EXISTS, "Customer with this email already exists for this merchant");
@@ -39,12 +40,8 @@ public class CreateCustomerUseCase {
 
         customerRepository.save(customer);
 
-        customer.pullDomainEvents().forEach(this::publishEvent);
+        publishEvents(customer, eventPublisher);
 
         return new CreateCustomerResult(customer.getId());
-    }
-
-    private <T> void publishEvent(DomainEvent<T> event) {
-        eventPublisher.publish(EnvelopedDomainEvent.wrap(event));
     }
 }
