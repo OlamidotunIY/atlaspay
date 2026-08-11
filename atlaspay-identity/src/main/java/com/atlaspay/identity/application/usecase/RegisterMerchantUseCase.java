@@ -1,6 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
+import com.atlaspay.identity.application.dto.RegisterMerchantResult;
 import com.atlaspay.identity.application.port.out.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Merchant;
@@ -8,7 +9,9 @@ import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
+import com.atlaspay.shared.event.DomainEvent;
 import com.atlaspay.shared.event.DomainEventPublisher;
+import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.atlaspay.shared.exception.ConflictException;
 
 public class RegisterMerchantUseCase {
@@ -50,7 +53,9 @@ public class RegisterMerchantUseCase {
 
         merchantRepository.save(merchant);
 
-        merchant.pullDomainEvents().forEach(eventPublisher::publish);
+        merchant.pullDomainEvents().forEach(event -> 
+            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
+        );
 
         ApiKeyPairResult keys = generateTestApiKeyPairUseCase.execute(new GenerateTestApiKeyPairCommand(merchant.getId()));
 

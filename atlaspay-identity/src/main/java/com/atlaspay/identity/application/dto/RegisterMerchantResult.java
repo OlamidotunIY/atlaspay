@@ -1,4 +1,4 @@
-package com.atlaspay.identity.application.usecase;
+package com.atlaspay.identity.application.dto;
 
 import com.atlaspay.shared.domain.id.MerchantId;
 

@@ -8,6 +8,9 @@ import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
+import com.atlaspay.shared.event.EnvelopedDomainEvent;
+import com.atlaspay.shared.event.DomainEvent;
+
 import java.util.UUID;
 
 public class GenerateTestApiKeyPairUseCase {
@@ -52,8 +55,12 @@ public class GenerateTestApiKeyPairUseCase {
         apiKeyRepository.save(publicKey);
         apiKeyRepository.save(secretKey);
 
-        publicKey.pullDomainEvents().forEach(eventPublisher::publish);
-        secretKey.pullDomainEvents().forEach(eventPublisher::publish);
+        publicKey.pullDomainEvents().forEach(event -> 
+            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
+        );
+        secretKey.pullDomainEvents().forEach(event -> 
+            eventPublisher.publish(EnvelopedDomainEvent.wrap((DomainEvent<Object>) event))
+        );
 
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
     }
