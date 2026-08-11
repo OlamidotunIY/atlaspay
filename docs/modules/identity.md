@@ -203,6 +203,8 @@ merchant must re-register (or appeal via admin tooling — out of scope for v1).
 | Enum | Values | Notes |
 |---|---|---|
 | `KycStatus` | `UNVERIFIED`, `PENDING`, `VERIFIED`, `REJECTED` | Belongs to `identity` domain package. Transition guards in `Merchant` aggregate. |
+| `KeyType` | `PUBLIC`, `SECRET` | Determines display and storage strategy for an `ApiKey` |
+| `ApiEnvironment` | `TEST`, `LIVE` | `LIVE` keys only generated after KYC verified |
 
 ---
 
@@ -220,7 +222,11 @@ All events implement `DomainEvent` (shared-kernel). All are Java `record`s.
 | `CustomerProfileUpdated` | `Customer.updateProfile()` | `merchantId` | `atlaspay.identity.customer.updated` |
 | `SubAccountRegistered` | `SubAccount` (constructor) | `merchantId`, `bankCode`, `accountNumber`, `accountName` | `atlaspay.identity.subaccount.registered` |
 | `SubAccountDeactivated` | `SubAccount.deactivate()` | `merchantId` | `atlaspay.identity.subaccount.deactivated` |
+| `ApiKeyGenerated` | `ApiKey` (constructor) | `merchantId`, `keyType`, `environment`, `prefix` | `atlaspay.identity.apikey.generated` |
+| `ApiKeyRevoked` | `ApiKey.revoke()` | `merchantId`, `keyType`, `environment` | `atlaspay.identity.apikey.revoked` |
 
+> **Note on `MerchantKycVerified`:** When this event is published, the application layer also triggers `GenerateLiveApiKeyPairUseCase` to automatically issue the merchant's live key pair.
+>
 > Base fields on every event: `eventId`, `aggregateId`, `occurredAt`, `correlationId`.
 
 ---
@@ -264,6 +270,18 @@ Implementations live in `infrastructure/persistence/`.
 | `existsById(SubAccountId id)` | `boolean` | Inherited |
 | `findByMerchantIdAndAccountNumberAndBankCode(MerchantId, String, String)` | `Optional<SubAccount>` | Duplicate sub-account check |
 | `findAllByMerchantId(MerchantId merchantId, Pageable pageable)` | `Page<SubAccount>` | List sub-accounts for a Merchant |
+
+---
+
+### `ApiKeyRepository`
+
+| Method | Returns | Notes |
+|---|---|---|
+| `save(ApiKey key)` | `ApiKey` | Inherited |
+| `findById(ApiKeyId id)` | `Optional<ApiKey>` | Inherited |
+| `findByKeyHash(String keyHash)` | `Optional<ApiKey>` | Used by the auth filter for lookup by hashed secret key |
+| `findByMerchantIdAndKeyTypeAndEnvironmentAndActiveTrue(MerchantId, KeyType, ApiEnvironment)` | `Optional<ApiKey>` | Find the one active key of a given type/env for a merchant |
+| `findAllByMerchantId(MerchantId merchantId)` | `List<ApiKey>` | List all keys (active and revoked) for a merchant |
 
 ---
 
@@ -419,6 +437,108 @@ public record RegisterSubAccountCommand(
 
 ---
 
+### `GenerateTestApiKeyPairUseCase`
+
+**Type:** Command (called automatically after `RegisterMerchantUseCase` succeeds)
+
+**Input:**
+```java
+public record GenerateTestApiKeyPairCommand(MerchantId merchantId) {}
+```
+
+**Output:** `ApiKeyPairResult` (record containing `publicKey: String` and `secretKey: String` — the raw values shown once)
+
+**Happy Path:**
+1. Generate raw public key: `pk_test_` + 32 random alphanumeric chars.
+2. Generate raw secret key: `sk_test_` + 32 random alphanumeric chars.
+3. For public key: `keyHash = rawKey` (stored as-is), `displayValue = rawKey`.
+4. For secret key: `keyHash = HMAC-SHA256(rawKey, serverSecret)`, `displayValue = prefix + "****" + last4`.
+5. Create two `ApiKey` aggregates, save both.
+6. Publish `ApiKeyGenerated` for each.
+7. Return `ApiKeyPairResult(rawPublicKey, rawSecretKey)` — the only time raw secret is visible.
+
+**Failure Cases:** None (internal system call; merchant already validated).
+
+---
+
+### `GenerateLiveApiKeyPairUseCase`
+
+**Type:** Command (triggered by `MerchantKycVerified` event handler)
+
+**Input:**
+```java
+public record GenerateLiveApiKeyPairCommand(MerchantId merchantId) {}
+```
+
+**Happy Path:** Same as `GenerateTestApiKeyPairUseCase` but with `LIVE` environment and `pk_live_` / `sk_live_` prefixes.
+
+**Failure Cases:**
+
+| Condition | Exception | Error Code |
+|---|---|---|
+| Merchant KYC not verified | `BusinessRuleException` | `LIVE_KEYS_REQUIRE_KYC_VERIFIED` |
+
+---
+
+### `RevokeApiKeyUseCase`
+
+**Type:** Command
+
+**Input:**
+```java
+public record RevokeApiKeyCommand(
+    MerchantId authenticatedMerchantId,
+    ApiKeyId keyId
+) {}
+```
+
+**Output:** `void`
+
+**Happy Path:**
+1. Load `ApiKey` by `keyId` — throw `NotFoundException` if absent.
+2. Verify `apiKey.getMerchantId().equals(authenticatedMerchantId)` — throw `NotFoundException` if mismatch (do not leak existence).
+3. Call `apiKey.revoke()` — throws `BusinessRuleException` if already revoked.
+4. `apiKeyRepository.save(apiKey)` → publish `ApiKeyRevoked`.
+
+**Failure Cases:**
+
+| Condition | Exception | Error Code |
+|---|---|---|
+| Key not found or belongs to another merchant | `NotFoundException` | `API_KEY_NOT_FOUND` |
+| Key already revoked | `BusinessRuleException` | `API_KEY_ALREADY_REVOKED` |
+
+---
+
+### `RegenerateApiKeyUseCase`
+
+**Type:** Command
+
+**Input:**
+```java
+public record RegenerateApiKeyCommand(
+    MerchantId authenticatedMerchantId,
+    KeyType keyType,
+    ApiEnvironment environment
+) {}
+```
+
+**Output:** `String` (the new raw key — shown once)
+
+**Happy Path:**
+1. Find existing active key for this merchant/type/environment.
+2. Call `existingKey.revoke()` → save.
+3. Generate new key (same logic as `GenerateTestApiKeyPairUseCase`).
+4. Save new key → publish events.
+5. Return raw new key.
+
+**Failure Cases:**
+
+| Condition | Exception | Error Code |
+|---|---|---|
+| Attempting to regenerate LIVE key without KYC | `BusinessRuleException` | `LIVE_KEYS_REQUIRE_KYC_VERIFIED` |
+
+---
+
 ## 6. Outbound Ports (External Dependencies)
 
 ---
@@ -463,15 +583,25 @@ public interface AccountNameResolutionPort {
 
 Base path: `/api/v1`
 
-Authentication: `Bearer JWT` (required on all endpoints unless noted)
+### Authentication
+
+All endpoints (except `POST /merchants`) require one of:
+- `Authorization: Bearer sk_live_xxx` — Secret API Key (API consumers / server-to-server)
+- `Authorization: Bearer eyJ...` — JWT (issued at dashboard login)
+
+The `merchantId` is **never passed in the URL**. It is always resolved from the credential:
+- **JWT:** `sub` claim = `merchantId`
+- **API Key:** HMAC-SHA256(key) → lookup in `api_keys` → `merchantId`
+
+Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchantId` in the path.
 
 ---
 
-### `POST /merchants`
+### Merchant Endpoints
 
-**Description:** Register a new Merchant.
+#### `POST /merchants` — Register a new Merchant
 
-**Auth:** Public (no JWT required — this is the registration endpoint).
+**Auth:** Public (no token required — this is onboarding)
 
 **Request Body:**
 ```json
@@ -483,19 +613,15 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 }
 ```
 
-| Field | Required | Notes |
-|---|---|---|
-| `businessName` | Yes | 2–200 chars |
-| `email` | Yes | Valid email |
-| `phone` | Yes | E.164 format |
-| `rcNumber` | No | Can be supplied later before KYC |
-
 **Response `201 Created`:**
 ```json
 {
-  "merchantId": "uuid"
+  "merchantId": "uuid",
+  "testPublicKey": "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "testSecretKey": "sk_test_REDACTED_DUMMY_KEY"
 }
 ```
+> The `testSecretKey` is shown **only once**. The merchant must store it securely.
 
 **Error Responses:**
 
@@ -507,39 +633,9 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 
 ---
 
-### `POST /merchants/{merchantId}/kyc/verify`
+#### `GET /merchants/me` — Get authenticated merchant's profile
 
-**Description:** Initiate and complete KYC verification for a Merchant.
-
-**Request Body:**
-```json
-{
-  "bvn": "12345678901",
-  "nin": null
-}
-```
-
-**Response `200 OK`:**
-```json
-{
-  "merchantId": "uuid",
-  "kycStatus": "VERIFIED"
-}
-```
-
-**Error Responses:**
-
-| Status | Error Code | Condition |
-|---|---|---|
-| `404` | `MERCHANT_NOT_FOUND` | Merchant not found |
-| `422` | `KYC_ALREADY_VERIFIED` | KYC already completed |
-| `422` | `KYC_ALREADY_IN_PROGRESS` | KYC already pending |
-| `400` | `KYC_IDENTITY_DOCUMENT_REQUIRED` | No BVN or NIN supplied |
-| `502` | `KYC_PROVIDER_UNAVAILABLE` | Dojah API failure |
-
----
-
-### `GET /merchants/{merchantId}`
+**Auth:** Required
 
 **Response `200 OK`:**
 ```json
@@ -555,9 +651,36 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 
 ---
 
-### `POST /merchants/{merchantId}/customers`
+#### `POST /merchants/kyc/verify` — Initiate KYC verification
 
-**Description:** Create a Customer for a Merchant.
+**Auth:** Required
+
+**Request Body:**
+```json
+{ "bvn": "12345678901", "nin": null }
+```
+
+**Response `200 OK`:**
+```json
+{ "kycStatus": "VERIFIED" }
+```
+
+**Error Responses:**
+
+| Status | Error Code | Condition |
+|---|---|---|
+| `422` | `KYC_ALREADY_VERIFIED` | Already verified |
+| `422` | `KYC_ALREADY_IN_PROGRESS` | Already pending |
+| `400` | `KYC_IDENTITY_DOCUMENT_REQUIRED` | No BVN or NIN supplied |
+| `502` | `KYC_PROVIDER_UNAVAILABLE` | Dojah API failure |
+
+---
+
+### Customer Endpoints
+
+#### `POST /customers` — Create a Customer
+
+**Auth:** Required
 
 **Request Body:**
 ```json
@@ -572,42 +695,41 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 
 **Response `201 Created`:**
 ```json
-{
-  "customerId": "uuid"
-}
+{ "customerId": "uuid" }
 ```
 
 **Error Responses:**
 
 | Status | Error Code | Condition |
 |---|---|---|
-| `404` | `MERCHANT_NOT_FOUND` | Merchant not found |
 | `400` | `INVALID_EMAIL_FORMAT` | Malformed email |
 | `409` | `CUSTOMER_EMAIL_ALREADY_EXISTS` | Email already exists for this Merchant |
 
 ---
 
-### `GET /merchants/{merchantId}/customers`
+#### `GET /customers` — List Customers
 
-**Description:** List all Customers for a Merchant (paginated).
+**Auth:** Required
 
-**Query Params:** `page` (default 0), `size` (default 20)
+**Query Params:** `page` (default 0), `size` (default 50), `email` (optional filter)
 
 **Response `200 OK`:**
 ```json
 {
   "content": [
-    { "customerId": "uuid", "firstName": "John", "email": "john@example.com" }
+    { "customerId": "uuid", "firstName": "John", "email": "john@example.com", "createdAt": "..." }
   ],
   "page": 0,
-  "size": 20,
+  "size": 50,
   "totalElements": 1
 }
 ```
 
 ---
 
-### `GET /merchants/{merchantId}/customers/{customerId}`
+#### `GET /customers/{customerId}` — Get a Customer
+
+**Auth:** Required
 
 **Response `200 OK`:** Full customer object.
 
@@ -615,14 +737,15 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 
 | Status | Error Code | Condition |
 |---|---|---|
-| `404` | `MERCHANT_NOT_FOUND` | Merchant not found |
-| `404` | `CUSTOMER_NOT_FOUND` | Customer not found |
+| `404` | `CUSTOMER_NOT_FOUND` | Not found or belongs to another merchant |
 
 ---
 
-### `POST /merchants/{merchantId}/subaccounts`
+### SubAccount Endpoints
 
-**Description:** Register a bank account as a SubAccount for split payments.
+#### `POST /subaccounts` — Register a SubAccount
+
+**Auth:** Required
 
 **Request Body:**
 ```json
@@ -645,16 +768,106 @@ Authentication: `Bearer JWT` (required on all endpoints unless noted)
 
 | Status | Error Code | Condition |
 |---|---|---|
-| `404` | `MERCHANT_NOT_FOUND` | Merchant not found |
-| `404` | `BANK_ACCOUNT_NOT_FOUND` | Account not found in NIP directory |
-| `409` | `SUBACCOUNT_ALREADY_EXISTS` | Duplicate account for this Merchant |
-| `502` | `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` | Anchor API failure |
+| `404` | `BANK_ACCOUNT_NOT_FOUND` | Not in NIP directory |
+| `409` | `SUBACCOUNT_ALREADY_EXISTS` | Duplicate for this Merchant |
+| `502` | `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` | Anchor failure |
 
 ---
 
-### `GET /merchants/{merchantId}/subaccounts`
+#### `GET /subaccounts` — List SubAccounts
 
-**Response `200 OK`:** Paginated list of SubAccounts for the Merchant.
+**Auth:** Required
+
+**Response `200 OK`:** Paginated list of SubAccounts.
+
+---
+
+#### `GET /subaccounts/{subAccountId}` — Get a SubAccount
+
+**Auth:** Required
+
+---
+
+#### `DELETE /subaccounts/{subAccountId}` — Deactivate a SubAccount
+
+**Auth:** Required
+
+**Response `200 OK`:**
+```json
+{ "subAccountId": "uuid", "active": false }
+```
+
+---
+
+### API Key Management Endpoints
+
+#### `GET /keys` — List all API keys
+
+**Auth:** Required
+
+**Response `200 OK`:**
+```json
+{
+  "keys": [
+    {
+      "keyId": "uuid",
+      "keyType": "SECRET",
+      "environment": "LIVE",
+      "displayValue": "sk_live_****Ab3x",
+      "active": true,
+      "createdAt": "2026-08-11T20:00:00Z"
+    }
+  ]
+}
+```
+> Secret keys are **never** returned in full after initial generation. Only `displayValue` (masked) is returned.
+
+---
+
+#### `POST /keys/regenerate` — Regenerate a key
+
+**Auth:** Required
+
+**Request Body:**
+```json
+{
+  "keyType": "SECRET",
+  "environment": "LIVE"
+}
+```
+
+**Response `200 OK`:**
+```json
+{
+  "keyId": "uuid",
+  "rawKey": "sk_live_REDACTED_DUMMY_KEY"
+}
+```
+> `rawKey` shown **once only**. The previous key is immediately revoked.
+
+**Error Responses:**
+
+| Status | Error Code | Condition |
+|---|---|---|
+| `422` | `LIVE_KEYS_REQUIRE_KYC_VERIFIED` | Regenerating LIVE key before KYC |
+
+---
+
+#### `DELETE /keys/{keyId}` — Revoke a key
+
+**Auth:** Required
+
+**Response `200 OK`:**
+```json
+{ "keyId": "uuid", "active": false }
+```
+
+**Error Responses:**
+
+| Status | Error Code | Condition |
+|---|---|---|
+| `404` | `API_KEY_NOT_FOUND` | Key not found |
+| `422` | `API_KEY_ALREADY_REVOKED` | Key already revoked |
 
 ---
 
@@ -743,6 +956,34 @@ Flyway prefix: `V1__identity__*.sql`
 
 ---
 
+### `api_keys`
+
+| Column | MySQL Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | `CHAR(36)` | No | UUID PK |
+| `merchant_id` | `CHAR(36)` | No | FK → `merchants.id` |
+| `key_type` | `ENUM('PUBLIC','SECRET')` | No | — |
+| `environment` | `ENUM('TEST','LIVE')` | No | — |
+| `key_hash` | `VARCHAR(64)` | No | HMAC-SHA256 hex digest (or full value for PUBLIC keys) |
+| `display_value` | `VARCHAR(100)` | No | Full value for PUBLIC; masked for SECRET |
+| `prefix` | `VARCHAR(10)` | No | `pk_live_`, `sk_live_`, `pk_test_`, `sk_test_` |
+| `active` | `TINYINT(1)` | No | Default `1` |
+| `created_at` | `DATETIME(6)` | No | UTC |
+| `revoked_at` | `DATETIME(6)` | Yes | Set on revocation |
+
+**Indexes:**
+
+| Index | Column(s) | Type | Reason |
+|---|---|---|---|
+| `PRIMARY` | `id` | — | — |
+| `uq_api_keys_hash` | `key_hash` | UNIQUE | Fast auth filter lookup; also prevents duplicate keys |
+| `idx_api_keys_merchant` | `merchant_id` | B-tree | List keys by merchant |
+| `idx_api_keys_merchant_type_env_active` | `(merchant_id, key_type, environment, active)` | B-tree | Find active key of a given type/env |
+
+**Migration:** `V4__identity__create_api_keys.sql`
+
+---
+
 ## 9. Error Codes
 
 All defined in `IdentityErrorCode` enum (`atlaspay-identity`, `domain/exception/`).
@@ -762,6 +1003,9 @@ All defined in `IdentityErrorCode` enum (`atlaspay-identity`, `domain/exception/
 | `KYC_PROVIDER_UNAVAILABLE` | `ExternalServiceException` | 502 | Dojah API returned an error or timed out |
 | `BANK_ACCOUNT_NOT_FOUND` | `NotFoundException` | 404 | Account number not found in NIP directory |
 | `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` | `ExternalServiceException` | 502 | Anchor account-name resolution API failure |
+| `API_KEY_NOT_FOUND` | `NotFoundException` | 404 | Key ID not found or belongs to another merchant |
+| `API_KEY_ALREADY_REVOKED` | `BusinessRuleException` | 422 | Revoking an already-revoked key |
+| `LIVE_KEYS_REQUIRE_KYC_VERIFIED` | `BusinessRuleException` | 422 | Attempting to generate/regenerate LIVE keys before KYC |
 
 ---
 
