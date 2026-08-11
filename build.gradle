@@ -1,27 +1,52 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.5.4' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
+group = 'com.atlaspay'
+version = '1.0-SNAPSHOT'
+
 subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.4"
+        }
+    }
+
+    dependencies {
+        // Lombok — available in all modules
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
+        // Testing baseline
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+        jvmArgs '-XX:+EnableDynamicAgentLoading'
+    }
+
+    // Compatibility task required by IntelliJ Kotlin DSL model
     tasks.register('prepareKotlinBuildScriptModel') {
         group = 'ide'
         description = 'Compatibility task for IDE Kotlin DSL model preparation.'
     }
-}
-
-group = 'com.axora'
-version = '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-test {
-    useJUnitPlatform()
 }
