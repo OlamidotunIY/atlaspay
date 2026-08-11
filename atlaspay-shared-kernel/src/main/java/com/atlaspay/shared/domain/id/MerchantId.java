@@ -9,4 +9,8 @@ public record MerchantId(String value) {
             throw new ValidationException(SharedErrorCode.INVALID_ID, "MerchantId cannot be empty");
         }
     }
+    
+    public static MerchantId generate() {
+        return new MerchantId(java.util.UUID.randomUUID().toString());
+    }
 }
