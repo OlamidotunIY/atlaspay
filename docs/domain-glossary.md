@@ -46,6 +46,11 @@ Module: `atlaspay-identity`
 | **KYC** | Know Your Customer — the process of verifying a merchant's or customer's identity using BVN, NIN, or business registration documents. | A single verification call. KYC is a process, not an event. |
 | **AccountNameResolution** | The act of querying the bank's NIP directory to confirm the real name behind a bank account number + bank code combination. Used before creating a `TransferRecipient`. | A customer lookup. This is a bank directory query, not a system user lookup. |
 | **DojahAdapter** | The infrastructure adapter that wraps HTTP calls to the Dojah API for BVN/NIN verification. | The domain `KycVerificationPort` (interface). Code outside infrastructure must never reference `DojahAdapter` directly. |
+| **ApiKey** | A credential issued to a `Merchant` that allows server-to-server access to the AtlasPay API without a session JWT. Comes in two types (`PUBLIC`, `SECRET`) and two environments (`TEST`, `LIVE`). The aggregate root for key management. | A JWT. A JWT is a session credential for dashboard users; an ApiKey is a long-lived credential for API integrations. |
+| **PublicKey** | An `ApiKey` of type `PUBLIC` (prefix `pk_live_` or `pk_test_`). Safe to embed in frontend or mobile code. Used to initialise payment widgets. Stored in plaintext. | A `SecretKey`. Public keys cannot authorise server-side operations. |
+| **SecretKey** | An `ApiKey` of type `SECRET` (prefix `sk_live_` or `sk_test_`). Must never be exposed publicly. Authorises all server-side API calls. Stored as an HMAC-SHA256 hash; the raw value is shown only once at generation. | A `PublicKey`. If a secret key is exposed, it must be immediately revoked and regenerated. |
+| **ApiEnvironment** | `TEST` or `LIVE`. Test keys operate in sandbox mode with no real money. Live keys are only issued after KYC is `VERIFIED`. | A deployment environment (staging, prod). `ApiEnvironment` is a domain concept on the `ApiKey` aggregate, not an infrastructure concept. |
+| **MerchantContext** | The resolved `MerchantId` placed on the Spring `SecurityContext` after authenticating either a JWT or a Secret API Key. All use cases read the `MerchantId` from this context — never from the URL path. | A URL parameter. Merchant-scoped endpoints never include `merchantId` in the path for public API consumers. |
 
 ---
 
@@ -259,3 +264,4 @@ or have a more precise equivalent.
 | `record` (verb, meaning "save") | `persist`, `post`, `save` | "Record" is also a Java keyword and a DDD concept |
 | `process` (verb, meaning anything) | `initiate`, `submit`, `post`, `dispatch`, `settle` | Too vague — every use case has a precise verb |
 | `inventory` | `Product` with `stock` field | AtlasPay uses `Product` aggregate; "inventory" is not a bounded context term |
+| `merchantId` in URL path | `MerchantContext` (resolved from JWT/API key) | Public merchant-scoped endpoints never include `merchantId` in the URL; it is always derived from the credential. Only `/admin/**` endpoints accept `merchantId` in the path. |

@@ -64,7 +64,7 @@ provider is behind it.
 
 | Module | Aggregate root | Key invariant |
 |---|---|---|
-| `atlaspay-identity` | Merchant, Customer, SubAccount | KycStatus transitions are one-way; BVN verification is idempotent; Customer email is unique per Merchant |
+| `atlaspay-identity` | Merchant, Customer, SubAccount, ApiKey | KycStatus transitions are one-way; BVN verification is idempotent; Customer email is unique per Merchant; exactly one active key per type+environment per Merchant |
 | `atlaspay-accounts` | VirtualAccount | Issuance is idempotent per owner; closure is irreversible |
 | `atlaspay-ledger` | LedgerEntry | Append-only; balance always derived, never mutated directly |
 | `atlaspay-transfers` | Transfer | State machine `PENDING→PROCESSING→SUCCESS/FAILED`; idempotency key enforced at DB level |
@@ -365,18 +365,39 @@ Used wherever an operation spans modules asynchronously:
 
 ### 7.7 Security
 
-- **Authentication**: JWT (RS256) issued at login; `spring-security-oauth2-resource-server`
-- **Authorization**: Role/permission model (`ROLE_MERCHANT`, `ROLE_SUB_ACCOUNT`, `ROLE_ADMIN`);
-  method-level security with `@PreAuthorize`
-- **OAuth2**: Integration with Anchor/Dojah using client-credentials flow for outbound calls
-- **Secrets**: Never in `application.yml`; injected via environment variables / Kubernetes secrets
-- **TLS**: Required in production; local dev uses self-signed cert
-- **Password hashing**: BCrypt (Spring Security default)
-- **Rate limiting**: `atlaspay-rate-limiter` module (Redis token-bucket), applied as a
-  `OncePerRequestFilter` before authentication
-- **Audit logging**: Every write operation logs `actor`, `action`, `resource_id`, `timestamp`
-  to an immutable `audit_log` table
-- **PII protection**: SubAccount/Merchant PII fields encrypted at rest (AES-256 via Jasypt); masked in logs
+#### Authentication — Dual-Credential Model
+
+AtlasPay supports two credential types on the same endpoints, resolved by a single Spring Security
+filter chain. The `merchantId` is **never in the URL** for authenticated merchant endpoints — it is
+always derived from the credential:
+
+| Credential | Format | Who uses it | How `merchantId` is resolved |
+|---|---|---|---|
+| **Secret API Key** | `Bearer sk_live_xxx` or `Bearer sk_test_xxx` | Server-to-server API calls | HMAC-SHA256(key, serverSecret) → lookup `api_keys.key_hash` → `merchant_id` |
+| **JWT** | `Bearer eyJ...` | Dashboard (browser) | `sub` claim in the JWT payload = `merchantId` |
+
+**Filter chain order:** `RateLimitFilter` → `ApiKeyAuthFilter` (checks `sk_`/`pk_` prefix) → `JwtAuthFilter` → controller
+
+**API Key specifics:**
+- Two key types: `PUBLIC KEY` (`pk_`) for client-side/frontend; `SECRET KEY` (`sk_`) for server-side.
+- Two environments: `TEST` and `LIVE`. Live keys are only issued after KYC is `VERIFIED`.
+- Secret keys are stored as **HMAC-SHA256 hashes** — the raw key is shown only once at generation. The server secret (HMAC key) is injected via environment variable, never in `application.yml`.
+- Regenerating a key atomically revokes the old one and issues a new one.
+- Public keys are stored plaintext (they are designed to be embedded in frontend code).
+
+#### Authorization
+- Role/permission model (`ROLE_MERCHANT`, `ROLE_ADMIN`); method-level security with `@PreAuthorize`.
+- Admin endpoints (`/admin/**`) accept `merchantId` in the URL path and require `ROLE_ADMIN`.
+- All merchant-scoped data queries filter by the resolved `merchantId` — a merchant can never read another merchant's data even by guessing a UUID.
+
+#### Other Security Controls
+- **OAuth2**: Client-credentials flow for outbound Anchor/Dojah HTTP calls.
+- **Secrets**: Never in `application.yml`; injected via environment variables / Kubernetes secrets.
+- **TLS**: Required in production; local dev uses self-signed cert.
+- **Password hashing**: BCrypt (Spring Security default) for dashboard login.
+- **Rate limiting**: `atlaspay-rate-limiter` module (Redis token-bucket), applied as a `OncePerRequestFilter` before authentication.
+- **Audit logging**: Every write operation logs `actor`, `action`, `resource_id`, `timestamp` to an immutable `audit_log` table.
+- **PII protection**: Merchant PII fields encrypted at rest (AES-256 via Jasypt); masked in logs.
 - **Compliance**: KYC/AML hooks in identity module; PCI DSS — card data never touches AtlasPay
   servers (tokenised at Paystack layer)
 
