@@ -140,14 +140,21 @@ Phase 2 — Compliance (unlocks live mode):
 
 | Field | Type | Nullable | Notes |
 |---|---|---|---|
-| `businessStreet` | `String` | Yes | Street address |
+| `generalEmail` | `EmailAddress` | Yes | Merchant's general email |
+| `supportEmail` | `EmailAddress` | Yes | Merchant's customer support email |
+| `disputeEmail` | `EmailAddress` | Yes | Merchant's dispute resolution email |
+| `supportPhone` | `PhoneNumber` | Yes | Merchant's customer support phone |
+| `whatsappPhone` | `PhoneNumber` | Yes | Trusted WhatsApp phone number |
+| `whatsappName` | `String` | Yes | Name to easily identify the WhatsApp number |
+| `websiteUrl` | `String` | Yes | Optional. If supplied, must be a valid URL |
+| `twitterHandle` | `String` | Yes | Twitter username |
+| `facebookUsername` | `String` | Yes | Facebook username |
+| `instagramHandle` | `String` | Yes | Instagram handle |
+| `businessCountry` | `String` | Yes | ISO 3166-1 alpha-2 (non-editable, copied from Merchant) |
+| `businessState` | `String` | Yes | State / region |
+| `businessLga` | `String` | Yes | Local Government Area |
 | `businessCity` | `String` | Yes | City |
-| `businessState` | `String` | Yes | State / province |
-| `businessPostalCode` | `String` | Yes | Postal / ZIP code |
-| `businessCountry` | `String` | Yes | ISO 3166-1 alpha-2 (usually same as `Merchant.country`) |
-| `website` | `String` | Yes | Optional. If supplied, must be a valid URL |
-| `supportEmail` | `EmailAddress` | Yes | Merchant's customer-facing support email |
-| `supportPhone` | `PhoneNumber` | Yes | Merchant's customer-facing support phone |
+| `businessStreet` | `String` | Yes | Street address |
 
 **Step 3 — Owner fields:**
 
@@ -867,14 +874,20 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 **Request Body:**
 ```json
 {
-  "street": "14 Broad Street",
-  "city": "Lagos",
-  "state": "Lagos",
-  "postalCode": "100001",
-  "country": "NG",
-  "website": "https://acmecorp.com",
+  "generalEmail": "hello@acmecorp.com",
   "supportEmail": "support@acmecorp.com",
-  "supportPhone": "+2348022222222"
+  "disputeEmail": "disputes@acmecorp.com",
+  "supportPhone": "+2348022222222",
+  "whatsappPhone": "+2348022222222",
+  "whatsappName": "Acme Support Team",
+  "websiteUrl": "https://acmecorp.com",
+  "twitterHandle": "acmecorp",
+  "facebookUsername": "acmecorporation",
+  "instagramHandle": "acmecorp_official",
+  "state": "Lagos",
+  "lga": "Ikeja",
+  "city": "Ikeja",
+  "street": "14 Broad Street"
 }
 ```
 
@@ -1179,14 +1192,21 @@ Flyway prefix: `V1__identity__*.sql`
 | `category` | `VARCHAR(100)` | Yes | Profile step |
 | `annual_projected_sales_volume` | `DECIMAL(19,4)` | Yes | Profile step |
 | `annual_projected_sales_currency` | `CHAR(3)` | Yes | Profile step |
-| `business_street` | `VARCHAR(255)` | Yes | Contact step |
-| `business_city` | `VARCHAR(100)` | Yes | Contact step |
-| `business_state` | `VARCHAR(100)` | Yes | Contact step |
-| `business_postal_code` | `VARCHAR(20)` | Yes | Contact step |
-| `business_country` | `CHAR(2)` | Yes | Contact step |
-| `website` | `VARCHAR(255)` | Yes | Contact step (optional) |
+| `general_email` | `VARCHAR(254)` | Yes | Contact step |
 | `support_email` | `VARCHAR(254)` | Yes | Contact step |
+| `dispute_email` | `VARCHAR(254)` | Yes | Contact step |
 | `support_phone` | `VARCHAR(20)` | Yes | Contact step |
+| `whatsapp_phone` | `VARCHAR(20)` | Yes | Contact step |
+| `whatsapp_name` | `VARCHAR(100)` | Yes | Contact step |
+| `website_url` | `VARCHAR(255)` | Yes | Contact step (optional) |
+| `twitter_handle` | `VARCHAR(50)` | Yes | Contact step |
+| `facebook_username` | `VARCHAR(50)` | Yes | Contact step |
+| `instagram_handle` | `VARCHAR(50)` | Yes | Contact step |
+| `business_country` | `CHAR(2)` | Yes | Contact step (non-editable) |
+| `business_state` | `VARCHAR(100)` | Yes | Contact step |
+| `business_lga` | `VARCHAR(100)` | Yes | Contact step |
+| `business_city` | `VARCHAR(100)` | Yes | Contact step |
+| `business_street` | `VARCHAR(255)` | Yes | Contact step |
 | `owner_bvn` | `VARCHAR(11)` | Yes | Owner step (encrypted at rest) |
 | `owner_nin` | `VARCHAR(11)` | Yes | Owner step (encrypted at rest) |
 | `owner_date_of_birth` | `DATE` | Yes | Owner step |
