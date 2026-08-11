@@ -3,9 +3,12 @@
 ## 1. What this is
 
 AtlasPay is a **Java 21 / Spring Boot 3.x** payment infrastructure platform modeled after the
-core product surface of Paystack / Flutterwave / Moniepoint: merchant & sub-account onboarding,
-real bank-backed virtual account issuance, transfers, charges, subscriptions, escrow,
-settlement, and transaction reporting.
+core product surface of Paystack / Flutterwave / Moniepoint: merchant onboarding, customer
+management, sub-account split-payment configuration, real bank-backed virtual account issuance,
+transfers, charges, subscriptions, escrow, settlement, and transaction reporting.
+
+AtlasPay also supports optional commerce features: product inventory management, order
+orchestration, and digital storefronts for merchants to sell directly through the platform.
 
 This project is also an **intentional, comprehensive portfolio of senior Java engineering**. Every
 module is designed so that the skills listed in §10 are demonstrably present in production-grade
@@ -61,7 +64,7 @@ provider is behind it.
 
 | Module | Aggregate root | Key invariant |
 |---|---|---|
-| `atlaspay-identity` | Merchant, SubAccount | KycStatus transitions are one-way; BVN verification is idempotent |
+| `atlaspay-identity` | Merchant, Customer, SubAccount | KycStatus transitions are one-way; BVN verification is idempotent; Customer email is unique per Merchant |
 | `atlaspay-accounts` | VirtualAccount | Issuance is idempotent per owner; closure is irreversible |
 | `atlaspay-ledger` | LedgerEntry | Append-only; balance always derived, never mutated directly |
 | `atlaspay-transfers` | Transfer | State machine `PENDING→PROCESSING→SUCCESS/FAILED`; idempotency key enforced at DB level |
@@ -70,6 +73,9 @@ provider is behind it.
 | `atlaspay-escrow` | EscrowHold | Two-phase: `FUNDED→COMPLETED_PENDING_RELEASE→RELEASED`; native split support; clearance window enforced |
 | `atlaspay-settlement` | SettlementBatch (SettlementLineItem children) | `effectiveAmount = totalProcessed − fees − deductions`; immutable once `SUCCESS` |
 | `atlaspay-transaction-splits` | SplitConfiguration (SplitAllocation children) | Allocation shares must sum to 100 % of charge total |
+| `atlaspay-products` *(optional)* | Product | Price and stock cannot be negative; product must belong to a Merchant |
+| `atlaspay-orders` *(optional)* | Order (OrderLineItem children) | Total must equal sum of line items; status machine is strictly ordered |
+| `atlaspay-storefronts` *(optional)* | Storefront | One active Storefront per Merchant; only published Products can be listed |
 
 ### Light / folded in — no standalone aggregate
 
@@ -78,6 +84,7 @@ provider is behind it.
 | Account-name resolution | `atlaspay-identity`, thin service | Stateless gateway call, no invariants |
 | Transfer recipients (beneficiaries) | `atlaspay-transfers`, entity | CRUD with uniqueness constraint, no lifecycle |
 | Plans | `atlaspay-subscriptions`, entity | Catalog/lookup data referenced by Subscription |
+| SubAccount split configuration | `atlaspay-transaction-splits` | SubAccounts used here purely as split-payment recipients, not as identities |
 
 ### Query-only, no domain layer
 
@@ -108,18 +115,19 @@ atlaspay/
 │       ├── exception/                  # AtlasPayException hierarchy (sealed hierarchy)
 │       └── util/                       # DateTimeUtils (java.time), PageResult (generic record)
 │
-├── atlaspay-identity/                  # KYC, merchant & sub-account registration
+├── atlaspay-identity/                  # KYC, merchant/customer/sub-account registration
 │   └── src/main/java/com/atlaspay/identity/
 │       ├── domain/
-│       │   ├── model/                  # Merchant (aggregate), SubAccount (aggregate), KycStatus (enum)
-│       │   └── repository/             # MerchantRepository, SubAccountRepository (ports)
+│       │   ├── model/                  # Merchant (aggregate), Customer (aggregate), SubAccount (aggregate), KycStatus (enum)
+│       │   └── repository/             # MerchantRepository, CustomerRepository, SubAccountRepository (ports)
 │       ├── application/
-│       │   ├── usecase/                # RegisterMerchantUseCase, RegisterSubAccountUseCase, VerifyIdentityUseCase
+│       │   ├── usecase/                # RegisterMerchantUseCase, CreateCustomerUseCase,
+│       │   │                           # RegisterSubAccountUseCase, VerifyIdentityUseCase
 │       │   └── port/out/               # KycVerificationPort, AccountNameResolutionPort
 │       ├── infrastructure/
 │       │   ├── persistence/            # JPA entities + Flyway V1__identity__*
 │       │   └── adapter/dojah/          # DojahClient, DojahKycAdapter
-│       └── presentation/rest/          # MerchantController, SubAccountController
+│       └── presentation/rest/          # MerchantController, CustomerController, SubAccountController
 │
 ├── atlaspay-accounts/                  # Virtual account issuance (Anchor-backed)
 │   └── src/main/java/com/atlaspay/accounts/
@@ -234,6 +242,29 @@ atlaspay/
 │       ├── port/                       # EventPublisher, EventSubscriber (interfaces)
 │       ├── inmemory/                   # InMemoryEventBus (local/test)
 │       └── kafka/                      # KafkaEventBus (production) — outbox pattern impl
+│
+├── atlaspay-products/                  # [OPTIONAL] Merchant product/inventory management
+│   └── src/main/java/com/atlaspay/products/
+│       ├── domain/model/               # Product (aggregate): name, price (Money), stock, status (ACTIVE/ARCHIVED)
+│       ├── application/usecase/        # CreateProductUseCase, UpdateStockUseCase, ArchiveProductUseCase
+│       ├── infrastructure/persistence/ # Flyway V1__products__*
+│       └── presentation/rest/          # ProductController
+│
+├── atlaspay-orders/                    # [OPTIONAL] Order orchestration for merchant products
+│   └── src/main/java/com/atlaspay/orders/
+│       ├── domain/
+│       │   ├── model/                  # Order (aggregate), OrderLineItem (child entity), OrderStatus (enum)
+│       │   └── repository/
+│       ├── application/usecase/        # CreateOrderUseCase, FulfilOrderUseCase, CancelOrderUseCase
+│       ├── infrastructure/persistence/ # Flyway V1__orders__*
+│       └── presentation/rest/          # OrderController
+│
+├── atlaspay-storefronts/               # [OPTIONAL] Digital storefronts for merchants
+│   └── src/main/java/com/atlaspay/storefronts/
+│       ├── domain/model/               # Storefront (aggregate): slug, published Products listing
+│       ├── application/usecase/        # CreateStorefrontUseCase, PublishProductUseCase
+│       ├── infrastructure/persistence/ # Flyway V1__storefronts__*
+│       └── presentation/rest/          # StorefrontController (public-facing + merchant management)
 │
 └── atlaspay-app/                       # Composition root (Spring Boot entry point)
     └── src/main/
@@ -606,8 +637,9 @@ This section maps every required skill to the module or pattern where it is **de
 
 ## 11. Suggested Build Order
 
+### Core (Required)
 1. `atlaspay-shared-kernel` — Money, records, exception hierarchy, idempotency utils
-2. `atlaspay-identity` — Merchant/SubAccount registration + Dojah KYC adapter
+2. `atlaspay-identity` — Merchant, Customer & SubAccount registration + Dojah KYC adapter
 3. `atlaspay-accounts` — Virtual account issuance + Anchor adapter
 4. `atlaspay-ledger` — Double-entry ledger (most rigorous module; all others depend on it)
 5. `atlaspay-eventbus` — In-memory first; Kafka impl later
@@ -615,12 +647,17 @@ This section maps every required skill to the module or pattern where it is **de
 7. `atlaspay-charges` — Payment collection + refunds
 8. `atlaspay-subscriptions` — Recurring billing + scheduler
 9. `atlaspay-escrow` — Two-phase escrow
-10. `atlaspay-transaction-splits` — Revenue splits
+10. `atlaspay-transaction-splits` — Revenue splits (SubAccount split-payment configuration)
 11. `atlaspay-settlement` — Merchant settlement batching (depends on ledger + transfers)
 12. `atlaspay-transactions-query` — CQRS read model (depends on events from all above)
 13. `atlaspay-notifications` — Async notification dispatch
 14. `atlaspay-rate-limiter` — Redis rate limiting (wired in `atlaspay-app`)
 15. `atlaspay-app` — Composition root; security config; global exception handler
+
+### Optional Commerce Extensions (build after core is stable)
+16. `atlaspay-products` — Product/inventory management (depends on identity)
+17. `atlaspay-orders` — Order orchestration (depends on products + charges + identity)
+18. `atlaspay-storefronts` — Digital storefronts (depends on products + orders)
 
 ---
 
@@ -630,3 +667,6 @@ This section maps every required skill to the module or pattern where it is **de
 - KYC results are sandbox/test data from Dojah, not connected to real BVN/NIN databases.
 - Settlement payouts move through Anchor's sandbox, not real money.
 - Card data never touches AtlasPay servers — tokenised entirely at the Paystack layer.
+- `SubAccount` in AtlasPay maps to Paystack's **Subaccounts API** (split-payment recipients only), not to customer identities.
+- `Customer` in AtlasPay maps to Paystack's **Customers API** — a distinct concept from SubAccount.
+- The Products, Orders, and Storefronts modules map to Paystack's optional commerce APIs and are feature-flagged off by default in `application.yml`.

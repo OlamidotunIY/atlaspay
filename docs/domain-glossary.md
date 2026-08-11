@@ -37,12 +37,13 @@ Module: `atlaspay-identity`
 
 | Term | Definition | NOT to be confused with |
 |---|---|---|
-| **Merchant** | A registered business entity (platform) that uses AtlasPay to power its operations and collect payments. Has a business name, RC number, and a `KycStatus`. | A `SubAccount`. |
-| **SubAccount** | An end-user (individual or business) onboarded by a `Merchant`. They get virtual accounts, can make/receive payments, and use escrow under the Merchant's platform. | A `Merchant`. |
+| **Merchant** | A registered business entity (platform) that uses AtlasPay to power its operations and collect payments. Has a business name, RC number, and a `KycStatus`. | A `Customer` or `SubAccount`. |
+| **Customer** | An individual or business that a `Merchant` has transacted with or wishes to track. Customers can be attached to charges, subscriptions, and orders. Email must be unique per Merchant. | A `Merchant` (the platform owner) or a `SubAccount` (a split-payment routing entity). |
+| **SubAccount** | A registered bank account (or split-payment recipient) configured by a `Merchant` to receive a portion of a split charge. SubAccounts are purely financial routing entities — they are not user identities. | A `Customer`. A SubAccount routes money; a Customer is a person or business identity. |
 | **KycStatus** | The state of an identity verification — `UNVERIFIED`, `PENDING`, `VERIFIED`, `REJECTED`. One-way transitions only: `UNVERIFIED → PENDING → VERIFIED` or `→ REJECTED`. | A general "status" field on any other entity. |
 | **BVN** | Bank Verification Number — a unique 11-digit identity number issued by the CBN to Nigerian bank customers. Verified via Dojah sandbox. | NIN. They are different identifiers. |
 | **NIN** | National Identification Number — issued by NIMC. Used as an alternative/supplementary identity document. | BVN. |
-| **KYC** | Know Your Customer — the process of verifying a sub-account's or merchant's identity using BVN, NIN, or business registration documents. | A single verification call. KYC is a process, not an event. |
+| **KYC** | Know Your Customer — the process of verifying a merchant's or customer's identity using BVN, NIN, or business registration documents. | A single verification call. KYC is a process, not an event. |
 | **AccountNameResolution** | The act of querying the bank's NIP directory to confirm the real name behind a bank account number + bank code combination. Used before creating a `TransferRecipient`. | A customer lookup. This is a bank directory query, not a system user lookup. |
 | **DojahAdapter** | The infrastructure adapter that wraps HTTP calls to the Dojah API for BVN/NIN verification. | The domain `KycVerificationPort` (interface). Code outside infrastructure must never reference `DojahAdapter` directly. |
 
@@ -196,10 +197,48 @@ Module: `atlaspay-notifications`
 
 | Term | Definition | NOT to be confused with |
 |---|---|---|
-| **Notification** | A message dispatched to a user (Merchant or SubAccount) about a financial event. Has a `channel`, `status`, and `payload`. | A domain event. A domain event is internal system-to-system; a notification is system-to-human. |
+| **Notification** | A message dispatched to a user (Merchant or Customer) about a financial event. Has a `channel`, `status`, and `payload`. | A domain event. A domain event is internal system-to-system; a notification is system-to-human. |
 | **Channel** | The delivery mechanism for a notification: `EMAIL`, `SMS`, `PUSH` (in-app). A Java `enum`. | A `PaymentChannel` (Charges context). Different concept, same word — always qualify with context. |
 | **NotificationStatus** | `PENDING → SENT → DELIVERED → FAILED`. | `ChargeStatus` or `TransferStatus`. Notifications have their own lifecycle. |
 | **NotificationTemplate** | A parameterised message template for a notification type (e.g., "Your transfer of {amount} to {recipient} was successful."). | The notification itself. Templates are configuration; notifications are instances. |
+
+---
+
+## Bounded Context: Products *(Optional)*
+
+Module: `atlaspay-products`
+
+| Term | Definition | NOT to be confused with |
+|---|---|---|
+| **Product** | A tangible or digital item created by a `Merchant` for sale. Has a `name`, `price` (Money), `quantity` (stock), and a `ProductStatus`. The aggregate root. | A `Plan` (Subscriptions context). A Plan is a billing template; a Product is a sellable item. |
+| **ProductStatus** | `ACTIVE` (available for sale) or `ARCHIVED` (soft-deleted; no longer purchasable). Archiving is irreversible via the standard flow. | `OrderStatus`. Products and Orders have separate state machines. |
+| **Stock** | The available quantity of a `Product`. Decremented when an `Order` is placed; incremented on cancellation. Cannot go below zero — a domain invariant. | A warehouse concept. In AtlasPay, stock is a numeric field on the `Product` aggregate. |
+
+---
+
+## Bounded Context: Orders *(Optional)*
+
+Module: `atlaspay-orders`
+
+| Term | Definition | NOT to be confused with |
+|---|---|---|
+| **Order** | A purchase request made by a `Customer` for one or more `Product`s from a `Merchant`. The aggregate root. `Order.total` must equal the sum of all `OrderLineItem` totals. | A `Charge`. An Order is a commerce concept; a Charge is the payment act that fulfils the Order. |
+| **OrderLineItem** | A single product entry within an `Order`: a reference to a `Product`, a `quantity`, and a `unitPrice` snapshot (captured at order time — immutable). Child entity of `Order`. | A `SettlementLineItem`. |
+| **OrderStatus** | `PENDING → PAID → FULFILLED → CANCELLED` or `→ REFUNDED`. `PAID` is set when the associated `Charge` succeeds. | `ChargeStatus`. An Order drives commerce; a Charge drives payment. They are linked but separate state machines. |
+| **OrderTotal** | The sum of `(quantity × unitPrice)` across all `OrderLineItem`s. Construction invariant: `Order` cannot be created if this sum does not match the provided total. | A `Charge` amount. The Order total determines the Charge amount, but they are in different bounded contexts. |
+
+---
+
+## Bounded Context: Storefronts *(Optional)*
+
+Module: `atlaspay-storefronts`
+
+| Term | Definition | NOT to be confused with |
+|---|---|---|
+| **Storefront** | A digital shop belonging to a `Merchant`, accessible via a unique URL slug, that displays published `Product`s for purchase. The aggregate root. One active Storefront per Merchant. | A `Merchant` profile. A Storefront is the public-facing commerce surface; a Merchant is the internal business identity. |
+| **Slug** | A URL-safe, human-readable identifier for a `Storefront` (e.g., `/shop/merchant-name`). Unique across all Storefronts. Validated as lowercase alphanumeric + hyphens only. | A Merchant's ID (UUID). The slug is the public-facing identifier; the ID is the internal key. |
+| **StorefrontListing** | A link between a `Storefront` and a published `Product`. Only `ACTIVE` Products can be listed. Removing a listing does not archive the Product. | A `Product` itself. A listing is the commerce display association; a Product is the inventory entity. |
+| **StorefrontStatus** | `DRAFT` (in setup, not publicly accessible) or `LIVE` (publicly accessible). | `ProductStatus`. A Storefront can be LIVE while containing ACTIVE products — the listing controls visibility. |
 
 ---
 
@@ -211,10 +250,12 @@ or have a more precise equivalent.
 | Banned term | Use instead | Why |
 |---|---|---|
 | `transaction` (unqualified) | `LedgerEntry`, `Transfer`, `Charge`, `JournalEntry` (based on context) | "Transaction" means 4 different things across contexts |
-| `account` (unqualified) | `VirtualAccount`, `Wallet`, `Merchant`, `SubAccount` (based on context) | Too ambiguous — always qualify |
+| `account` (unqualified) | `VirtualAccount`, `Wallet`, `Merchant`, `Customer`, `SubAccount` (based on context) | Too ambiguous — always qualify |
 | `payment` (unqualified) | `Charge` (inbound) or `Transfer` (outbound) | "Payment" doesn't tell you direction |
 | `amount` (raw `double`) | `Money` | Raw amounts without currency and type are meaningless |
-| `status` (unqualified) | `TransferStatus`, `ChargeStatus`, `KycStatus`, etc. | Every status has a specific type |
-| `user` | `Merchant` or `SubAccount` (based on context) | Too generic for a payment domain |
+| `status` (unqualified) | `TransferStatus`, `ChargeStatus`, `KycStatus`, `OrderStatus`, etc. | Every status has a specific type |
+| `user` | `Merchant`, `Customer`, or `SubAccount` (based on context) | Too generic for a payment domain |
+| `sub-account` as identity | `Customer` | SubAccounts are split-payment routing entities, not user identities |
 | `record` (verb, meaning "save") | `persist`, `post`, `save` | "Record" is also a Java keyword and a DDD concept |
 | `process` (verb, meaning anything) | `initiate`, `submit`, `post`, `dispatch`, `settle` | Too vague — every use case has a precise verb |
+| `inventory` | `Product` with `stock` field | AtlasPay uses `Product` aggregate; "inventory" is not a bounded context term |
