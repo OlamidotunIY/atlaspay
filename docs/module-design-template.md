@@ -129,9 +129,15 @@ Extends `Repository<AggregateName, AggregateNameId>` from shared-kernel.
 
 ---
 
-## 5. Use Cases (Application Layer)
+## 5. Application Layer (CQRS)
 
-Use cases live in `application/usecase/`. Each extends `BaseUseCase<Input, Output>` from shared-kernel.
+The application layer follows CQRS (Command Query Responsibility Segregation) pattern.
+- **Commands**: Live in `application/command/`
+- **Queries**: Live in `application/query/`
+- **Use Cases (Handlers)**: Live in `application/usecase/`
+- **Data Transfer Objects (DTOs)**: Live in `application/dto/`
+
+Each use case extends `BaseUseCase<Input, Output>` from `atlaspay-shared-kernel`. For use cases that do not return a result (mutating commands), they should extend `BaseUseCase<Input, Void>` and return `null`.
 
 ---
 
@@ -155,7 +161,7 @@ public record [UseCaseName]Command(
 **Output:**
 
 ```java
-// What the use case returns (record, void, ID, etc.)
+// What the use case returns (record, Void, etc.)
 ```
 
 **Happy Path:**

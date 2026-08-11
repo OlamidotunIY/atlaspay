@@ -425,11 +425,17 @@ Implementations live in `infrastructure/persistence/`.
 
 ---
 
-## 5. Use Cases (Application Layer)
+## 5. Application Layer (CQRS)
 
-All extend `BaseUseCase<Input, Output>` from shared-kernel.
+The application layer follows CQRS (Command Query Responsibility Segregation).
+- **Commands**: Live in `application/command/`
+- **Queries**: Live in `application/query/`
+- **Use Cases (Handlers)**: Live in `application/usecase/`
+- **Data Transfer Objects (DTOs)**: Live in `application/dto/`
+
+All use cases extend `BaseUseCase<Input, Output>` from shared-kernel. Use cases that process commands with no return value return `Void` (`null`).
 All use cases are `@Transactional` at their boundary.
-Domain events are published via `DomainEventPublisher` after `repository.save()`.
+Domain events are published via `DomainEventPublisher` (which is injected into the BaseUseCase).
 
 ---
 
@@ -745,6 +751,21 @@ public record RegenerateApiKeyCommand(
 ---
 
 ## 6. Outbound Ports (External Dependencies)
+
+### Query Services (Read Models)
+
+Package: `application/port/out/`
+
+These ports allow query use cases to retrieve data transfer objects (`DTOs`) directly, bypassing aggregate roots.
+
+| Interface | Method | Returns |
+|---|---|---|
+| `CustomerQueryService` | `findById(merchantId, customerId)` | `Optional<CustomerDto>` |
+| `CustomerQueryService` | `findAllByMerchantId(...)` | `PageResult<CustomerDto>` |
+| `SubAccountQueryService` | `findById(merchantId, subAccountId)` | `Optional<SubAccountDto>` |
+| `SubAccountQueryService` | `findAllByMerchantId(...)` | `PageResult<SubAccountDto>` |
+| `MerchantQueryService` | `findProfileById(merchantId)` | `Optional<MerchantProfileDto>` |
+| `ApiKeyQueryService` | `findAllByMerchantId(merchantId)` | `List<ApiKeyDto>` |
 
 ---
 
