@@ -1,0 +1,12 @@
+dependencies {
+    // Shared kernel should have minimal dependencies.
+    // We include Jackson for Money serialization.
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // Jakarta Validation API for custom annotations
+    implementation 'jakarta.validation:jakarta.validation-api'
+
+    // SLF4J for MDC tracing
+    implementation 'org.slf4j:slf4j-api'
+}
