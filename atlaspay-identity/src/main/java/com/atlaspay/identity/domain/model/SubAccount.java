@@ -7,6 +7,8 @@ import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.id.SubAccountId;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.exception.BusinessRuleException;
+import com.atlaspay.shared.exception.SharedErrorCode;
+import com.atlaspay.shared.exception.ValidationException;
 import com.atlaspay.shared.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,11 +29,11 @@ public class SubAccount extends AggregateRoot<SubAccountId> {
     private final ZonedDateTime createdAt;
 
     public SubAccount(SubAccountId id, MerchantId merchantId, String bankCode, String accountNumber, String accountName, String description) {
-        if (id == null) throw new IllegalArgumentException("SubAccount ID is required");
-        if (merchantId == null) throw new IllegalArgumentException("Merchant ID is required");
-        if (bankCode == null || bankCode.isBlank()) throw new IllegalArgumentException("Bank code is required");
-        if (accountNumber == null || accountNumber.isBlank()) throw new IllegalArgumentException("Account number is required");
-        if (accountName == null || accountName.isBlank()) throw new IllegalArgumentException("Account name is required");
+        if (id == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "SubAccount ID is required");
+        if (merchantId == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Merchant ID is required");
+        if (bankCode == null || bankCode.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Bank code is required");
+        if (accountNumber == null || accountNumber.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Account number is required");
+        if (accountName == null || accountName.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Account name is required");
 
         this.id = id;
         this.merchantId = merchantId;

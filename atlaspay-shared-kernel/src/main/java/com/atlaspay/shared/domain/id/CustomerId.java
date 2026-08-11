@@ -1,11 +1,14 @@
 package com.atlaspay.shared.domain.id;
 
+import com.atlaspay.shared.exception.SharedErrorCode;
+import com.atlaspay.shared.exception.ValidationException;
+
 import java.util.UUID;
 
 public record CustomerId(String value) {
     public CustomerId {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Customer ID cannot be null or blank");
+            throw new ValidationException(SharedErrorCode.INVALID_ID, "Customer ID cannot be null or blank");
         }
     }
     

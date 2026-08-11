@@ -7,6 +7,8 @@ import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
+import com.atlaspay.shared.exception.SharedErrorCode;
+import com.atlaspay.shared.exception.ValidationException;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -29,11 +31,11 @@ public class Customer extends AggregateRoot<CustomerId> {
     private ZonedDateTime updatedAt;
 
     public Customer(CustomerId id, MerchantId merchantId, String firstName, String lastName, EmailAddress email, PhoneNumber phone, Map<String, String> metadata) {
-        if (id == null) throw new IllegalArgumentException("Customer ID is required");
-        if (merchantId == null) throw new IllegalArgumentException("Merchant ID is required");
-        if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("First name is required");
-        if (lastName == null || lastName.isBlank()) throw new IllegalArgumentException("Last name is required");
-        if (email == null) throw new IllegalArgumentException("Email is required");
+        if (id == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Customer ID is required");
+        if (merchantId == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Merchant ID is required");
+        if (firstName == null || firstName.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "First name is required");
+        if (lastName == null || lastName.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Last name is required");
+        if (email == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Email is required");
 
         this.id = id;
         this.merchantId = merchantId;
@@ -59,8 +61,8 @@ public class Customer extends AggregateRoot<CustomerId> {
     }
 
     public void updateProfile(String firstName, String lastName, PhoneNumber phone) {
-        if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("First name is required");
-        if (lastName == null || lastName.isBlank()) throw new IllegalArgumentException("Last name is required");
+        if (firstName == null || firstName.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "First name is required");
+        if (lastName == null || lastName.isBlank()) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Last name is required");
 
         this.firstName = firstName;
         this.lastName = lastName;
