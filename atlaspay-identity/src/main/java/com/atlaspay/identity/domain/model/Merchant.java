@@ -210,12 +210,5 @@ public class Merchant extends AggregateRoot<MerchantId> {
     public MerchantId getId() {
         return id;
     }
-    
-    public MerchantCompliance getCompliance() {
-        return compliance;
-    }
-    
-    public ComplianceStatus getComplianceStatus() {
-        return complianceStatus;
-    }
+
 }
