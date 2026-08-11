@@ -6,5 +6,5 @@ package com.atlaspay.shared.event;
  * or serialize and insert into a transactional outbox table.
  */
 public interface DomainEventPublisher {
-    void publish(DomainEvent event);
+    void publish(DomainEvent<?> event);
 }

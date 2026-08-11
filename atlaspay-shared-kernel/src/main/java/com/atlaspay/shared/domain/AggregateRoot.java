@@ -46,7 +46,7 @@ import java.util.List;
  */
 public abstract class AggregateRoot<ID> {
 
-    private final List<DomainEvent> domainEvents = new ArrayList<>();
+    private final List<DomainEvent<?>> domainEvents = new ArrayList<>();
 
     /**
      * Returns the unique identity of this aggregate.
@@ -59,7 +59,7 @@ public abstract class AggregateRoot<ID> {
      *
      * @param event the event that just occurred
      */
-    protected void registerEvent(DomainEvent event) {
+    protected void registerEvent(DomainEvent<?> event) {
         domainEvents.add(event);
     }
 
@@ -71,8 +71,8 @@ public abstract class AggregateRoot<ID> {
      *
      * @return an immutable snapshot of the accumulated events
      */
-    public List<DomainEvent> pullDomainEvents() {
-        List<DomainEvent> snapshot = List.copyOf(domainEvents);
+    public List<DomainEvent<?>> pullDomainEvents() {
+        List<DomainEvent<?>> snapshot = List.copyOf(domainEvents);
         domainEvents.clear();
         return snapshot;
     }
@@ -81,7 +81,7 @@ public abstract class AggregateRoot<ID> {
      * Returns a read-only view of pending events without clearing them.
      * Useful for testing or inspection without side effects.
      */
-    public List<DomainEvent> peekDomainEvents() {
+    public List<DomainEvent<?>> peekDomainEvents() {
         return Collections.unmodifiableList(domainEvents);
     }
 }
