@@ -7,11 +7,11 @@ import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.exception.BusinessRuleException;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.AccessLevel;
 
 @Getter(AccessLevel.PACKAGE)
 public class Merchant extends AggregateRoot<MerchantId> {
@@ -21,7 +21,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
     private String businessName;
     private String firstName;
     private String lastName;
-    private EmailAddress email;
+    private final EmailAddress email;
     private PhoneNumber phone;
     private String hashedPassword;
     private final BusinessType businessType;
@@ -185,12 +185,26 @@ public class Merchant extends AggregateRoot<MerchantId> {
         ));
     }
 
-    public void updateProfile(String businessName, PhoneNumber phone) {
+    public void updateProfile(String firstName, String lastName, String businessName, PhoneNumber phone) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.businessName = businessName;
         this.phone = phone;
         this.updatedAt = ZonedDateTime.now();
         
         registerEvent(new MerchantProfileUpdated(
+            UUID.randomUUID().toString(),
+            id.value(),
+            ZonedDateTime.now(),
+            null
+        ));
+    }
+    
+    public void changePassword(String newHashedPassword) {
+        this.hashedPassword = newHashedPassword;
+        this.updatedAt = ZonedDateTime.now();
+        
+        registerEvent(new MerchantPasswordChanged(
             UUID.randomUUID().toString(),
             id.value(),
             ZonedDateTime.now(),

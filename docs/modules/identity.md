@@ -104,7 +104,8 @@ Phase 2 — Compliance (unlocks live mode):
 | `submitCompliance()` | — | `void` | `BusinessRuleException(COMPLIANCE_NOT_ALL_STEPS_COMPLETE)` | Moves `complianceStatus` to `SUBMITTED`; raises `MerchantComplianceSubmitted` |
 | `approveCompliance()` | — | `void` | `BusinessRuleException(COMPLIANCE_NOT_SUBMITTED)` | Moves status to `APPROVED`; raises `MerchantComplianceApproved` |
 | `rejectCompliance(String reason)` | `reason` | `void` | `BusinessRuleException(COMPLIANCE_NOT_SUBMITTED)` | Moves status to `REJECTED`; raises `MerchantComplianceRejected` |
-| `updateProfile(String businessName, PhoneNumber phone)` | fields | `void` | — | Updates mutable contact fields; raises `MerchantProfileUpdated` |
+| `updateProfile(String firstName, String lastName, String businessName, PhoneNumber phone)` | fields | `void` | — | Updates mutable contact fields; raises `MerchantProfileUpdated` |
+| `changePassword(String newHashedPassword)` | `newHashedPassword` | `void` | — | Updates password hash; raises `MerchantPasswordChanged` |
 
 **Domain Events Raised:**
 
@@ -118,6 +119,7 @@ Phase 2 — Compliance (unlocks live mode):
 | `MerchantComplianceApproved` | On `approveCompliance()` |
 | `MerchantComplianceRejected` | On `rejectCompliance()` |
 | `MerchantProfileUpdated` | On `updateProfile()` |
+| `MerchantPasswordChanged` | On `changePassword()` |
 
 ---
 
@@ -313,6 +315,7 @@ All events implement `DomainEvent` (shared-kernel). All are Java `record`s.
 | `MerchantComplianceApproved` | `Merchant.approveCompliance()` | — | `atlaspay.identity.merchant.compliance.approved` |
 | `MerchantComplianceRejected` | `Merchant.rejectCompliance()` | `reason` | `atlaspay.identity.merchant.compliance.rejected` |
 | `MerchantProfileUpdated` | `Merchant.updateProfile()` | — | `atlaspay.identity.merchant.updated` |
+| `MerchantPasswordChanged` | `Merchant.changePassword()` | — | `atlaspay.identity.merchant.password.changed` |
 | `CustomerCreated` | `Customer` (constructor) | `merchantId`, `email`, `firstName`, `lastName` | `atlaspay.identity.customer.created` |
 | `CustomerProfileUpdated` | `Customer.updateProfile()` | `merchantId` | `atlaspay.identity.customer.updated` |
 | `SubAccountRegistered` | `SubAccount` (constructor) | `merchantId`, `bankCode`, `accountNumber`, `accountName` | `atlaspay.identity.subaccount.registered` |
