@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class Customer extends AggregateRoot<CustomerId> {
 
     private final CustomerId id;
