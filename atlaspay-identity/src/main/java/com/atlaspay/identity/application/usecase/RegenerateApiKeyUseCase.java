@@ -4,7 +4,7 @@ import com.atlaspay.identity.application.command.RegenerateApiKeyCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
 
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;

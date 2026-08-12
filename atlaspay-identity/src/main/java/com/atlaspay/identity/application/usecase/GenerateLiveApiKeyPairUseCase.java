@@ -16,7 +16,7 @@ import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 
 import java.util.UUID;
 

@@ -2,7 +2,7 @@ package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.command.RegisterSubAccountCommand;
 import com.atlaspay.identity.application.dto.SubAccountDto;
-import com.atlaspay.identity.application.port.out.AccountNameResolutionPort;
+import com.atlaspay.identity.application.port.AccountNameResolutionPort;
 import com.atlaspay.identity.domain.model.SubAccount;
 import com.atlaspay.identity.domain.repository.SubAccountRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;

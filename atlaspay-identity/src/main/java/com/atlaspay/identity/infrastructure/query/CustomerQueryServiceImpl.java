@@ -1,7 +1,7 @@
 package com.atlaspay.identity.infrastructure.query;
 
 import com.atlaspay.identity.application.dto.CustomerDto;
-import com.atlaspay.identity.application.port.out.CustomerQueryService;
+import com.atlaspay.identity.application.port.CustomerQueryService;
 import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataCustomerRepository;
 import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.id.MerchantId;

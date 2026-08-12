@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest;
+package com.atlaspay.identity.presentation;
 
 import com.atlaspay.identity.application.command.RegisterSubAccountCommand;
 import com.atlaspay.identity.application.dto.RegisterSubAccountResult;
@@ -8,7 +8,7 @@ import com.atlaspay.identity.application.query.ListSubAccountsQuery;
 import com.atlaspay.identity.application.usecase.GetSubAccountUseCase;
 import com.atlaspay.identity.application.usecase.ListSubAccountsUseCase;
 import com.atlaspay.identity.application.usecase.RegisterSubAccountUseCase;
-import com.atlaspay.identity.presentation.rest.dto.RegisterSubAccountRequest;
+import com.atlaspay.identity.presentation.dto.RegisterSubAccountRequest;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.id.SubAccountId;
 import com.atlaspay.shared.util.PageResult;

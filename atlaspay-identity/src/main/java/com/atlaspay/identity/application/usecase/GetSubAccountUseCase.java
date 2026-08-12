@@ -1,7 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.dto.SubAccountDto;
-import com.atlaspay.identity.application.port.out.SubAccountQueryService;
+import com.atlaspay.identity.application.port.SubAccountQueryService;
 import com.atlaspay.identity.application.query.GetSubAccountQuery;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.exception.NotFoundException;

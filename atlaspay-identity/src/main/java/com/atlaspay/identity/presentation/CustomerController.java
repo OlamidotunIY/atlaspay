@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest;
+package com.atlaspay.identity.presentation;
 
 import com.atlaspay.identity.application.command.CreateCustomerCommand;
 import com.atlaspay.identity.application.dto.CustomerDto;
@@ -8,7 +8,7 @@ import com.atlaspay.identity.application.query.ListCustomersQuery;
 import com.atlaspay.identity.application.usecase.CreateCustomerUseCase;
 import com.atlaspay.identity.application.usecase.GetCustomerUseCase;
 import com.atlaspay.identity.application.usecase.ListCustomersUseCase;
-import com.atlaspay.identity.presentation.rest.dto.CreateCustomerRequest;
+import com.atlaspay.identity.presentation.dto.CreateCustomerRequest;
 import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.util.PageResult;

@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.adapter.in.web;
+package com.atlaspay.identity.presentation;
 
 public record LoginResponse(
         String accessToken

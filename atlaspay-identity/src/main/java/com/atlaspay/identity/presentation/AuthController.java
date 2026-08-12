@@ -1,7 +1,7 @@
-package com.atlaspay.identity.infrastructure.adapter.in.web;
+package com.atlaspay.identity.presentation;
 
 import com.atlaspay.identity.infrastructure.security.JwtService;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
 import jakarta.validation.Valid;

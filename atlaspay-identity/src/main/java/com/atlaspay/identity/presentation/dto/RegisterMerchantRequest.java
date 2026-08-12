@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest.dto;
+package com.atlaspay.identity.presentation.dto;
 
 import com.atlaspay.identity.domain.model.BusinessType;
 import jakarta.validation.constraints.Email;

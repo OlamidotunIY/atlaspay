@@ -1,7 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.command.CompleteComplianceAccountCommand;
-import com.atlaspay.identity.application.port.out.AccountNameResolutionPort;
+import com.atlaspay.identity.application.port.AccountNameResolutionPort;
 import com.atlaspay.identity.domain.model.ComplianceStatus;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;

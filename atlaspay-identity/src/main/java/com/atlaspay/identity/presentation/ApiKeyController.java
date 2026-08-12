@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest;
+package com.atlaspay.identity.presentation;
 
 import com.atlaspay.identity.application.command.RegenerateApiKeyCommand;
 import com.atlaspay.identity.application.command.RevokeApiKeyCommand;
@@ -9,7 +9,7 @@ import com.atlaspay.identity.application.usecase.RegenerateApiKeyUseCase;
 import com.atlaspay.identity.application.usecase.RevokeApiKeyUseCase;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.KeyType;
-import com.atlaspay.identity.presentation.rest.dto.RegenerateApiKeyRequest;
+import com.atlaspay.identity.presentation.dto.RegenerateApiKeyRequest;
 import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.domain.id.MerchantId;
 import io.swagger.v3.oas.annotations.Operation;

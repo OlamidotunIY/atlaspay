@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest;
+package com.atlaspay.identity.presentation;
 
 import com.atlaspay.identity.application.command.*;
 import com.atlaspay.identity.application.dto.MerchantProfileDto;
@@ -6,7 +6,7 @@ import com.atlaspay.identity.application.dto.RegisterMerchantResult;
 import com.atlaspay.identity.application.query.GetMerchantProfileQuery;
 import com.atlaspay.identity.application.usecase.*;
 import com.atlaspay.identity.domain.model.ComplianceStatus;
-import com.atlaspay.identity.presentation.rest.dto.*;
+import com.atlaspay.identity.presentation.dto.*;
 import com.atlaspay.shared.domain.id.MerchantId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

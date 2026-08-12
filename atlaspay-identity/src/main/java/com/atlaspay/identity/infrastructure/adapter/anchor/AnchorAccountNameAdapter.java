@@ -1,6 +1,6 @@
 package com.atlaspay.identity.infrastructure.adapter.anchor;
 
-import com.atlaspay.identity.application.port.out.AccountNameResolutionPort;
+import com.atlaspay.identity.application.port.AccountNameResolutionPort;
 import com.atlaspay.shared.exception.NotFoundException;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import org.springframework.stereotype.Service;

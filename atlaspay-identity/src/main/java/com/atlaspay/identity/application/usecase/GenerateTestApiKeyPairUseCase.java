@@ -5,7 +5,7 @@ import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
 import com.atlaspay.identity.domain.model.KeyType;

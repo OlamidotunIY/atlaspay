@@ -1,4 +1,4 @@
-package com.atlaspay.identity.application.port.out;
+package com.atlaspay.identity.application.port;
 
 public interface PasswordEncoder {
     String encode(String rawPassword);

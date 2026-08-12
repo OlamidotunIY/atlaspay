@@ -1,7 +1,7 @@
 package com.atlaspay.identity.infrastructure.query;
 
 import com.atlaspay.identity.application.dto.SubAccountDto;
-import com.atlaspay.identity.application.port.out.SubAccountQueryService;
+import com.atlaspay.identity.application.port.SubAccountQueryService;
 import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataSubAccountRepository;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.id.SubAccountId;

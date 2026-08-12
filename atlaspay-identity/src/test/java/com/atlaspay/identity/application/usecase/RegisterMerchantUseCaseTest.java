@@ -4,7 +4,7 @@ import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 import com.atlaspay.identity.application.command.RegisterMerchantCommand;
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
 import com.atlaspay.identity.application.dto.RegisterMerchantResult;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.BusinessType;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;

@@ -1,4 +1,4 @@
-package com.atlaspay.identity.application.port.out;
+package com.atlaspay.identity.application.port;
 
 import com.atlaspay.identity.application.dto.MerchantProfileDto;
 import com.atlaspay.shared.domain.id.MerchantId;

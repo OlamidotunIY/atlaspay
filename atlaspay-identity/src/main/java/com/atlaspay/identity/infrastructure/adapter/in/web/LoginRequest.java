@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.adapter.in.web;
+package com.atlaspay.identity.presentation;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
 package com.atlaspay.identity.config;
 
-import com.atlaspay.identity.application.port.out.*;
+import com.atlaspay.identity.application.port.*;
 import com.atlaspay.identity.application.usecase.*;
 import com.atlaspay.identity.domain.repository.*;
 import com.atlaspay.shared.event.DomainEventPublisher;

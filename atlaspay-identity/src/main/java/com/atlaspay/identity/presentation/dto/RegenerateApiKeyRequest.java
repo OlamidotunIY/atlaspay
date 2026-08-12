@@ -1,4 +1,4 @@
-package com.atlaspay.identity.presentation.rest.dto;
+package com.atlaspay.identity.presentation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
