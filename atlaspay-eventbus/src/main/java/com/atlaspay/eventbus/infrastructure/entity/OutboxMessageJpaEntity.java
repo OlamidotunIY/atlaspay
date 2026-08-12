@@ -1,4 +1,4 @@
-package com.atlaspay.eventbus.infrastructure.persistence.entity;
+package com.atlaspay.eventbus.infrastructure.entity;
 
 import com.atlaspay.eventbus.domain.model.OutboxStatus;
 import jakarta.persistence.*;

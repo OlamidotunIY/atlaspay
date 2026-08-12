@@ -1,7 +1,7 @@
 package com.atlaspay.eventbus.infrastructure.adapter;
 
 import com.atlaspay.eventbus.domain.model.OutboxStatus;
-import com.atlaspay.eventbus.infrastructure.persistence.entity.OutboxMessageJpaEntity;
+import com.atlaspay.eventbus.infrastructure.entity.OutboxMessageJpaEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
