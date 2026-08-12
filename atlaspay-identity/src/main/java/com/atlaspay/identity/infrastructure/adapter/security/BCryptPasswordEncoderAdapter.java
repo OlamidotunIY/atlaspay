@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.security;
+package com.atlaspay.identity.infrastructure.adapter.security;
 
 import com.atlaspay.identity.application.port.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

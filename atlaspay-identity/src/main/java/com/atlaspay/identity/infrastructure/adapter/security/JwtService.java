@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.security;
+package com.atlaspay.identity.infrastructure.adapter.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

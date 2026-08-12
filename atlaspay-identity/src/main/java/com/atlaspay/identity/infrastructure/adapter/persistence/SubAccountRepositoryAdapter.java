@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.persistence;
+package com.atlaspay.identity.infrastructure.adapter.persistence;
 
 import com.atlaspay.identity.domain.model.SubAccount;
 import com.atlaspay.identity.domain.repository.SubAccountRepository;
