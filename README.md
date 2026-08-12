@@ -82,7 +82,7 @@ See [`docs/design.md`](docs/design.md) for the complete specification.
 | `atlaspay-transaction-splits` | `SplitConfiguration` | 🔲 Planned | — |
 | `atlaspay-transactions-query` | *(CQRS read model — no aggregate)* | 🔲 Planned | — |
 | `atlaspay-notifications` | `Notification` | 🔲 Planned | — |
-| `atlaspay-rate-limiter` | *(Cross-cutting filter — no aggregate)* | 🔲 Planned | — |
+| `atlaspay-rate-limiter` | *(Cross-cutting filter — no aggregate)* | ✅ Done | [rate-limiter.md](docs/modules/rate-limiter.md) |
 | `atlaspay-eventbus` | *(Infrastructure — no aggregate)* | 🔲 Planned | — |
 | `atlaspay-app` | *(Composition root)* | ✅ In progress | — |
 
