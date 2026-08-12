@@ -84,7 +84,7 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: kafka-topics --bootstrap-server localhost:9092 --list
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -109,6 +109,7 @@ services:
   # ── Tempo (Distributed Tracing) ─────────────────────────────────────────────
   tempo:
     image: grafana/tempo:2.6.1
+    user: "0:0"
     container_name: atlaspay-tempo
     restart: unless-stopped
     networks:
@@ -202,6 +203,10 @@ services:
       REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: prod
       ATLASPAY_ENV: docker
+      OTEL_EXPORTER_ENDPOINT: http://tempo:4318
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     env_file:
       - path: .env
         required: false
