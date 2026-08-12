@@ -1,6 +1,6 @@
-package com.atlaspay.ratelimiter.application.port.out;
+package com.atlaspay.ratelimiter.core;
 
-import com.atlaspay.ratelimiter.domain.RateLimitRule;
+import com.atlaspay.ratelimiter.core.RateLimitRule;
 
 public interface RateLimitRuleProvider {
     /**

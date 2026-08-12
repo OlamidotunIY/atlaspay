@@ -1,4 +1,4 @@
-package com.atlaspay.ratelimiter.domain.exception;
+package com.atlaspay.ratelimiter.exception;
 
 import com.atlaspay.shared.exception.ErrorCode;
 

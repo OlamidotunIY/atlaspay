@@ -1,7 +1,7 @@
-package com.atlaspay.ratelimiter.infrastructure.sync;
+package com.atlaspay.ratelimiter.redis;
 
-import com.atlaspay.ratelimiter.domain.RateLimitAlgorithm;
-import com.atlaspay.ratelimiter.domain.RateLimitRule;
+import com.atlaspay.ratelimiter.core.RateLimitAlgorithm;
+import com.atlaspay.ratelimiter.core.RateLimitRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;

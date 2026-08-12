@@ -1,10 +1,10 @@
-package com.atlaspay.ratelimiter.presentation.aspect;
+package com.atlaspay.ratelimiter.annotation;
 
-import com.atlaspay.ratelimiter.application.port.out.RateLimitRuleProvider;
-import com.atlaspay.ratelimiter.application.usecase.EvaluateRateLimitUseCase;
-import com.atlaspay.ratelimiter.domain.RateLimitKeyType;
-import com.atlaspay.ratelimiter.domain.RateLimitRule;
-import com.atlaspay.ratelimiter.presentation.annotation.RateLimit;
+import com.atlaspay.ratelimiter.core.RateLimitRuleProvider;
+import com.atlaspay.ratelimiter.core.EvaluateRateLimitUseCase;
+import com.atlaspay.ratelimiter.core.RateLimitKeyType;
+import com.atlaspay.ratelimiter.core.RateLimitRule;
+import com.atlaspay.ratelimiter.annotation.RateLimit;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;

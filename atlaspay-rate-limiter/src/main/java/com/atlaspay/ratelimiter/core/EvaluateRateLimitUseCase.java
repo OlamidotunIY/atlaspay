@@ -1,10 +1,8 @@
-package com.atlaspay.ratelimiter.application.usecase;
+package com.atlaspay.ratelimiter.core;
 
-import com.atlaspay.ratelimiter.domain.RateLimitRule;
-import com.atlaspay.ratelimiter.domain.RateLimitAlgorithm;
-import com.atlaspay.ratelimiter.domain.exception.RateLimiterErrorCode;
-import com.atlaspay.ratelimiter.infrastructure.adapter.RedisSlidingWindowRateLimiter;
-import com.atlaspay.ratelimiter.infrastructure.adapter.RedisTokenBucketRateLimiter;
+import com.atlaspay.ratelimiter.exception.RateLimiterErrorCode;
+import com.atlaspay.ratelimiter.redis.RedisSlidingWindowRateLimiter;
+import com.atlaspay.ratelimiter.redis.RedisTokenBucketRateLimiter;
 import com.atlaspay.shared.exception.RateLimitExceededException;
 import org.springframework.stereotype.Service;
 

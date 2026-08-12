@@ -1,6 +1,6 @@
-package com.atlaspay.ratelimiter.presentation.annotation;
+package com.atlaspay.ratelimiter.annotation;
 
-import com.atlaspay.ratelimiter.domain.RateLimitKeyType;
+import com.atlaspay.ratelimiter.core.RateLimitKeyType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

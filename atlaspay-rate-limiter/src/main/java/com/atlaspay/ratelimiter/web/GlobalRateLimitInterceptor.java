@@ -1,8 +1,8 @@
-package com.atlaspay.ratelimiter.presentation.interceptor;
+package com.atlaspay.ratelimiter.web;
 
-import com.atlaspay.ratelimiter.application.port.out.RateLimitRuleProvider;
-import com.atlaspay.ratelimiter.application.usecase.EvaluateRateLimitUseCase;
-import com.atlaspay.ratelimiter.domain.RateLimitRule;
+import com.atlaspay.ratelimiter.core.RateLimitRuleProvider;
+import com.atlaspay.ratelimiter.core.EvaluateRateLimitUseCase;
+import com.atlaspay.ratelimiter.core.RateLimitRule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

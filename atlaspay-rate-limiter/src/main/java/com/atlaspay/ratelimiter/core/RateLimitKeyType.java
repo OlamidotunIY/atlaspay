@@ -1,4 +1,4 @@
-package com.atlaspay.ratelimiter.domain;
+package com.atlaspay.ratelimiter.core;
 
 public enum RateLimitKeyType {
     IP,
