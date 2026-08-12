@@ -17,7 +17,7 @@ dependencies {
     // implementation project(':atlaspay-settlement')
     // implementation project(':atlaspay-transaction-splits')
     // implementation project(':atlaspay-transactions-query')
-    // implementation project(':atlaspay-notifications')
+    implementation project(':atlaspay-notifications')
     implementation project(':atlaspay-rate-limiter')
     // implementation project(':atlaspay-eventbus')
 
