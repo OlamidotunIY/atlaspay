@@ -16,7 +16,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class SubAccount extends AggregateRoot<SubAccountId> {
 
     private final SubAccountId id;
