@@ -1,4 +1,4 @@
-package com.atlaspay.app.event;
+package com.atlaspay.eventbus.application;
 
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.event.EnvelopedDomainEvent;

@@ -1,4 +1,4 @@
-package com.atlaspay.app.event;
+package com.atlaspay.eventbus.application;
 
 import com.atlaspay.shared.event.EnvelopedDomainEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,10 @@ public class KafkaEventForwarder {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaEventForwarder.class);
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final KafkaTemplate<String, String> kafkaTemplate;
+    
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final ObjectMapper objectMapper;
 
     public KafkaEventForwarder(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
@@ -25,8 +28,6 @@ public class KafkaEventForwarder {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void forwardToKafka(EnvelopedDomainEvent<?> envelopedEvent) {
         try {
-            // Determine the topic based on the event type. 
-            // For now, route all Merchant events to "merchant-events".
             String topic = getTopicForEvent(envelopedEvent.event().getClass().getSimpleName());
             String jsonPayload = objectMapper.writeValueAsString(envelopedEvent.event());
             

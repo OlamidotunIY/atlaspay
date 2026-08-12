@@ -19,7 +19,7 @@ dependencies {
     // implementation project(':atlaspay-transactions-query')
     implementation project(':atlaspay-notifications')
     implementation project(':atlaspay-rate-limiter')
-    // implementation project(':atlaspay-eventbus')
+    implementation project(':atlaspay-eventbus')
 
     // ── Spring Boot ─────────────────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-web'
