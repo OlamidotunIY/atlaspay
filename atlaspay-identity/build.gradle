@@ -5,6 +5,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     // Spring Data JPA for persistence adapters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Spring Web for REST controllers
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Security crypto for PasswordEncoder
+    implementation 'org.springframework.security:spring-security-crypto'
+    // Swagger annotations for OpenAPI
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
