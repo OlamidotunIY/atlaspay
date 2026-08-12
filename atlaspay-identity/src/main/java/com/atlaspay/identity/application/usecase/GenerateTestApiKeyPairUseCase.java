@@ -42,7 +42,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
             "pk_test_"
         );
 
-        String secretKeyHash = passwordEncoder.encode(rawSecretKey);
+        String secretKeyHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_test_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
         ApiKey secretKey = new ApiKey(

@@ -86,6 +86,10 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
         return merchantId;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     @Override
     public ApiKeyId getId() {
         return id;

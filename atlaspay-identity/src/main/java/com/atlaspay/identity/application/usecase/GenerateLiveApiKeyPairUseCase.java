@@ -60,7 +60,7 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
                 "pk_live_"
         );
 
-        String secretHash = passwordEncoder.encode(rawSecretKey);
+        String secretHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_live_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
         ApiKey secretKey = new ApiKey(

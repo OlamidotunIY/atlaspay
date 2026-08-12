@@ -234,6 +234,14 @@ public class Merchant extends AggregateRoot<MerchantId> {
         return complianceStatus;
     }
 
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public EmailAddress getEmail() {
+        return email;
+    }
+
     @Override
     public MerchantId getId() {
         return id;

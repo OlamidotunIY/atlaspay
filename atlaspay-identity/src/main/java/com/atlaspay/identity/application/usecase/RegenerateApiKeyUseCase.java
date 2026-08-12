@@ -69,7 +69,7 @@ public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand
             keyHash = rawKey;
             displayValue = rawKey;
         } else {
-            keyHash = passwordEncoder.encode(rawKey);
+            keyHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawKey);
             displayValue = prefix + "****" + rawKey.substring(rawKey.length() - 4);
         }
 
