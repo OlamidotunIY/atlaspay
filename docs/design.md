@@ -48,7 +48,7 @@ of Wema Bank / Titan Trust in production.
 
 | Provider | Role | Consumed by module |
 |---|---|---|
-| **Anchor** (getanchor.co) | BaaS: merchant/sub-account deposit accounts, virtual NUBAN issuance, NIP transfers, payout, inbound webhook simulation | `atlaspay-accounts`, `atlaspay-transfers`, `atlaspay-settlement` |
+| **Simulator** (Internal) | BaaS mock: merchant/sub-account deposit accounts, virtual NUBAN issuance, NIP transfers, payout, inbound webhook simulation | `atlaspay-accounts`, `atlaspay-transfers`, `atlaspay-settlement` |
 | **Dojah** (dojah.io) | BVN/NIN verification, sandbox test data | `atlaspay-identity` |
 | **Paystack** (optional, later) | Card collection channel, test mode | `atlaspay-charges` (additional adapter) |
 
@@ -243,6 +243,19 @@ atlaspay/
 │       ├── inmemory/                   # InMemoryEventBus (local/test)
 │       └── kafka/                      # KafkaEventBus (production) — outbox pattern impl
 │
+├── atlaspay-fraud/                     # Asynchronous fraud detection engine
+│   └── src/main/java/com/atlaspay/fraud/
+│       ├── domain/model/               # FraudCase (aggregate)
+│       ├── application/usecase/        # OpenFraudCaseUseCase, ResolveFraudCaseUseCase
+│       ├── infrastructure/adapter/
+│       └── presentation/rest/
+│
+├── atlaspay-simulator/                 # Mock BaaS Provider (Replaces Anchor sandbox)
+│   └── src/main/java/com/atlaspay/simulator/
+│       ├── domain/model/               # SimulatorAccount (standalone mock domain)
+│       ├── application/usecase/
+│       ├── infrastructure/adapter/
+│       └── presentation/rest/          # Webhooks out, REST in
 ├── atlaspay-products/                  # [OPTIONAL] Merchant product/inventory management
 │   └── src/main/java/com/atlaspay/products/
 │       ├── domain/model/               # Product (aggregate): name, price (Money), stock, status (ACTIVE/ARCHIVED)
