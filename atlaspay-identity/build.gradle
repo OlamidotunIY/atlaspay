@@ -1,4 +1,17 @@
 dependencies {
-    // Add dependencies here when needed
     implementation project(':atlaspay-shared-kernel')
+
+    // Spring context for @Component, @Service etc in use cases
+    implementation 'org.springframework.boot:spring-boot-starter'
+    // Spring Data JPA for persistence adapters
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Observability — Micrometer for metrics counters/timers on use case execution
+    implementation 'io.micrometer:micrometer-core'
+
+    // Test: WireMock for Dojah adapter integration tests
+    testImplementation "org.wiremock:wiremock-standalone:${wiremockVersion}"
+    testImplementation 'org.testcontainers:mysql'
 }
