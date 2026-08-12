@@ -826,7 +826,7 @@ public interface AccountNameResolutionPort {
 |---|---|---|---|
 | `resolve(bankCode, accountNumber)` | `String`, `String` | `String accountName` | Throws `NotFoundException(BANK_ACCOUNT_NOT_FOUND)` if not found. Throws `ExternalServiceException` on provider failure. |
 
-**Adapter:** `AnchorAccountNameAdapter` in `infrastructure/provider/anchor/`
+**Adapter:** `AnchorAccountNameAdapter` in `infrastructure/adapter/anchor/`
 
 ---
 

@@ -114,7 +114,7 @@ All events are Java `record`s — immutable by construction.
 
 ## 4. Repository Ports
 
-Repository interfaces live in `domain/repository/`. Implementations live in `infrastructure/persistence/`.
+Repository interfaces live in `domain/repository/`. Implementations (Adapters) live in `infrastructure/adapter/persistence/`. Spring Data JPA interfaces live in `infrastructure/repository/` and JPA Entities in `infrastructure/entity/`.
 
 ### `[AggregateNameRepository]`
 
@@ -182,7 +182,7 @@ public record [UseCaseName]Command(
 
 ## 6. Outbound Ports (External Dependencies)
 
-Ports live in `application/port/out/`. Adapters live in `infrastructure/adapter/`.
+Ports live in `application/port/`. Adapters live in `infrastructure/adapter/`.
 
 ### `[PortName]`
 

@@ -190,14 +190,14 @@ atlaspay/
 │       ├── application/
 │       │   ├── usecase/                # CreateSubscriptionUseCase, CancelSubscriptionUseCase
 │       │   └── scheduler/              # BillingCycleScheduler (Spring @Scheduled + virtual threads)
-│       ├── infrastructure/persistence/
+│       ├── infrastructure/adapter/
 │       └── presentation/rest/
 │
 ├── atlaspay-escrow/                    # Two-phase escrow holds
 │   └── src/main/java/com/atlaspay/escrow/
 │       ├── domain/model/               # EscrowHold: FUNDED → COMPLETED_PENDING_RELEASE → RELEASED (or DISPUTED)
 │       ├── application/usecase/
-│       ├── infrastructure/persistence/
+│       ├── infrastructure/adapter/
 │       └── presentation/rest/
 │
 ├── atlaspay-settlement/                # Merchant settlement batching
@@ -206,20 +206,20 @@ atlaspay/
 │       ├── application/
 │       │   ├── usecase/
 │       │   └── scheduler/              # SettlementBatchScheduler
-│       ├── infrastructure/persistence/
+│       ├── infrastructure/adapter/
 │       └── presentation/rest/          # GET /settlements, GET /settlements/{id}/transactions
 │
 ├── atlaspay-transaction-splits/        # Revenue split configuration
 │   └── src/main/java/com/atlaspay/splits/
 │       ├── domain/model/               # SplitConfiguration (aggregate), SplitAllocation (child)
 │       ├── application/usecase/
-│       ├── infrastructure/persistence/
+│       ├── infrastructure/adapter/
 │       └── presentation/rest/
 │
 ├── atlaspay-transactions-query/        # CQRS read-model (unified transaction history)
 │   └── src/main/java/com/atlaspay/transactionsquery/
 │       ├── projection/                 # listens to domain events via Kafka
-│       ├── infrastructure/persistence/ # denormalized read table + full-text index
+│       ├── infrastructure/adapter/ # denormalized read table + full-text index
 │       └── presentation/rest/          # GET /transactions (search, filter, pagination)
 │
 ├── atlaspay-notifications/             # Async notification dispatch
@@ -247,7 +247,7 @@ atlaspay/
 │   └── src/main/java/com/atlaspay/products/
 │       ├── domain/model/               # Product (aggregate): name, price (Money), stock, status (ACTIVE/ARCHIVED)
 │       ├── application/usecase/        # CreateProductUseCase, UpdateStockUseCase, ArchiveProductUseCase
-│       ├── infrastructure/persistence/ # Flyway V1__products__*
+│       ├── infrastructure/adapter/ # Flyway V1__products__*
 │       └── presentation/rest/          # ProductController
 │
 ├── atlaspay-orders/                    # [OPTIONAL] Order orchestration for merchant products
@@ -256,14 +256,14 @@ atlaspay/
 │       │   ├── model/                  # Order (aggregate), OrderLineItem (child entity), OrderStatus (enum)
 │       │   └── repository/
 │       ├── application/usecase/        # CreateOrderUseCase, FulfilOrderUseCase, CancelOrderUseCase
-│       ├── infrastructure/persistence/ # Flyway V1__orders__*
+│       ├── infrastructure/adapter/ # Flyway V1__orders__*
 │       └── presentation/rest/          # OrderController
 │
 ├── atlaspay-storefronts/               # [OPTIONAL] Digital storefronts for merchants
 │   └── src/main/java/com/atlaspay/storefronts/
 │       ├── domain/model/               # Storefront (aggregate): slug, published Products listing
 │       ├── application/usecase/        # CreateStorefrontUseCase, PublishProductUseCase
-│       ├── infrastructure/persistence/ # Flyway V1__storefronts__*
+│       ├── infrastructure/adapter/ # Flyway V1__storefronts__*
 │       └── presentation/rest/          # StorefrontController (public-facing + merchant management)
 │
 └── atlaspay-app/                       # Composition root (Spring Boot entry point)
