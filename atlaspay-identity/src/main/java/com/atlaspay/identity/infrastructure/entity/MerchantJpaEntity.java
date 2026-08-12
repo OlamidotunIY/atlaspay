@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.persistence.entity;
+package com.atlaspay.identity.infrastructure.entity;
 
 import com.atlaspay.identity.domain.model.BusinessType;
 import com.atlaspay.identity.domain.model.ComplianceStatus;

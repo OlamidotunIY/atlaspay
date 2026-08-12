@@ -2,7 +2,7 @@ package com.atlaspay.identity.infrastructure.query;
 
 import com.atlaspay.identity.application.dto.ApiKeyDto;
 import com.atlaspay.identity.application.port.ApiKeyQueryService;
-import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataApiKeyRepository;
+import com.atlaspay.identity.infrastructure.repository.SpringDataApiKeyRepository;
 import com.atlaspay.shared.domain.id.MerchantId;
 import org.springframework.stereotype.Service;
 

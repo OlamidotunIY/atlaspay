@@ -1,6 +1,6 @@
-package com.atlaspay.identity.infrastructure.persistence.repository;
+package com.atlaspay.identity.infrastructure.repository;
 
-import com.atlaspay.identity.infrastructure.persistence.entity.MerchantJpaEntity;
+import com.atlaspay.identity.infrastructure.entity.MerchantJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

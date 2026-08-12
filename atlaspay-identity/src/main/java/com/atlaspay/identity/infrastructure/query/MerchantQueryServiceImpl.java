@@ -2,7 +2,7 @@ package com.atlaspay.identity.infrastructure.query;
 
 import com.atlaspay.identity.application.dto.MerchantProfileDto;
 import com.atlaspay.identity.application.port.MerchantQueryService;
-import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataMerchantRepository;
+import com.atlaspay.identity.infrastructure.repository.SpringDataMerchantRepository;
 import com.atlaspay.shared.domain.id.MerchantId;
 import org.springframework.stereotype.Service;
 

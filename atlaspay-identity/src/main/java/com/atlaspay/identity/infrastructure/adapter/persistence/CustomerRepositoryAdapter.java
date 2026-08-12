@@ -2,8 +2,8 @@ package com.atlaspay.identity.infrastructure.adapter.persistence;
 
 import com.atlaspay.identity.domain.model.Customer;
 import com.atlaspay.identity.domain.repository.CustomerRepository;
-import com.atlaspay.identity.infrastructure.persistence.entity.CustomerJpaEntity;
-import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataCustomerRepository;
+import com.atlaspay.identity.infrastructure.entity.CustomerJpaEntity;
+import com.atlaspay.identity.infrastructure.repository.SpringDataCustomerRepository;
 import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;

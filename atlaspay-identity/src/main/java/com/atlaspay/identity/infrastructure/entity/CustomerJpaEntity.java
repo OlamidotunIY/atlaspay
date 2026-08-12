@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.persistence.entity;
+package com.atlaspay.identity.infrastructure.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

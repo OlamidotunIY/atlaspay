@@ -2,8 +2,8 @@ package com.atlaspay.identity.infrastructure.adapter.persistence;
 
 import com.atlaspay.identity.domain.model.SubAccount;
 import com.atlaspay.identity.domain.repository.SubAccountRepository;
-import com.atlaspay.identity.infrastructure.persistence.entity.SubAccountJpaEntity;
-import com.atlaspay.identity.infrastructure.persistence.repository.SpringDataSubAccountRepository;
+import com.atlaspay.identity.infrastructure.entity.SubAccountJpaEntity;
+import com.atlaspay.identity.infrastructure.repository.SpringDataSubAccountRepository;
 import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.id.SubAccountId;
 import org.springframework.stereotype.Repository;
