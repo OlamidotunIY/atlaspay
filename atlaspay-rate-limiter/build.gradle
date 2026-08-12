@@ -1,3 +1,11 @@
 dependencies {
     implementation project(':atlaspay-shared-kernel')
+    
+    // Spring Boot dependencies for Redis and AOP
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
