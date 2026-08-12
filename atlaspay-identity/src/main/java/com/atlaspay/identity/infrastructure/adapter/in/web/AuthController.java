@@ -1,6 +1,6 @@
-package com.atlaspay.app.security.controller;
+package com.atlaspay.identity.infrastructure.adapter.in.web;
 
-import com.atlaspay.app.security.jwt.JwtService;
+import com.atlaspay.identity.infrastructure.security.JwtService;
 import com.atlaspay.identity.application.port.out.PasswordEncoder;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
