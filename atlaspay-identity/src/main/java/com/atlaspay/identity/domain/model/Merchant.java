@@ -13,7 +13,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class Merchant extends AggregateRoot<MerchantId> {
 
     private final MerchantId id;
