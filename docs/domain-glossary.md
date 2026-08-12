@@ -37,19 +37,19 @@ Module: `atlaspay-identity`
 
 | Term | Definition | NOT to be confused with |
 |---|---|---|
-| **Merchant** | A registered business entity (platform) that uses AtlasPay to power its operations and collect payments. Has a business name, RC number, and a `KycStatus`. | A `Customer` or `SubAccount`. |
+| **Merchant** | A registered business entity (platform) that uses AtlasPay to power its operations and collect payments. Has a business name, RC number, and a `ComplianceStatus`. | A `Customer` or `SubAccount`. |
 | **Customer** | An individual or business that a `Merchant` has transacted with or wishes to track. Customers can be attached to charges, subscriptions, and orders. Email must be unique per Merchant. | A `Merchant` (the platform owner) or a `SubAccount` (a split-payment routing entity). |
 | **SubAccount** | A registered bank account (or split-payment recipient) configured by a `Merchant` to receive a portion of a split charge. SubAccounts are purely financial routing entities — they are not user identities. | A `Customer`. A SubAccount routes money; a Customer is a person or business identity. |
-| **KycStatus** | The state of an identity verification — `UNVERIFIED`, `PENDING`, `VERIFIED`, `REJECTED`. One-way transitions only: `UNVERIFIED → PENDING → VERIFIED` or `→ REJECTED`. | A general "status" field on any other entity. |
+| **ComplianceStatus** | The state of identity verification — `NOT_STARTED`, `IN_PROGRESS`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`. | A general "status" field on any other entity. |
 | **BVN** | Bank Verification Number — a unique 11-digit identity number issued by the CBN to Nigerian bank customers. Verified via Dojah sandbox. | NIN. They are different identifiers. |
 | **NIN** | National Identification Number — issued by NIMC. Used as an alternative/supplementary identity document. | BVN. |
-| **KYC** | Know Your Customer — the process of verifying a merchant's or customer's identity using BVN, NIN, or business registration documents. | A single verification call. KYC is a process, not an event. |
+| **Compliance** | The 5-step process (Profile, Contact, Owner, Account, Service Agreement) to verify a merchant before granting LIVE keys. | Just identity verification. |
 | **AccountNameResolution** | The act of querying the bank's NIP directory to confirm the real name behind a bank account number + bank code combination. Used before creating a `TransferRecipient`. | A customer lookup. This is a bank directory query, not a system user lookup. |
-| **DojahAdapter** | The infrastructure adapter that wraps HTTP calls to the Dojah API for BVN/NIN verification. | The domain `KycVerificationPort` (interface). Code outside infrastructure must never reference `DojahAdapter` directly. |
+| **DojahAdapter** | The infrastructure adapter that wraps HTTP calls to the Dojah API for BVN/NIN verification. | Code outside infrastructure must never reference `DojahAdapter` directly. |
 | **ApiKey** | A credential issued to a `Merchant` that allows server-to-server access to the AtlasPay API without a session JWT. Comes in two types (`PUBLIC`, `SECRET`) and two environments (`TEST`, `LIVE`). The aggregate root for key management. | A JWT. A JWT is a session credential for dashboard users; an ApiKey is a long-lived credential for API integrations. |
 | **PublicKey** | An `ApiKey` of type `PUBLIC` (prefix `pk_live_` or `pk_test_`). Safe to embed in frontend or mobile code. Used to initialise payment widgets. Stored in plaintext. | A `SecretKey`. Public keys cannot authorise server-side operations. |
 | **SecretKey** | An `ApiKey` of type `SECRET` (prefix `sk_live_` or `sk_test_`). Must never be exposed publicly. Authorises all server-side API calls. Stored as an HMAC-SHA256 hash; the raw value is shown only once at generation. | A `PublicKey`. If a secret key is exposed, it must be immediately revoked and regenerated. |
-| **ApiEnvironment** | `TEST` or `LIVE`. Test keys operate in sandbox mode with no real money. Live keys are only issued after KYC is `VERIFIED`. | A deployment environment (staging, prod). `ApiEnvironment` is a domain concept on the `ApiKey` aggregate, not an infrastructure concept. |
+| **ApiEnvironment** | `TEST` or `LIVE`. Test keys operate in sandbox mode with no real money. Live keys are only issued after compliance is `APPROVED`. | A deployment environment (staging, prod). `ApiEnvironment` is a domain concept on the `ApiKey` aggregate, not an infrastructure concept. |
 | **MerchantContext** | The resolved `MerchantId` placed on the Spring `SecurityContext` after authenticating either a JWT or a Secret API Key. All use cases read the `MerchantId` from this context — never from the URL path. | A URL parameter. Merchant-scoped endpoints never include `merchantId` in the path for public API consumers. |
 
 ---
@@ -258,7 +258,7 @@ or have a more precise equivalent.
 | `account` (unqualified) | `VirtualAccount`, `Wallet`, `Merchant`, `Customer`, `SubAccount` (based on context) | Too ambiguous — always qualify |
 | `payment` (unqualified) | `Charge` (inbound) or `Transfer` (outbound) | "Payment" doesn't tell you direction |
 | `amount` (raw `double`) | `Money` | Raw amounts without currency and type are meaningless |
-| `status` (unqualified) | `TransferStatus`, `ChargeStatus`, `KycStatus`, `OrderStatus`, etc. | Every status has a specific type |
+| `status` (unqualified) | `TransferStatus`, `ChargeStatus`, `ComplianceStatus`, `OrderStatus`, etc. | Every status has a specific type |
 | `user` | `Merchant`, `Customer`, or `SubAccount` (based on context) | Too generic for a payment domain |
 | `sub-account` as identity | `Customer` | SubAccounts are split-payment routing entities, not user identities |
 | `record` (verb, meaning "save") | `persist`, `post`, `save` | "Record" is also a Java keyword and a DDD concept |

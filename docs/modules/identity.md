@@ -37,7 +37,7 @@ verified Merchant and, optionally, a linked Customer.
 | Dependency | Type | Reason |
 |---|---|---|
 | `atlaspay-shared-kernel` | Internal module | `Money`, `AggregateRoot`, `DomainEvent`, `ErrorCode`, exception hierarchy, `UserId`, `MerchantId` |
-| Dojah (dojah.io) | External HTTP | BVN/NIN KYC verification (sandbox) |
+| Dojah (dojah.io) | External HTTP | BVN/NIN verification (sandbox) |
 | Anchor (getanchor.co) | External HTTP | Account-name resolution (NIP directory) |
 
 ---
@@ -227,7 +227,7 @@ Phase 2 — Compliance (unlocks live mode):
 **Identity:** `SubAccountId` (defined in `atlaspay-shared-kernel`, `com.atlaspay.shared.domain.id`)
 
 > **Important:** A `SubAccount` is NOT a user identity. It is a bank account routing entity
-> used exclusively for split-payment configuration. It has no login, no KYC, and no Customer
+> used exclusively for split-payment configuration. It has no login, no compliance profile, and no Customer
 > relationship. See `atlaspay-transaction-splits` for how SubAccounts are used in splits.
 
 **Fields:**
@@ -334,7 +334,7 @@ Phase 2 — Compliance (unlocks live mode):
 | Enum | Values | Notes |
 |---|---|---|
 | `BusinessType` | `STARTER`, `REGISTERED` | `STARTER` = unregistered/informal business; `REGISTERED` = has CAC/RC number |
-| `ComplianceStatus` | `NOT_STARTED`, `IN_PROGRESS`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED` | Replaces the old `KycStatus`. Governs live-mode access. |
+| `ComplianceStatus` | `NOT_STARTED`, `IN_PROGRESS`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED` | Governs live-mode access. |
 | `ComplianceStep` | `PROFILE`, `CONTACT`, `OWNER`, `ACCOUNT`, `SERVICE_AGREEMENT` | The current compliance step being filled in |
 | `StaffSize` | `ONE_TO_TEN`, `ELEVEN_TO_FIFTY`, `FIFTY_ONE_TO_TWO_HUNDRED`, `OVER_TWO_HUNDRED` | Used in compliance PROFILE step |
 | `GovernmentIdType` | `PASSPORT`, `DRIVERS_LICENSE`, `VOTERS_CARD`, `NIN_SLIP` | Used in compliance OWNER step |
@@ -556,7 +556,7 @@ Similar command records exist for CONTACT, OWNER, ACCOUNT, and SERVICE_AGREEMENT
 **Happy Path (OWNER step):**
 1. Load merchant — throw `NotFoundException` if absent.
 2. Validate step data.
-3. If OWNER step: call `KycVerificationPort.verify(bvn, nin)` — fail the step if provider returns failure.
+3. If OWNER step: validate BVN/NIN against external Dojah verification endpoint (internal API out of scope for domain).
 4. If ACCOUNT step: call `AccountNameResolutionPort.resolve(bankCode, accountNumber)` — fail the step if not found.
 5. Call `merchant.completeComplianceStep(step, data)` — throws if out of order.
 6. `merchantRepository.save(merchant)` → publish `MerchantComplianceStepCompleted`.
@@ -570,9 +570,9 @@ Similar command records exist for CONTACT, OWNER, ACCOUNT, and SERVICE_AGREEMENT
 | Merchant not found | `NotFoundException` | `MERCHANT_NOT_FOUND` |
 | Email not verified | `BusinessRuleException` | `EMAIL_VERIFICATION_REQUIRED` |
 | Step completed out of order | `BusinessRuleException` | `COMPLIANCE_STEP_OUT_OF_ORDER` |
-| BVN/NIN verification fails (OWNER step) | `BusinessRuleException` | `KYC_VERIFICATION_FAILED` |
+| BVN/NIN verification fails (OWNER step) | `BusinessRuleException` | `VERIFICATION_FAILED` |
 | Bank account not found (ACCOUNT step) | `NotFoundException` | `BANK_ACCOUNT_NOT_FOUND` |
-| Provider unavailable | `ExternalServiceException` | `KYC_PROVIDER_UNAVAILABLE` / `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` |
+| Provider unavailable | `ExternalServiceException` | `PROVIDER_UNAVAILABLE` / `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` |
 
 ---
 
@@ -750,6 +750,49 @@ public record RegenerateApiKeyCommand(
 
 ---
 
+
+---
+
+### `GetCustomerUseCase`
+**Type:** Query
+**Input:** `GetCustomerQuery(MerchantId, CustomerId)`
+**Output:** `CustomerDto`
+
+---
+
+### `ListCustomersUseCase`
+**Type:** Query
+**Input:** `ListCustomersQuery(MerchantId, page, size, emailFilter)`
+**Output:** `PageResult<CustomerDto>`
+
+---
+
+### `GetSubAccountUseCase`
+**Type:** Query
+**Input:** `GetSubAccountQuery(MerchantId, SubAccountId)`
+**Output:** `SubAccountDto`
+
+---
+
+### `ListSubAccountsUseCase`
+**Type:** Query
+**Input:** `ListSubAccountsQuery(MerchantId, page, size)`
+**Output:** `PageResult<SubAccountDto>`
+
+---
+
+### `GetMerchantProfileUseCase`
+**Type:** Query
+**Input:** `GetMerchantProfileQuery(MerchantId)`
+**Output:** `MerchantProfileDto`
+
+---
+
+### `ListApiKeysUseCase`
+**Type:** Query
+**Input:** `ListApiKeysQuery(MerchantId)`
+**Output:** `List<ApiKeyDto>`
+
 ## 6. Outbound Ports (External Dependencies)
 
 ### Query Services (Read Models)
@@ -766,24 +809,6 @@ These ports allow query use cases to retrieve data transfer objects (`DTOs`) dir
 | `SubAccountQueryService` | `findAllByMerchantId(...)` | `PageResult<SubAccountDto>` |
 | `MerchantQueryService` | `findProfileById(merchantId)` | `Optional<MerchantProfileDto>` |
 | `ApiKeyQueryService` | `findAllByMerchantId(merchantId)` | `List<ApiKeyDto>` |
-
----
-
-### `KycVerificationPort`
-
-Package: `application/port/out/`
-
-```java
-public interface KycVerificationPort {
-    KycVerificationResult verify(String bvn, String nin);
-}
-```
-
-| Method | Parameters | Returns | Notes |
-|---|---|---|---|
-| `verify(bvn, nin)` | `String bvn`, `String nin` | `KycVerificationResult` | At least one of bvn/nin must be non-null. Result has `passed: boolean` and `failureReason: String`. |
-
-**Adapter:** `DojahKycAdapter` in `infrastructure/adapter/dojah/`
 
 ---
 
@@ -974,7 +999,7 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 }
 ```
 
-**Error Responses:** Include `KYC_VERIFICATION_FAILED` (422) and `KYC_PROVIDER_UNAVAILABLE` (502).
+**Error Responses:** Include `VERIFICATION_FAILED` (422) and `PROVIDER_UNAVAILABLE` (502).
 
 ---
 
@@ -1182,7 +1207,7 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 
 | Status | Error Code | Condition |
 |---|---|---|
-| `422` | `LIVE_KEYS_REQUIRE_KYC_VERIFIED` | Regenerating LIVE key before KYC |
+| `422` | `LIVE_KEYS_REQUIRE_COMPLIANCE_APPROVED` | Regenerating LIVE key before compliance is approved |
 
 ---
 
@@ -1392,7 +1417,7 @@ All defined in `IdentityErrorCode` enum (`atlaspay-identity`, `domain/exception/
 | `COMPLIANCE_STEP_OUT_OF_ORDER` | `BusinessRuleException` | 422 | Attempting a step before the previous one is done |
 | `COMPLIANCE_NOT_ALL_STEPS_COMPLETE` | `BusinessRuleException` | 422 | Submitting compliance before all 5 steps done |
 | `COMPLIANCE_NOT_SUBMITTED` | `BusinessRuleException` | 422 | Admin trying to approve/reject before submission |
-| `KYC_VERIFICATION_FAILED` | `BusinessRuleException` | 422 | BVN/NIN check failed at Dojah |
+| `VERIFICATION_FAILED` | `BusinessRuleException` | 422 | BVN/NIN check failed at provider |
 | `BANK_ACCOUNT_NOT_FOUND` | `NotFoundException` | 404 | Account number not found in NIP directory |
 | `ACCOUNT_RESOLUTION_PROVIDER_UNAVAILABLE` | `ExternalServiceException` | 502 | Anchor account-name resolution API failure |
 | `API_KEY_NOT_FOUND` | `NotFoundException` | 404 | Key ID not found or belongs to another merchant |

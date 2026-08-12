@@ -16,7 +16,7 @@ code — not toy examples.
 
 **Honesty constraint (do not violate in implementation):** AtlasPay is not a licensed bank or
 BaaS provider. Real account issuance, NIP transfers, and payout settlement are delegated to
-**Anchor** (BaaS sandbox). Identity verification is delegated to **Dojah** (KYC sandbox).
+**Anchor** (BaaS sandbox). Identity verification is delegated to **Dojah** (verification sandbox).
 AtlasPay's engineering value is the domain model, ledger correctness, orchestration, and API
 surface sitting on top of those providers — exactly the role Paystack/Flutterwave play on top
 of Wema Bank / Titan Trust in production.
@@ -49,7 +49,7 @@ of Wema Bank / Titan Trust in production.
 | Provider | Role | Consumed by module |
 |---|---|---|
 | **Anchor** (getanchor.co) | BaaS: merchant/sub-account deposit accounts, virtual NUBAN issuance, NIP transfers, payout, inbound webhook simulation | `atlaspay-accounts`, `atlaspay-transfers`, `atlaspay-settlement` |
-| **Dojah** (dojah.io) | KYC: BVN/NIN verification, sandbox test data | `atlaspay-identity` |
+| **Dojah** (dojah.io) | BVN/NIN verification, sandbox test data | `atlaspay-identity` |
 | **Paystack** (optional, later) | Card collection channel, test mode | `atlaspay-charges` (additional adapter) |
 
 Each provider is wrapped behind a **port interface** owned by the domain module.
@@ -64,7 +64,7 @@ provider is behind it.
 
 | Module | Aggregate root | Key invariant |
 |---|---|---|
-| `atlaspay-identity` | Merchant, Customer, SubAccount, ApiKey | KycStatus transitions are one-way; BVN verification is idempotent; Customer email is unique per Merchant; exactly one active key per type+environment per Merchant |
+| `atlaspay-identity` | Merchant, Customer, SubAccount, ApiKey | ComplianceStatus governs verification state; BVN/NIN verification is idempotent; Customer email is unique per Merchant; exactly one active key per type+environment per Merchant |
 | `atlaspay-accounts` | VirtualAccount | Issuance is idempotent per owner; closure is irreversible |
 | `atlaspay-ledger` | LedgerEntry | Append-only; balance always derived, never mutated directly |
 | `atlaspay-transfers` | Transfer | State machine `PENDING→PROCESSING→SUCCESS/FAILED`; idempotency key enforced at DB level |
@@ -115,18 +115,18 @@ atlaspay/
 │       ├── exception/                  # AtlasPayException hierarchy (sealed hierarchy)
 │       └── util/                       # DateTimeUtils (java.time), PageResult (generic record)
 │
-├── atlaspay-identity/                  # KYC, merchant/customer/sub-account registration
+├── atlaspay-identity/                  # Compliance, merchant/customer/sub-account registration
 │   └── src/main/java/com/atlaspay/identity/
 │       ├── domain/
-│       │   ├── model/                  # Merchant (aggregate), Customer (aggregate), SubAccount (aggregate), KycStatus (enum)
+│       │   ├── model/                  # Merchant (aggregate), Customer (aggregate), SubAccount (aggregate), ComplianceStatus (enum)
 │       │   └── repository/             # MerchantRepository, CustomerRepository, SubAccountRepository (ports)
 │       ├── application/
 │       │   ├── usecase/                # RegisterMerchantUseCase, CreateCustomerUseCase,
 │       │   │                           # RegisterSubAccountUseCase, VerifyIdentityUseCase
-│       │   └── port/out/               # KycVerificationPort, AccountNameResolutionPort
+│       │   └── port/out/               # QueryServices, AccountNameResolutionPort
 │       ├── infrastructure/
 │       │   ├── persistence/            # JPA entities + Flyway V1__identity__*
-│       │   └── adapter/dojah/          # DojahClient, DojahKycAdapter
+│       │   └── adapter/dojah/          # DojahClient, DojahVerificationAdapter
 │       └── presentation/rest/          # MerchantController, CustomerController, SubAccountController
 │
 ├── atlaspay-accounts/                  # Virtual account issuance (Anchor-backed)
@@ -380,7 +380,7 @@ always derived from the credential:
 
 **API Key specifics:**
 - Two key types: `PUBLIC KEY` (`pk_`) for client-side/frontend; `SECRET KEY` (`sk_`) for server-side.
-- Two environments: `TEST` and `LIVE`. Live keys are only issued after KYC is `VERIFIED`.
+- Two environments: `TEST` and `LIVE`. Live keys are only issued after compliance is `APPROVED`.
 - Secret keys are stored as **HMAC-SHA256 hashes** — the raw key is shown only once at generation. The server secret (HMAC key) is injected via environment variable, never in `application.yml`.
 - Regenerating a key atomically revokes the old one and issues a new one.
 - Public keys are stored plaintext (they are designed to be embedded in frontend code).
@@ -398,7 +398,7 @@ always derived from the credential:
 - **Rate limiting**: `atlaspay-rate-limiter` module (Redis token-bucket), applied as a `OncePerRequestFilter` before authentication.
 - **Audit logging**: Every write operation logs `actor`, `action`, `resource_id`, `timestamp` to an immutable `audit_log` table.
 - **PII protection**: Merchant PII fields encrypted at rest (AES-256 via Jasypt); masked in logs.
-- **Compliance**: KYC/AML hooks in identity module; PCI DSS — card data never touches AtlasPay
+- **Compliance**: AML hooks in identity module via 5-step compliance process; PCI DSS — card data never touches AtlasPay
   servers (tokenised at Paystack layer)
 
 ### 7.8 Correlation / Distributed Tracing
@@ -468,8 +468,8 @@ This section maps every required skill to the module or pattern where it is **de
 | Collections | `atlaspay-ledger` (balance derivation via Stream over `List<LedgerEntry>`), settlement batch line items |
 | Exceptions | Sealed `AtlasPayException` hierarchy; typed domain exceptions; Spring `@ControllerAdvice` handler |
 | Records | `Money`, `IdempotencyKey`, `NUBAN`, `DomainEvent`, `LedgerEntry`, `PageResult`, `JournalEntry` |
-| Enums | `KycStatus`, `TransferStatus`, `EntryType`, `CurrencyCode`, `Channel`, `BillingCycle`, `EscrowState` |
-| Interfaces / abstract classes | Port interfaces (`KycVerificationPort`, `AccountIssuancePort`, `EventPublisher`); `BaseUseCase<I,O>` abstract class |
+| Enums | `ComplianceStatus`, `TransferStatus`, `EntryType`, `CurrencyCode`, `Channel`, `BillingCycle`, `EscrowState` |
+| Interfaces / abstract classes | Port interfaces (`AccountIssuancePort`, `EventPublisher`); `BaseUseCase<I,O>` abstract class |
 | Annotations | Custom annotations: `@IdempotencyKey`, `@AuditLog`, `@Monetary`; Hibernate/JPA annotations; Spring annotations |
 | Streams & lambdas | Ledger balance aggregation, settlement fee computation, transaction query projections, notification fan-out |
 | Optional | Repository return types; nullable external API fields; `Optional.map().orElseThrow()` chains |
@@ -480,7 +480,7 @@ This section maps every required skill to the module or pattern where it is **de
 | JVM basics | JVM tuning docs + `jvm-tuning/` resource; heap size, stack size, GC flags in Dockerfile |
 | Memory management | Off-heap Kafka buffers; virtual thread stack sizing; `WeakReference` in event subscriber registry |
 | Garbage collection | G1GC (default Java 21); JFR GC event monitoring; explicit GC log configuration in startup flags |
-| Multithreading | `BillingCycleScheduler`, `SettlementBatchScheduler`, parallel KYC verification |
+| Multithreading | `BillingCycleScheduler`, `SettlementBatchScheduler`, parallel verification |
 | Concurrency | `ConcurrentHashMap` idempotency cache, `AtomicLong` sequence generators, `BlockingQueue` retry queue |
 | Virtual threads | All Spring MVC request threads; JDBC pool threads; `@Async` beans; schedulers |
 | Executors | `Executors.newVirtualThreadPerTaskExecutor()` for schedulers; bounded `ThreadPoolExecutor` for CPU tasks |
@@ -660,7 +660,7 @@ This section maps every required skill to the module or pattern where it is **de
 
 ### Core (Required)
 1. `atlaspay-shared-kernel` — Money, records, exception hierarchy, idempotency utils
-2. `atlaspay-identity` — Merchant, Customer & SubAccount registration + Dojah KYC adapter
+2. `atlaspay-identity` — Merchant, Customer & SubAccount registration + Dojah verification adapter
 3. `atlaspay-accounts` — Virtual account issuance + Anchor adapter
 4. `atlaspay-ledger` — Double-entry ledger (most rigorous module; all others depend on it)
 5. `atlaspay-eventbus` — In-memory first; Kafka impl later
@@ -685,7 +685,7 @@ This section maps every required skill to the module or pattern where it is **de
 ## 12. Non-Goals / Credibility Statements (for README)
 
 - Not a licensed bank or PSSP; account issuance and NIP transfers are delegated to Anchor's sandbox.
-- KYC results are sandbox/test data from Dojah, not connected to real BVN/NIN databases.
+- Verification results are sandbox/test data from Dojah, not connected to real BVN/NIN databases.
 - Settlement payouts move through Anchor's sandbox, not real money.
 - Card data never touches AtlasPay servers — tokenised entirely at the Paystack layer.
 - `SubAccount` in AtlasPay maps to Paystack's **Subaccounts API** (split-payment recipients only), not to customer identities.

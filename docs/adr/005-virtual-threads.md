@@ -58,7 +58,7 @@ All blocking I/O paths in AtlasPay run on **virtual threads**:
 ### Positive
 - Throughput scales with I/O concurrency, not thread pool size
 - Code remains synchronous and readable — no `Mono<>`, no `CompletableFuture<>` chains for routine I/O
-- `CompletableFuture` still used selectively for deliberate parallelism (e.g., parallel KYC calls)
+- `CompletableFuture` still used selectively for deliberate parallelism (e.g., parallel verification calls)
   but not forced on all code
 - Debuggability: stack traces are normal; no async operator chains to untangle
 - Spring Boot 3.2+ makes this a one-line config change — zero code changes in business logic
