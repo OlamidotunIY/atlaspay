@@ -6,14 +6,22 @@ global:
 
 scrape_configs:
 
-  # ── AtlasPay Application ───────────────────────────────────────────────────
-  - job_name: 'atlaspay'
+  # ── AtlasPay app running in Docker (uncomment the app service in compose) ──
+  - job_name: 'atlaspay-docker'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['app:8080']   # 'app' is the service name on atlaspay-net
+        labels:
+          instance: atlaspay-docker
+
+  # ── AtlasPay app running in your IDE (most common during dev) ─────────────
+  # host.docker.internal resolves to your laptop from inside a container
+  - job_name: 'atlaspay-local'
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: ['host.docker.internal:8080']
         labels:
-          application: atlaspay
-    # Scrape more frequently during active development
+          instance: atlaspay-local
     scrape_interval: 5s
 
   # ── Prometheus self-monitoring ─────────────────────────────────────────────
