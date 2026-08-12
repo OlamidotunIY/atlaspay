@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.adapter.anchor;
+package com.atlaspay.identity.infrastructure.provider.anchor;
 
 import com.atlaspay.identity.application.port.AccountNameResolutionPort;
 import com.atlaspay.shared.exception.NotFoundException;

@@ -1,4 +1,4 @@
-package com.atlaspay.identity.infrastructure.persistence.adapter;
+package com.atlaspay.identity.infrastructure.persistence;
 
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
