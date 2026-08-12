@@ -172,32 +172,42 @@ services:
       timeout: 5s
       retries: 3
 
-  # ── AtlasPay Application (comment out when running from IDE) ──────────────
-  # app:
-  #   build:
-  #     context: .
-  #     target: runtime
-  #   container_name: atlaspay-app
-  #   restart: unless-stopped
-  #   networks:
-  #     - atlaspay-net
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_healthy
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     ATLASPAY_DB_URL: jdbc:mysql://mysql:3306/atlaspay?serverTimezone=UTC&useSSL=false
-  #     ATLASPAY_DB_USERNAME: atlaspay
-  #     ATLASPAY_DB_PASSWORD: atlaspay
-  #     REDIS_HOST: redis
-  #     SPRING_PROFILES_ACTIVE: prod
-  #   env_file:
-  #     - .env
+  # ── AtlasPay Application ─────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      target: runtime
+    container_name: atlaspay-app
+    restart: unless-stopped
+    networks:
+      - atlaspay-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ATLASPAY_DB_URL: jdbc:mysql://mysql:3306/atlaspay?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      ATLASPAY_DB_USERNAME: atlaspay
+      ATLASPAY_DB_PASSWORD: atlaspay
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPRING_PROFILES_ACTIVE: prod
+      ATLASPAY_ENV: docker
+    env_file:
+      - path: .env
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 
 # ── Shared network — all containers talk to each other by service name ────────
 networks:
