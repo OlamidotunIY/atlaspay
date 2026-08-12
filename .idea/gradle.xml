@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -8,30 +7,23 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/atlaspay-api" />
+            <option value="$PROJECT_DIR$/atlaspay-accounts" />
             <option value="$PROJECT_DIR$/atlaspay-app" />
-            <option value="$PROJECT_DIR$/atlaspay-core" />
-            <option value="$PROJECT_DIR$/atlaspay-messaging" />
-            <option value="$PROJECT_DIR$/atlaspay-persistence" />
-            <option value="$PROJECT_DIR$/atlaspay-simulators" />
+            <option value="$PROJECT_DIR$/atlaspay-charges" />
+            <option value="$PROJECT_DIR$/atlaspay-escrow" />
+            <option value="$PROJECT_DIR$/atlaspay-eventbus" />
+            <option value="$PROJECT_DIR$/atlaspay-identity" />
+            <option value="$PROJECT_DIR$/atlaspay-ledger" />
+            <option value="$PROJECT_DIR$/atlaspay-notifications" />
+            <option value="$PROJECT_DIR$/atlaspay-rate-limiter" />
+            <option value="$PROJECT_DIR$/atlaspay-settlement" />
+            <option value="$PROJECT_DIR$/atlaspay-shared-kernel" />
+            <option value="$PROJECT_DIR$/atlaspay-subscriptions" />
+            <option value="$PROJECT_DIR$/atlaspay-transaction-splits" />
+            <option value="$PROJECT_DIR$/atlaspay-transactions-query" />
+            <option value="$PROJECT_DIR$/atlaspay-transfers" />
           </set>
         </option>
-        <option name="myGradleHome" value="" />
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/atlaspay-core" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/atlaspay-api" />
-            <option value="$PROJECT_DIR$/atlaspay-app" />
-            <option value="$PROJECT_DIR$/atlaspay-core" />
-            <option value="$PROJECT_DIR$/atlaspay-messaging" />
-            <option value="$PROJECT_DIR$/atlaspay-persistence" />
-            <option value="$PROJECT_DIR$/atlaspay-simulators" />
-          </set>
-        </option>
-        <option name="myGradleHome" value="" />
       </GradleProjectSettings>
     </option>
   </component>

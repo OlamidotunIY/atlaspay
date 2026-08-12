@@ -1,0 +1,4 @@
+dependencies {
+    // Add dependencies here when needed
+    implementation project(':atlaspay-shared-kernel')
+}
