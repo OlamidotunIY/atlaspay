@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.Random;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class EmailVerificationCode {
 
     private final String code;
