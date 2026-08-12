@@ -18,7 +18,7 @@ dependencies {
     // implementation project(':atlaspay-transaction-splits')
     // implementation project(':atlaspay-transactions-query')
     // implementation project(':atlaspay-notifications')
-    // implementation project(':atlaspay-rate-limiter')
+    implementation project(':atlaspay-rate-limiter')
     // implementation project(':atlaspay-eventbus')
 
     // ── Spring Boot ─────────────────────────────────────────────────────────
@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 
     // ── Observability ────────────────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
