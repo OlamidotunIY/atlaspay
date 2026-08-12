@@ -1,5 +1,6 @@
 package com.atlaspay.app.security.authentication;
 
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -9,6 +10,7 @@ public class AtlasPayAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String merchantId;
     private final Object credentials;
+    @Getter
     private final AuthType authType;
 
     public enum AuthType {
@@ -33,7 +35,4 @@ public class AtlasPayAuthenticationToken extends AbstractAuthenticationToken {
         return merchantId;
     }
 
-    public AuthType getAuthType() {
-        return authType;
-    }
 }
