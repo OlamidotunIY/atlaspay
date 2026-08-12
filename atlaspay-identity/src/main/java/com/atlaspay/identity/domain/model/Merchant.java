@@ -63,7 +63,8 @@ public class Merchant extends AggregateRoot<MerchantId> {
                 this.businessName,
                 this.email.value(),
                 this.country,
-                this.businessType
+                this.businessType,
+                this.emailVerificationCode.getCode()
             )
         ));
     }
@@ -100,7 +101,11 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantEmailVerificationResent(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now()
+            ZonedDateTime.now(),
+            new MerchantEmailVerificationResent.Payload(
+                this.email.value(),
+                this.emailVerificationCode.getCode()
+            )
         ));
     }
     
