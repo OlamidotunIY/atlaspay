@@ -6,7 +6,7 @@ spring:
     hibernate:
       ddl-auto: none          # Flyway manages schema — never let Hibernate touch it
   flyway:
-    enabled: false            # Disabled until migrations are written; remove this when identity
+    enabled: true            # Disabled until migrations are written; remove this when identity
                               # persistence layer is implemented with Flyway SQL files
   security:
     user:
