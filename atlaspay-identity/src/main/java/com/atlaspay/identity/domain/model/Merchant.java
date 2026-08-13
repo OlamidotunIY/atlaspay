@@ -233,6 +233,23 @@ public class Merchant extends AggregateRoot<Long> {
             ZonedDateTime.now()
         ));
     }
+    
+    public void ban(String reason) {
+        if (this.complianceStatus == ComplianceStatus.REJECTED) {
+            throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_SUBMITTED, "Merchant is already rejected/banned");
+        }
+        
+        // We will repurpose REJECTED for now or just emit the event
+        this.complianceStatus = ComplianceStatus.REJECTED;
+        this.updatedAt = ZonedDateTime.now();
+        
+        registerEvent(new MerchantBanned(
+            UUID.randomUUID().toString(),
+            String.valueOf(id),
+            ZonedDateTime.now(),
+            new MerchantBanned.Payload(reason)
+        ));
+    }
 
     @Override
     public Long getId() {
