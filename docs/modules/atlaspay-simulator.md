@@ -99,7 +99,25 @@ A CRON job that proves AtlasPay's core ledger has no bugs.
 
 ## 5. REST API & DTOs
 
-### 5.1 Inbound Transfer Trigger
+### 5.1 Account Generation Endpoint (Called by AtlasPay)
+**POST** `/simulator/mock/accounts/issue`
+**DTO:**
+```java
+record AccountGenerationRequestDto(
+    @NotBlank String referenceId,
+    @NotBlank String accountName,
+    @NotBlank String callbackUrl
+) {}
+```
+**Response:** `202 Accepted` (Simulator will process asynchronously and POST to `callbackUrl`).
+*   **Logic:**
+    1. Determine Bank Code (e.g., `035` for Wema, `057` for Zenith) based on internal logic.
+    2. Generate unique 9-digit `account_serial` from DB sequence.
+    3. Calculate 1-digit Check Digit using CBN modulo-10 algorithm.
+    4. Concat to form 10-digit NUBAN.
+    5. Fire webhook to `callbackUrl`.
+
+### 5.2 Inbound Transfer Trigger
 **POST** `/simulator/mock/inbound-transfer`
 **DTO:**
 ```java
@@ -135,7 +153,11 @@ Flyway: `V1__simulator__001_initial_schema.sql`
 CREATE TABLE simulator_accounts (
     id VARCHAR(50) PRIMARY KEY,
     reference VARCHAR(100) NOT NULL,
+    bank_name VARCHAR(50) NOT NULL,
+    bank_code VARCHAR(3) NOT NULL,
+    account_serial BIGINT NOT NULL UNIQUE, -- The 9-digit unique serial
     nuban VARCHAR(10) NULL,
+    account_name VARCHAR(100) NOT NULL,
     callback_url VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL,
     created_at DATETIME(6) NOT NULL

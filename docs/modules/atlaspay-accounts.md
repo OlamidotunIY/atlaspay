@@ -125,10 +125,20 @@ atlaspay-accounts/
 4. Saves aggregate.
 
 ### 4.3 Sagas / Orchestration
-**`AccountIssuanceSaga`**
+**Merchant Account Issuance Saga**
+*   Listens to `MerchantComplianceCompletedEvent` from the Identity module.
+*   Automatically dispatches **two** `IssueVirtualAccountCommand`s for the merchant: one specifying `Wema` and the other `Zenith`.
+*   Note: The constraint that limits the system to Nigerian merchants is strictly enforced at the Identity/Registration boundary. The Accounts module inherently trusts that any issuance request is valid.
+
+**Customer Account Issuance**
+*   Unlike merchants, customer account creation is **NOT** event-driven.
+*   It is triggered via a direct REST endpoint (`POST /api/v1/dedicated_accounts`).
+*   The system randomly selects either `Wema` or `Zenith` and dispatches a **single** `IssueVirtualAccountCommand` for the customer.
+
+**`AccountIssuanceSaga` (The Webhook Listener)**
 *   Listens to `VirtualAccountIssuanceRequested` (from Kafka/Outbox).
-*   Executes asynchronously using Java 21 Virtual Threads (`@Async("virtualThreadExecutor")`).
-*   Maps event to `AccountIssuanceRequestDto(reference, accountName, bankName)`.
+*   Executes asynchronously using Java 21 Virtual Threads.
+*   Maps event to `AccountIssuanceRequestDto(accountName)`. (Does not validate bank name or country here).
 *   Calls `accountIssuancePort.requestIssuance(...)` which makes the HTTP call to the Simulator.
 *   **No Polling:** Saga terminates here. It waits for the webhook.
 
@@ -151,20 +161,23 @@ atlaspay-accounts/
 
 ## 6. REST API Surface
 
-### 6.1 Issue Account
-*   **POST** `/api/v1/accounts/issue`
-*   **Headers:** `Idempotency-Key: uuid`
-*   **Body:** `{"bankName": "TITAN_TRUST"}`
-*   **Security:** `merchantId` resolved from JWT/API Key in `SecurityContext`.
-*   **Response:** `202 Accepted`
-```json
-{
-  "id": "acc_12345",
-  "ownerId": "mer_987",
-  "nuban": null,
-  "status": "PENDING_ISSUANCE"
-}
-```
+### 6.1 Dedicated Accounts (Customers)
+*   **POST** `/api/v1/dedicated_accounts`
+    *   **Headers:** `Idempotency-Key: uuid`
+    *   **Body:** `{"customerId": "cus_123", "bankName": "Wema"}`
+    *   **Security:** `merchantId` resolved from JWT/API Key.
+    *   **Response:** `202 Accepted`
+
+*   **GET** `/api/v1/dedicated_accounts`
+    *   **Security:** `merchantId` resolved from JWT/API Key.
+    *   **Response:** `200 OK` (List of accounts)
+
+*   **GET** `/api/v1/dedicated_accounts/{accountId}`
+    *   **Response:** `200 OK` (Account details)
+
+*   **DELETE** `/api/v1/dedicated_accounts/{accountId}`
+    *   **Description:** Deactivates the virtual account.
+    *   **Response:** `204 No Content`
 
 ### 6.2 Simulator Webhook Receiver
 *   **POST** `/api/v1/accounts/webhooks/simulator`
