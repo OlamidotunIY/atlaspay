@@ -20,21 +20,39 @@ public class VirtualAccountController {
     private final IssueVirtualAccountUseCase issueVirtualAccountUseCase;
     private final Random random = new Random();
 
-    @PostMapping("/customers/issue")
-    public ResponseEntity<Void> issueCustomerAccount(
-            @RequestHeader("X-Customer-Id") String customerId,
-            @RequestHeader("Idempotency-Key") String idempotencyKey) {
+    @PostMapping("/merchants/issue")
+    public ResponseEntity<String> issueMerchantAccount(
+            @RequestHeader("X-Merchant-Id") String merchantId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
         
-        // Randomly select Wema or Zenith for the customer
+        String actualIdempotencyKey = idempotencyKey != null ? idempotencyKey : java.util.UUID.randomUUID().toString();
         String bankName = random.nextBoolean() ? "Wema" : "Zenith";
 
-        issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
-                idempotencyKey,
+        var accountId = issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
+                actualIdempotencyKey,
+                merchantId,
+                OwnerType.MERCHANT,
+                bankName
+        ));
+        
+        return ResponseEntity.accepted().body(accountId.value());
+    }
+
+    @PostMapping("/customers/{customerId}/issue")
+    public ResponseEntity<String> issueCustomerAccount(
+            @org.springframework.web.bind.annotation.PathVariable String customerId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        
+        String actualIdempotencyKey = idempotencyKey != null ? idempotencyKey : java.util.UUID.randomUUID().toString();
+        String bankName = random.nextBoolean() ? "Wema" : "Zenith";
+
+        var accountId = issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
+                actualIdempotencyKey,
                 customerId,
                 OwnerType.CUSTOMER,
                 bankName
         ));
         
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.accepted().body(accountId.value());
     }
 }
