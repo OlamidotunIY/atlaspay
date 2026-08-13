@@ -37,6 +37,16 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
     }
 
     @Override
+    public boolean existsById(VirtualAccountId id) {
+        return repository.existsById(id.value());
+    }
+
+    @Override
+    public void deleteById(VirtualAccountId id) {
+        repository.deleteById(id.value());
+    }
+
+    @Override
     public Optional<VirtualAccount> findByNuban(NUBAN nuban) {
         return repository.findByNuban(nuban.value()).map(this::toDomain);
     }

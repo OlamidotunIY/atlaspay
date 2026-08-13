@@ -19,6 +19,7 @@
             <option value="$PROJECT_DIR$/atlaspay-rate-limiter" />
             <option value="$PROJECT_DIR$/atlaspay-settlement" />
             <option value="$PROJECT_DIR$/atlaspay-shared-kernel" />
+            <option value="$PROJECT_DIR$/atlaspay-simulator" />
             <option value="$PROJECT_DIR$/atlaspay-subscriptions" />
             <option value="$PROJECT_DIR$/atlaspay-transaction-splits" />
             <option value="$PROJECT_DIR$/atlaspay-transactions-query" />
