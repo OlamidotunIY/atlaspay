@@ -8,5 +8,6 @@ public enum SharedErrorCode implements ErrorCode {
     INVALID_ID,
     INVALID_EMAIL_FORMAT,
     INVALID_PHONE_FORMAT,
-    MISSING_REQUIRED_FIELD
+    MISSING_REQUIRED_FIELD,
+    INVALID_NUBAN_FORMAT
 }
