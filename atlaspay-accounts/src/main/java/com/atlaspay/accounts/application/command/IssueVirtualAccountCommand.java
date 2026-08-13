@@ -8,7 +8,6 @@ public record IssueVirtualAccountCommand(
         @IdempotencyKey String idempotencyKey, 
         String ownerId, 
         OwnerType ownerType, 
-        String bankName,
-        String country
+        String bankName
 ) implements Command {
 }
