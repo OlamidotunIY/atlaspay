@@ -19,21 +19,23 @@ public class VirtualAccount extends AggregateRoot<VirtualAccountId> {
     private final String accountName;
     private final OwnerType ownerType;
     private final String bankName;
+    private final String idempotencyKey;
     private AccountStatus status;
     private NUBAN nuban;
 
-    public VirtualAccount(VirtualAccountId id, String ownerId, String accountName, OwnerType ownerType, String bankName, AccountStatus status, NUBAN nuban) {
+    public VirtualAccount(VirtualAccountId id, String ownerId, String accountName, OwnerType ownerType, String bankName, String idempotencyKey, AccountStatus status, NUBAN nuban) {
         this.id = id;
         this.ownerId = ownerId;
         this.accountName = accountName;
         this.ownerType = ownerType;
         this.bankName = bankName;
+        this.idempotencyKey = idempotencyKey;
         this.status = status;
         this.nuban = nuban;
     }
 
-    public static VirtualAccount create(VirtualAccountId id, String ownerId, String accountName, OwnerType ownerType, String bankName) {
-        VirtualAccount account = new VirtualAccount(id, ownerId, accountName, ownerType, bankName, AccountStatus.PENDING_ISSUANCE, null);
+    public static VirtualAccount create(VirtualAccountId id, String ownerId, String accountName, OwnerType ownerType, String bankName, String idempotencyKey) {
+        VirtualAccount account = new VirtualAccount(id, ownerId, accountName, ownerType, bankName, idempotencyKey, AccountStatus.PENDING_ISSUANCE, null);
         account.registerEvent(new VirtualAccountCreatedEvent(
                 UUID.randomUUID().toString(),
                 id.value(),

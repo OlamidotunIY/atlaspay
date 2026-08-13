@@ -1,4 +1,6 @@
 package com.atlaspay.accounts.application.port.out;
 
-public class VirtualAccountQueryService {
+public interface VirtualAccountQueryService {
+    long countByOwnerId(String ownerId);
+    boolean existsByOwnerIdAndBankName(String ownerId, String bankName);
 }
