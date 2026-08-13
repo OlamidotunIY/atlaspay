@@ -11,9 +11,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import jakarta.validation.constraints.NotBlank;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+
+    public record LoginRequest(
+        @NotBlank String email,
+        @NotBlank String password
+    ) {}
+    
+    public record LoginResponse(String token) {}
 
     private final MerchantRepository merchantRepository;
     private final PasswordEncoder passwordEncoder;
