@@ -39,7 +39,6 @@ import jakarta.persistence.GenerationType;
 public class VirtualAccountEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @Column(nullable = false)
