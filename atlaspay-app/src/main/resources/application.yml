@@ -32,6 +32,9 @@ spring:
   threads:
     virtual:
       enabled: true   # Java 21 virtual threads for all Tomcat request threads
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
 
 # ── Actuator ──────────────────────────────────────────────────────────────────
 management:
