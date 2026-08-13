@@ -29,8 +29,7 @@ public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, Cr
             throw new ConflictException(IdentityErrorCode.CUSTOMER_EMAIL_ALREADY_EXISTS, "Customer with this email already exists for this merchant");
         }
 
-        Customer customer = new Customer(
-                null,
+        Customer customer = new Customer(customerRepository.nextIdentity(),
                 "CUS_" + java.util.UUID.randomUUID().toString(),
                 command.merchantId(),
             command.firstName(),

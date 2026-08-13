@@ -42,8 +42,7 @@ public class RegisterMerchantUseCase extends BaseUseCase<RegisterMerchantCommand
 
         String hashedPassword = passwordEncoder.encode(command.password());
 
-        Merchant merchant = new Merchant(
-            null,
+        Merchant merchant = new Merchant(merchantRepository.nextIdentity(),
             command.country(),
             command.businessName(),
             command.firstName(),

@@ -12,8 +12,10 @@ import java.util.Optional;
 public class SubAccountRepositoryAdapter implements SubAccountRepository {
 
     private final SpringDataSubAccountRepository jpaRepository;
+    private final com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator;
 
-    public SubAccountRepositoryAdapter(SpringDataSubAccountRepository jpaRepository) {
+    public SubAccountRepositoryAdapter(SpringDataSubAccountRepository jpaRepository, com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator) {
+        this.sequenceGenerator = sequenceGenerator;
         this.jpaRepository = jpaRepository;
     }
 
@@ -32,6 +34,12 @@ public class SubAccountRepositoryAdapter implements SubAccountRepository {
     @Override
     public Optional<SubAccount> findByMerchantIdAndBankCodeAndAccountNumber(Long merchantId, String bankCode, String accountNumber) {
         return jpaRepository.findByIntegrationAndBankCodeAndAccountNumber(merchantId, bankCode, accountNumber).map(this::toDomain);
+    }
+
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("subaccount_seq");
     }
 
     private SubAccountJpaEntity toEntity(SubAccount domain) {

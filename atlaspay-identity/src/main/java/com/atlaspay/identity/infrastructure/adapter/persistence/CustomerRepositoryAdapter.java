@@ -14,8 +14,10 @@ import java.util.Optional;
 public class CustomerRepositoryAdapter implements CustomerRepository {
 
     private final SpringDataCustomerRepository jpaRepository;
+    private final com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator;
 
-    public CustomerRepositoryAdapter(SpringDataCustomerRepository jpaRepository) {
+    public CustomerRepositoryAdapter(SpringDataCustomerRepository jpaRepository, com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator) {
+        this.sequenceGenerator = sequenceGenerator;
         this.jpaRepository = jpaRepository;
     }
 
@@ -34,6 +36,12 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
     @Override
     public Optional<Customer> findByMerchantIdAndEmail(Long merchantId, String email) {
         return jpaRepository.findByIntegrationAndEmail(merchantId, email).map(this::toDomain);
+    }
+
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("customer_seq");
     }
 
     private CustomerJpaEntity toEntity(Customer domain) {

@@ -72,8 +72,7 @@ public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand
             displayValue = prefix + "****" + rawKey.substring(rawKey.length() - 4);
         }
 
-        ApiKey newKey = new ApiKey(
-                null,
+        ApiKey newKey = new ApiKey(apiKeyRepository.nextIdentity(),
                 command.authenticatedMerchantId(),
                 command.keyType(),
                 command.environment(),

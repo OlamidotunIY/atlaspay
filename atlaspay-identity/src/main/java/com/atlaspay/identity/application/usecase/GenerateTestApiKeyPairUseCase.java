@@ -31,8 +31,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
         String rawPublicKey = "pk_test_" + UUID.randomUUID().toString().replace("-", "");
         String rawSecretKey = "sk_test_" + UUID.randomUUID().toString().replace("-", "");
 
-        ApiKey publicKey = new ApiKey(
-            null,
+        ApiKey publicKey = new ApiKey(apiKeyRepository.nextIdentity(),
             command.merchantId(),
             KeyType.PUBLIC,
             ApiEnvironment.TEST,
@@ -44,8 +43,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
         String secretKeyHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_test_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
-        ApiKey secretKey = new ApiKey(
-            null,
+        ApiKey secretKey = new ApiKey(apiKeyRepository.nextIdentity(),
             command.merchantId(),
             KeyType.SECRET,
             ApiEnvironment.TEST,

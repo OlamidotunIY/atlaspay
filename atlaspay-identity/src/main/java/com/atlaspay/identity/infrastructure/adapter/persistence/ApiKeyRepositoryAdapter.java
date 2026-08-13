@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
 
     private final SpringDataApiKeyRepository jpaRepository;
+    private final com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator;
 
-    public ApiKeyRepositoryAdapter(SpringDataApiKeyRepository jpaRepository) {
+    public ApiKeyRepositoryAdapter(SpringDataApiKeyRepository jpaRepository, com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator) {
+        this.sequenceGenerator = sequenceGenerator;
         this.jpaRepository = jpaRepository;
     }
 
@@ -48,6 +50,12 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
         return jpaRepository.findAllByIntegration(merchantId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("apikey_seq");
     }
 
     private ApiKeyJpaEntity toEntity(ApiKey domain) {

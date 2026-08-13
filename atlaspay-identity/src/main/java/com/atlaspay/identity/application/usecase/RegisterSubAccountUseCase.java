@@ -30,8 +30,7 @@ public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCom
     public RegisterSubAccountResult execute(RegisterSubAccountCommand input) {
         String accountName = accountNameResolutionPort.resolve(input.bankCode(), input.accountNumber());
         
-        SubAccount subAccount = new SubAccount(
-                null,
+        SubAccount subAccount = new SubAccount(subAccountRepository.nextIdentity(),
                 input.merchantId(),
                 input.bankCode(),
                 input.accountNumber(),

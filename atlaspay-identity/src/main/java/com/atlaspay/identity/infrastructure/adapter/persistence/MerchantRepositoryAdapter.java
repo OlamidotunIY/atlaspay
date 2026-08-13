@@ -15,9 +15,11 @@ import java.util.Optional;
 public class MerchantRepositoryAdapter implements MerchantRepository {
 
     private final SpringDataMerchantRepository jpaRepository;
+    private final com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator;
 
-    public MerchantRepositoryAdapter(SpringDataMerchantRepository jpaRepository) {
+    public MerchantRepositoryAdapter(SpringDataMerchantRepository jpaRepository, com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator) {
         this.jpaRepository = jpaRepository;
+        this.sequenceGenerator = sequenceGenerator;
     }
 
     @Override
@@ -35,6 +37,11 @@ public class MerchantRepositoryAdapter implements MerchantRepository {
     @Override
     public Optional<Merchant> findByEmail(String email) {
         return jpaRepository.findByEmail(email).map(this::toDomain);
+    }
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("merchant_seq");
     }
 
     private MerchantJpaEntity toEntity(Merchant domain) {
