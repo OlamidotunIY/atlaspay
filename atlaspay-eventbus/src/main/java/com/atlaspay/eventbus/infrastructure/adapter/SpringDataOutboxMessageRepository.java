@@ -13,5 +13,5 @@ import java.util.List;
 public interface SpringDataOutboxMessageRepository extends JpaRepository<OutboxMessageJpaEntity, String> {
 
     @Query("SELECT o FROM OutboxMessageJpaEntity o WHERE o.status = :status ORDER BY o.createdAt ASC")
-    List<OutboxMessageJpaEntity> findByStatusOrderByCreatedAtAsc(OutboxStatus status, Pageable pageable);
+    List<OutboxMessageJpaEntity> findByStatusOrderByCreatedAtAsc(@org.springframework.data.repository.query.Param("status") OutboxStatus status, Pageable pageable);
 }
