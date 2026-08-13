@@ -24,7 +24,17 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(com.atlaspay.shared.exception.RateLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handleRateLimitException(com.atlaspay.shared.exception.RateLimitExceededException ex) {
-        return buildResponse(HttpStatus.TOO_MANY_REQUESTS, ex);
+        ErrorResponse response = new ErrorResponse(
+                ex.getErrorCodeString(),
+                ex.getMessage(),
+                ZonedDateTime.now(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .header("X-RateLimit-Limit", String.valueOf(ex.getLimit()))
+                .header("X-RateLimit-Remaining", "0")
+                .body(response);
     }
 
     @ExceptionHandler(NotFoundException.class)

@@ -8,7 +8,7 @@ public interface RateLimiterPort {
      * 
      * @param key The unique key (e.g., IP address, Merchant ID)
      * @param rule The rule defining the limits
-     * @return true if allowed, false if limit exceeded
+     * @return RateLimitResult containing allowed status, remaining tokens, and retry-after
      */
-    boolean isAllowed(String key, RateLimitRule rule);
+    RateLimitResult evaluate(String key, RateLimitRule rule);
 }

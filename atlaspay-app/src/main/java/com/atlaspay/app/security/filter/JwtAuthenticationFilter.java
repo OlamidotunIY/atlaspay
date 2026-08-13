@@ -1,7 +1,7 @@
 package com.atlaspay.app.security.filter;
 
 import com.atlaspay.app.security.authentication.AtlasPayAuthenticationToken;
-import com.atlaspay.identity.infrastructure.security.JwtService;
+import com.atlaspay.identity.infrastructure.adapter.security.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

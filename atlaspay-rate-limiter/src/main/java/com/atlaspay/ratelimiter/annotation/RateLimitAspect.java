@@ -6,6 +6,7 @@ import com.atlaspay.ratelimiter.core.RateLimitKeyType;
 import com.atlaspay.ratelimiter.core.RateLimitRule;
 import com.atlaspay.ratelimiter.annotation.RateLimit;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -32,7 +33,13 @@ public class RateLimitAspect {
         RateLimitRule rule = ruleProvider.getRule(rateLimit.ruleId());
         String key = resolveKey(rateLimit.keyType(), rateLimit.ruleId());
         
-        evaluateRateLimitUseCase.execute(key, rule);
+        var result = evaluateRateLimitUseCase.execute(key, rule);
+        
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+        if (response != null) {
+            response.setHeader("X-RateLimit-Limit", String.valueOf(result.limit()));
+            response.setHeader("X-RateLimit-Remaining", String.valueOf(result.remainingRequests()));
+        }
     }
 
     private String resolveKey(RateLimitKeyType keyType, String ruleId) {

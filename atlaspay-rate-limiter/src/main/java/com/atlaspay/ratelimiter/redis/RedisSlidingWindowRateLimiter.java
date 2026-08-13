@@ -1,66 +1,78 @@
 package com.atlaspay.ratelimiter.redis;
 
+import com.atlaspay.ratelimiter.core.RateLimitResult;
 import com.atlaspay.ratelimiter.core.RateLimiterPort;
 import com.atlaspay.ratelimiter.core.RateLimitRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
+import org.springframework.dao.DataAccessException;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 public class RedisSlidingWindowRateLimiter implements RateLimiterPort {
 
+    private static final Logger log = LoggerFactory.getLogger(RedisSlidingWindowRateLimiter.class);
+
     private final StringRedisTemplate redisTemplate;
-    private final DefaultRedisScript<Long> script;
+    private final DefaultRedisScript<List> script;
 
     public RedisSlidingWindowRateLimiter(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
         
-        String lua = """
-            local key = KEYS[1]
-            local windowSize = tonumber(ARGV[1])
-            local maxRequests = tonumber(ARGV[2])
-            local now = tonumber(ARGV[3])
-            
-            local windowStart = now - (windowSize * 1000)
-            
-            -- Remove all elements outside the window
-            redis.call('ZREMRANGEBYSCORE', key, '-inf', windowStart)
-            
-            -- Count elements in the window
-            local count = redis.call('ZCARD', key)
-            
-            if count < maxRequests then
-                -- Generate unique score/member by combining timestamp with a random or incrementing value
-                -- Since this script runs atomically, just using the 'now' timestamp with a microsecond precision or simply 'now'
-                -- To handle identical millisecond requests, we append count
-                local member = tostring(now) .. '-' .. tostring(count)
-                redis.call('ZADD', key, now, member)
-                redis.call('EXPIRE', key, windowSize)
-                return 1
-            else
-                return 0
-            end
-            """;
-            
-        this.script = new DefaultRedisScript<>(lua, Long.class);
+        this.script = new DefaultRedisScript<>();
+        this.script.setScriptSource(new ResourceScriptSource(new ClassPathResource("lua/sliding_window_counter.lua")));
+        this.script.setResultType(List.class);
     }
 
     @Override
-    public boolean isAllowed(String key, RateLimitRule rule) {
-        List<String> keys = Collections.singletonList("rate_limit:sw:" + key);
-        long now = System.currentTimeMillis();
+    public RateLimitResult evaluate(String key, RateLimitRule rule) {
+        long nowMs = System.currentTimeMillis();
+        long windowSizeMs = rule.windowSizeSeconds() * 1000L;
         
-        Long result = redisTemplate.execute(
-            script,
-            keys,
-            String.valueOf(rule.windowSizeSeconds()),
-            String.valueOf(rule.maxRequests()),
-            String.valueOf(now)
-        );
+        // Calculate the current window timestamp
+        long currentWindowStartMs = (nowMs / windowSizeMs) * windowSizeMs;
+        long previousWindowStartMs = currentWindowStartMs - windowSizeMs;
         
-        return result != null && result == 1L;
+        String currentKey = "rate_limit:sw:" + key + ":" + currentWindowStartMs;
+        String previousKey = "rate_limit:sw:" + key + ":" + previousWindowStartMs;
+        
+        List<String> keys = Arrays.asList(currentKey, previousKey);
+        
+        try {
+            List<Long> result = redisTemplate.execute(
+                script,
+                keys,
+                String.valueOf(rule.windowSizeSeconds()),
+                String.valueOf(rule.maxRequests()),
+                String.valueOf(nowMs),
+                String.valueOf(currentWindowStartMs)
+            );
+            
+            if (result != null && result.size() == 3) {
+                boolean allowed = result.get(0) == 1L;
+                long remaining = result.get(1);
+                long retryAfter = result.get(2);
+                
+                if (allowed) {
+                    return RateLimitResult.allowed(remaining, rule.maxRequests());
+                } else {
+                    return RateLimitResult.rejected(remaining, rule.maxRequests(), retryAfter);
+                }
+            }
+        } catch (DataAccessException e) {
+            log.warn("Redis is down or timed out. Failing open for rate limit key: {}", key, e);
+            // Fail-open strategy
+            return RateLimitResult.allowed(rule.maxRequests(), rule.maxRequests());
+        }
+        
+        // Fallback fail-open if script returns malformed result
+        return RateLimitResult.allowed(rule.maxRequests(), rule.maxRequests());
     }
 }

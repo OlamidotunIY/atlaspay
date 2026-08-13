@@ -8,7 +8,7 @@ dependencies {
     implementation project(':atlaspay-identity')
 
     // ── Planned modules — uncomment each one as it is implemented ───────────
-    // implementation project(':atlaspay-accounts')
+    implementation project(':atlaspay-accounts')
     // implementation project(':atlaspay-ledger')
     // implementation project(':atlaspay-transfers')
     // implementation project(':atlaspay-charges')
@@ -48,6 +48,7 @@ dependencies {
     // ── Integration tests ─────────────────────────────────────────────────────
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:mysql'
+    testImplementation 'com.h2database:h2'
     testImplementation 'org.springframework.security:spring-security-test'
 }
 

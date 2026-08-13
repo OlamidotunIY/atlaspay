@@ -28,7 +28,10 @@ public class GlobalRateLimitInterceptor implements HandlerInterceptor {
         String key = ip + ":global_ip_tb";
         
         // This will throw RateLimitExceededException if exceeded, which is handled by global exception handler
-        evaluateRateLimitUseCase.execute(key, rule);
+        var result = evaluateRateLimitUseCase.execute(key, rule);
+        
+        response.setHeader("X-RateLimit-Limit", String.valueOf(result.limit()));
+        response.setHeader("X-RateLimit-Remaining", String.valueOf(result.remainingRequests()));
         
         return true;
     }
