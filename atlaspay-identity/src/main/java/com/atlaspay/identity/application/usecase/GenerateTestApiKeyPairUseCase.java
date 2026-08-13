@@ -10,7 +10,6 @@ import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
 import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
-import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 
 import java.util.UUID;
@@ -32,8 +31,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
         String rawPublicKey = "pk_test_" + UUID.randomUUID().toString().replace("-", "");
         String rawSecretKey = "sk_test_" + UUID.randomUUID().toString().replace("-", "");
 
-        ApiKey publicKey = new ApiKey(
-            ApiKeyId.generate(),
+        ApiKey publicKey = new ApiKey(apiKeyRepository.nextIdentity(),
             command.merchantId(),
             KeyType.PUBLIC,
             ApiEnvironment.TEST,
@@ -45,8 +43,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
         String secretKeyHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_test_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
-        ApiKey secretKey = new ApiKey(
-            ApiKeyId.generate(),
+        ApiKey secretKey = new ApiKey(apiKeyRepository.nextIdentity(),
             command.merchantId(),
             KeyType.SECRET,
             ApiEnvironment.TEST,

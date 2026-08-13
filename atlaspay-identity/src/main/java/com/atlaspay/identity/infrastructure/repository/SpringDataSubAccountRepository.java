@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataSubAccountRepository extends JpaRepository<SubAccountJpaEntity, String> {
-    Optional<SubAccountJpaEntity> findByMerchantIdAndBankCodeAndAccountNumber(String merchantId, String bankCode, String accountNumber);
+public interface SpringDataSubAccountRepository extends JpaRepository<SubAccountJpaEntity, Long> {
+    Optional<SubAccountJpaEntity> findByIntegrationAndBankCodeAndAccountNumber(Long merchantId, String bankCode, String accountNumber);
 }

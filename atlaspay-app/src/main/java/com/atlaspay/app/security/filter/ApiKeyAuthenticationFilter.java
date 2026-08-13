@@ -52,7 +52,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 ApiKey apiKey = apiKeyOpt.get();
                 if (apiKey.isActive() && SecurityContextHolder.getContext().getAuthentication() == null) {
                     AtlasPayAuthenticationToken authToken = new AtlasPayAuthenticationToken(
-                            apiKey.getMerchantId().value(),
+                            String.valueOf(apiKey.getMerchantId()),
                             token,
                             AtlasPayAuthenticationToken.AuthType.API_KEY
                     );

@@ -16,7 +16,7 @@ public class ForceCloseAccountsUseCase extends BaseUseCase<ForceCloseAccountsCom
 
     @Override
     public Void execute(ForceCloseAccountsCommand command) {
-        List<VirtualAccount> accounts = repository.findByOwnerId(command.ownerId());
+        List<VirtualAccount> accounts = repository.findByIntegration(command.integration());
         
         for (VirtualAccount account : accounts) {
             account.close();

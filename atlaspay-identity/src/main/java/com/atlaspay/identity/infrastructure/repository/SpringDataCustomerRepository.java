@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataCustomerRepository extends JpaRepository<CustomerJpaEntity, String> {
-    Optional<CustomerJpaEntity> findByMerchantIdAndEmail(String merchantId, String email);
+public interface SpringDataCustomerRepository extends JpaRepository<CustomerJpaEntity, Long> {
+    Optional<CustomerJpaEntity> findByIntegrationAndEmail(Long merchantId, String email);
 }

@@ -1,18 +1,15 @@
 package com.atlaspay.accounts.infrastructure.adapter.persistence;
 
-import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.model.AccountStatus;
-import com.atlaspay.accounts.domain.model.OwnerType;
+import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
 import com.atlaspay.accounts.infrastructure.entity.VirtualAccountEntity;
 import com.atlaspay.accounts.infrastructure.repository.JpaVirtualAccountRepository;
-import com.atlaspay.shared.domain.id.VirtualAccountId;
 import com.atlaspay.shared.domain.valueobject.NUBAN;
+import com.atlaspay.shared.infrastructure.DomainSequenceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,28 +19,28 @@ import java.util.stream.Collectors;
 public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRepository {
 
     private final JpaVirtualAccountRepository repository;
+    private final DomainSequenceGenerator sequenceGenerator;
 
     @Override
     public VirtualAccount save(VirtualAccount account) {
         VirtualAccountEntity entity = toEntity(account);
-        entity.setUpdatedAt(ZonedDateTime.now(ZoneOffset.UTC));
-        VirtualAccountEntity saved = repository.save(entity);
-        return toDomain(saved);
+        VirtualAccountEntity savedEntity = repository.save(entity);
+        return toDomain(savedEntity);
     }
 
     @Override
-    public Optional<VirtualAccount> findById(VirtualAccountId id) {
-        return repository.findById(id.value()).map(this::toDomain);
+    public Optional<VirtualAccount> findById(Long id) {
+        return repository.findById(id).map(this::toDomain);
     }
 
     @Override
-    public boolean existsById(VirtualAccountId id) {
-        return repository.existsById(id.value());
+    public boolean existsById(Long id) {
+        return repository.existsById(id);
     }
 
     @Override
-    public void deleteById(VirtualAccountId id) {
-        repository.deleteById(id.value());
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 
     @Override
@@ -52,8 +49,8 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
     }
 
     @Override
-    public List<VirtualAccount> findByOwnerId(String ownerId) {
-        return repository.findByOwnerId(ownerId).stream()
+    public List<VirtualAccount> findByIntegration(Long integration) {
+        return repository.findByIntegration(integration).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -63,38 +60,37 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
         return repository.existsByNuban(nuban.value());
     }
 
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("virtual_account_seq");
+    }
+
     private VirtualAccountEntity toEntity(VirtualAccount domain) {
-        VirtualAccountEntity entity = repository.findById(domain.getId().value())
-                .orElse(new VirtualAccountEntity(
-                        domain.getId().value(),
-                        domain.getOwnerId(),
-                        domain.getOwnerType().name(),
-                        domain.getAccountName(),
-                        domain.getBankName(),
-                        null,
-                        domain.getStatus().name(),
-                        domain.getIdempotencyKey(),
-                        0,
-                        ZonedDateTime.now(ZoneOffset.UTC),
-                        ZonedDateTime.now(ZoneOffset.UTC)
-                ));
-        
-        entity.setStatus(domain.getStatus().name());
-        entity.setNuban(domain.getNuban() != null ? domain.getNuban().value() : null);
-        
-        return entity;
+        return VirtualAccountEntity.builder()
+                .id(domain.getId())
+                .integration(domain.getIntegration())
+                .customerCode(domain.getCustomerCode())
+                .accountName(domain.getAccountName())
+                .bankName(domain.getBankName())
+                .nuban(domain.getNuban() != null ? domain.getNuban().value() : null)
+                .status(domain.getStatus().name())
+                .idempotencyKey(domain.getIdempotencyKey())
+                .build();
     }
 
     private VirtualAccount toDomain(VirtualAccountEntity entity) {
-        return new VirtualAccount(
-                new VirtualAccountId(entity.getId()),
-                entity.getOwnerId(),
+        VirtualAccount account = new VirtualAccount(
+                entity.getId(),
+                entity.getIntegration(),
+                entity.getCustomerCode(),
                 entity.getAccountName(),
-                OwnerType.valueOf(entity.getOwnerType()),
                 entity.getBankName(),
                 entity.getIdempotencyKey(),
                 AccountStatus.valueOf(entity.getStatus()),
                 entity.getNuban() != null ? new NUBAN(entity.getNuban()) : null
         );
+        account.pullDomainEvents();
+        return account;
     }
 }

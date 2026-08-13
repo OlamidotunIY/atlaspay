@@ -8,7 +8,6 @@ import com.atlaspay.identity.application.dto.CreateCustomerResult;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Customer;
 import com.atlaspay.identity.domain.repository.CustomerRepository;
-import com.atlaspay.shared.domain.id.CustomerId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.event.DomainEventPublisher;
@@ -30,9 +29,9 @@ public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, Cr
             throw new ConflictException(IdentityErrorCode.CUSTOMER_EMAIL_ALREADY_EXISTS, "Customer with this email already exists for this merchant");
         }
 
-        Customer customer = new Customer(
-            CustomerId.generate(),
-            command.merchantId(),
+        Customer customer = new Customer(customerRepository.nextIdentity(),
+                "CUS_" + java.util.UUID.randomUUID().toString(),
+                command.merchantId(),
             command.firstName(),
             command.lastName(),
             new EmailAddress(command.email()),

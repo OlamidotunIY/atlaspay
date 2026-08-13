@@ -37,10 +37,10 @@ public class ProcessOutboxMessagesUseCase extends BaseUseCase<ProcessOutboxMessa
 
         for (OutboxMessage message : messages) {
             try {
-                messageBrokerPort.send(message.getTopic(), message.getId().value(), message.getPayload());
+                messageBrokerPort.send(message.getTopic(), message.getId(), message.getPayload());
                 message.markAsSent();
             } catch (Exception e) {
-                log.error("Failed to process outbox message {}", message.getId().value(), e);
+                log.error("Failed to process outbox message {}", message.getId(), e);
                 message.markAsFailed();
             }
         }

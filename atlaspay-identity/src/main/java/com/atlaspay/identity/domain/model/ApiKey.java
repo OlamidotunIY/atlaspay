@@ -4,8 +4,6 @@ import com.atlaspay.identity.domain.event.ApiKeyGenerated;
 import com.atlaspay.identity.domain.event.ApiKeyRevoked;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.domain.AggregateRoot;
-import com.atlaspay.shared.domain.id.ApiKeyId;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.SharedErrorCode;
 import com.atlaspay.shared.exception.ValidationException;
@@ -16,10 +14,10 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
-public class ApiKey extends AggregateRoot<ApiKeyId> {
+public class ApiKey extends AggregateRoot<Long> {
 
-    private final ApiKeyId id;
-    private final MerchantId merchantId;
+    private final Long id;
+    private final Long merchantId;
     private final KeyType keyType;
     private final ApiEnvironment environment;
     private final String keyHash;
@@ -29,9 +27,8 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
     private final ZonedDateTime createdAt;
     private ZonedDateTime revokedAt;
 
-    public ApiKey(ApiKeyId id, MerchantId merchantId, KeyType keyType, ApiEnvironment environment, 
+    public ApiKey(Long id, Long merchantId, KeyType keyType, ApiEnvironment environment, 
                   String keyHash, String displayValue, String prefix) {
-        if (id == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "API Key ID is required");
         if (merchantId == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Merchant ID is required");
         if (keyType == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "KeyType is required");
         if (environment == null) throw new ValidationException(SharedErrorCode.MISSING_REQUIRED_FIELD, "Environment is required");
@@ -51,10 +48,10 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
 
         registerEvent(new ApiKeyGenerated(
             UUID.randomUUID().toString(),
-            this.id.value(),
+            id != null ? String.valueOf(id) : null,
             this.createdAt,
             new ApiKeyGenerated.Payload(
-                this.merchantId.value(),
+                String.valueOf(merchantId),
                 this.keyType,
                 this.environment,
                 this.prefix
@@ -72,17 +69,17 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
 
         registerEvent(new ApiKeyRevoked(
             UUID.randomUUID().toString(),
-            this.id.value(),
+            id != null ? String.valueOf(id) : null,
             this.revokedAt,
             new ApiKeyRevoked.Payload(
-                this.merchantId.value(),
+                String.valueOf(merchantId),
                 this.keyType,
                 this.environment
             )
         ));
     }
 
-    public MerchantId getMerchantId() {
+    public Long getMerchantId() {
         return merchantId;
     }
 
@@ -91,7 +88,7 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
     }
 
     @Override
-    public ApiKeyId getId() {
+    public Long getId() {
         return id;
     }
 }

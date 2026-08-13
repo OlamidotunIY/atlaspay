@@ -56,7 +56,7 @@ verified Merchant and, optionally, a linked Customer.
 
 | Field | Type | Nullable | Notes |
 |---|---|---|---|
-| `id` | `MerchantId` | No | UUID, generated on creation |
+| `id` | `Long` | No | Internal Database Primary Key (Auto-Increment) |
 | `country` | `String` | No | ISO 3166-1 alpha-2 country code (e.g., `NG`) |
 | `businessName` | `String` | No | Legal or trading name of the business |
 | `firstName` | `String` | No | Account owner's first name |
@@ -191,20 +191,21 @@ Phase 2 — Compliance (unlocks live mode):
 
 | Field | Type | Nullable | Notes |
 |---|---|---|---|
-| `id` | `CustomerId` | No | UUID |
-| `merchantId` | `MerchantId` | No | The Merchant this customer belongs to |
+| `id` | `Long` | No | Internal Database Primary Key (Auto-Increment) |
+| `code` | `String` | No | External API Reference Code (e.g., `CUS_uuid`) |
+| `integration` | `Long` | No | The ID of the Merchant this customer belongs to |
 | `firstName` | `String` | No | — |
 | `lastName` | `String` | No | — |
-| `email` | `EmailAddress` | No | Unique per Merchant (not globally) |
+| `email` | `EmailAddress` | No | Unique per Integration (Merchant) |
 | `phone` | `PhoneNumber` | Yes | Optional |
 | `metadata` | `Map<String, String>` | Yes | Arbitrary key-value pairs for Merchant use |
 | `createdAt` | `ZonedDateTime` | No | UTC |
 | `updatedAt` | `ZonedDateTime` | No | UTC |
 
 **Invariants:**
-- `email` must be unique within the scope of a single `Merchant` (two different Merchants may
+- `email` must be unique within the scope of a single `Integration` (two different Merchants may
   have customers with the same email — they are different Customer identities).
-- A Customer always belongs to exactly one Merchant.
+- A Customer always belongs to exactly one Integration (Merchant).
 
 **Domain Methods:**
 
@@ -584,7 +585,7 @@ Similar command records exist for CONTACT, OWNER, ACCOUNT, and SERVICE_AGREEMENT
 ```java
 public record CreateCustomerCommand(
     String idempotencyKey,
-    MerchantId merchantId,
+    Long integration,
     String firstName,
     String lastName,
     String email,
@@ -593,11 +594,11 @@ public record CreateCustomerCommand(
 ) {}
 ```
 
-**Output:** `CustomerId`
+**Output:** `String` (The `code` of the new Customer)
 
 **Happy Path:**
-1. Load merchant — throw `NotFoundException` if absent.
-2. Check `CustomerRepository.findByMerchantIdAndEmail()` — throw `ConflictException` if taken.
+1. Load merchant by integration ID — throw `NotFoundException` if absent.
+2. Check `CustomerRepository.findByIntegrationAndEmail()` — throw `ConflictException` if taken.
 3. Create `Customer` aggregate.
 4. `customerRepository.save(customer)` → publish `CustomerCreated`.
 5. Return `customer.getId()`.

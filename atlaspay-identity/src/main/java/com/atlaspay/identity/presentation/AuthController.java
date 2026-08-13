@@ -48,7 +48,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String token = jwtService.generateToken(merchant.getId().value());
+        String token = jwtService.generateToken(merchant.getId() != null ? String.valueOf(merchant.getId()) : null);
         return ResponseEntity.ok(new LoginResponse(token));
     }
 }

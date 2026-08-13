@@ -8,7 +8,6 @@ import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.BusinessType;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;

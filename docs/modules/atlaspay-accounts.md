@@ -79,10 +79,11 @@ atlaspay-accounts/
 **Class:** `public final class VirtualAccount extends AggregateRoot<VirtualAccountId>`
 
 **Fields:**
-*   `private final String ownerId;` (Merchant or Customer ID)
-*   `private final OwnerType ownerType;` (Enum: `MERCHANT`, `CUSTOMER`)
-*   `private final String accountName;` (e.g., "AtlasPay - John Doe")
-*   `private final String bankName;` (e.g., "TITAN_TRUST")
+*   `private final Long id;` (Internal Database Primary Key)
+*   `private final Long integration;` (The ID of the Merchant this account belongs to)
+*   `private final String customerCode;` (Optional: The Customer Reference Code `CUS_uuid` if this is a dedicated account)
+*   `private final String accountName;` (e.g., "AtlasPay / John Doe")
+*   `private final String bankName;` (e.g., "Wema")
 *   `private NUBAN nuban;` (Record: `record NUBAN(String value)`. Nullable initially.)
 *   `private AccountStatus status;` (Enum: `PENDING_ISSUANCE`, `ACTIVE`, `CLOSURE_REQUESTED`, `CLOSED`)
 
@@ -103,20 +104,21 @@ atlaspay-accounts/
 ## 4. Application Layer
 
 ### 4.1 Commands & DTOs
-*   `record IssueVirtualAccountCommand(@IdempotencyKey String idempotencyKey, String ownerId, OwnerType ownerType, String bankName) implements Command`
-*   `record ActivateVirtualAccountCommand(String referenceId, String nuban) implements Command`
-*   `record VirtualAccountDto(String id, String ownerId, String accountName, String nuban, String bankName, String status)`
+*   `record IssueVirtualAccountCommand(Long integration, String customerCode, String accountName, String bankName, @IdempotencyKey String idempotencyKey) implements Command`
+*   `record ActivateVirtualAccountCommand(Long referenceId, String nuban) implements Command`
+*   `record VirtualAccountDto(Long id, Long integration, String customerCode, String accountName, String nuban, String bankName, String status)`
 
 ### 4.2 Use Cases (Implementations of `BaseUseCase`)
 
 **`IssueVirtualAccountUseCase`**
 1. Receives `IssueVirtualAccountCommand`.
 2. **Rule Enforcement:** Queries `VirtualAccountQueryService` to check limits.
-    *   If `ownerType == MERCHANT`, ensure `< 2` accounts, and ensure no existing account with the same `bankName`.
-    *   If `ownerType == CUSTOMER`, ensure `0` accounts.
-3. Creates `VirtualAccount` via `requestIssuance(...)`.
-4. Saves via `VirtualAccountDomainRepository.save(account)`. (This automatically inserts outbox domain events via `BaseUseCase`'s infrastructure).
-5. Returns `VirtualAccountDto`.
+    *   If `customerCode == null`, ensure `< 2` merchant accounts, and ensure no existing account with the same `bankName`.
+    *   If `customerCode != null`, ensure `0` existing accounts for this customer.
+3. **Identity Lookup:** Queries the `atlaspay-identity` module to fetch the Merchant's `businessName` (by `integration`) and the Customer's `firstName` / `lastName` (by `customerCode`) to form the `accountName`.
+4. Creates `VirtualAccount` via `requestIssuance(...)`.
+5. Saves via `VirtualAccountDomainRepository.save(account)`.
+6. Returns `VirtualAccountDto`.
 
 **`ActivateVirtualAccountUseCase`**
 1. Receives `ActivateVirtualAccountCommand` (triggered by Webhook).
@@ -162,20 +164,20 @@ atlaspay-accounts/
 ## 6. REST API Surface
 
 ### 6.1 Dedicated Accounts (Customers)
-*   **POST** `/api/v1/dedicated_accounts`
+*   **POST** `/api/v1/dedicated_account`
     *   **Headers:** `Idempotency-Key: uuid`
-    *   **Body:** `{"customerId": "cus_123", "bankName": "Wema"}`
+    *   **Body:** `{"customerCode": "cus_123", "accountName": "John Doe Account", "bankName": "Wema Bank"}`
     *   **Security:** `merchantId` resolved from JWT/API Key.
     *   **Response:** `202 Accepted`
 
-*   **GET** `/api/v1/dedicated_accounts`
+*   **GET** `/api/v1/dedicated_account`
     *   **Security:** `merchantId` resolved from JWT/API Key.
     *   **Response:** `200 OK` (List of accounts)
 
-*   **GET** `/api/v1/dedicated_accounts/{accountId}`
+*   **GET** `/api/v1/dedicated_account/{accountId}`
     *   **Response:** `200 OK` (Account details)
 
-*   **DELETE** `/api/v1/dedicated_accounts/{accountId}`
+*   **DELETE** `/api/v1/dedicated_account/{accountId}`
     *   **Description:** Deactivates the virtual account.
     *   **Response:** `204 No Content`
 
@@ -202,9 +204,9 @@ atlaspay-accounts/
 
 ```sql
 CREATE TABLE virtual_accounts (
-    id VARCHAR(50) PRIMARY KEY,
-    owner_id VARCHAR(50) NOT NULL,
-    owner_type VARCHAR(20) NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    integration BIGINT NOT NULL,
+    customer_code VARCHAR(50) NULL,
     account_name VARCHAR(100) NOT NULL,
     bank_name VARCHAR(50) NOT NULL,
     nuban VARCHAR(10) NULL,
@@ -215,8 +217,9 @@ CREATE TABLE virtual_accounts (
     updated_at DATETIME(6) NOT NULL,
     
     CONSTRAINT uq_nuban UNIQUE (nuban),
-    CONSTRAINT uq_merchant_bank UNIQUE (owner_id, bank_name)
+    CONSTRAINT uq_integration_customer_bank UNIQUE (integration, customer_code, bank_name)
 );
 
-CREATE INDEX idx_owner ON virtual_accounts (owner_id, owner_type);
+CREATE INDEX idx_integration ON virtual_accounts (integration);
+CREATE INDEX idx_customer_code ON virtual_accounts (customer_code);
 ```

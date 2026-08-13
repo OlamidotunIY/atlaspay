@@ -3,7 +3,6 @@ package com.atlaspay.accounts.application.usecase;
 import com.atlaspay.accounts.application.command.ActivateVirtualAccountCommand;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
-import com.atlaspay.shared.domain.id.VirtualAccountId;
 import com.atlaspay.shared.domain.valueobject.NUBAN;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
@@ -19,10 +18,10 @@ public class ActivateVirtualAccountUseCase extends BaseUseCase<ActivateVirtualAc
 
     @Override
     public Void execute(ActivateVirtualAccountCommand command) {
-        VirtualAccount account = repository.findById(new VirtualAccountId(command.referenceId()))
+        VirtualAccount account = repository.findById(Long.valueOf(command.referenceId()))
                 .orElseThrow(() -> new NotFoundException(AccountsErrorCode.ACCOUNT_NOT_FOUND, "Account not found"));
         
-        account.assignNuban(new NUBAN(command.nuban()));
+        account.activate(new NUBAN(command.nuban()));
         
         repository.save(account);
         publishEvents(account, eventPublisher);

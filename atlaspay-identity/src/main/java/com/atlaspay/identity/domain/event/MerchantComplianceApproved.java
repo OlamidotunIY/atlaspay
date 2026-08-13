@@ -7,10 +7,9 @@ import java.time.ZonedDateTime;
 public record MerchantComplianceApproved(
     String eventId,
     String aggregateId,
-    ZonedDateTime occurredAt
-) implements DomainEvent<Void> {
-    @Override
-    public Void payload() {
-        return null;
-    }
+    ZonedDateTime occurredAt,
+    Payload payload
+) implements DomainEvent<MerchantComplianceApproved.Payload> {
+    
+    public record Payload(String merchantName) {}
 }

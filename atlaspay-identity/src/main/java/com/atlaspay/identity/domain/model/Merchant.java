@@ -3,20 +3,18 @@ package com.atlaspay.identity.domain.model;
 import com.atlaspay.identity.domain.event.*;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.domain.AggregateRoot;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.exception.BusinessRuleException;
-import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
-public class Merchant extends AggregateRoot<MerchantId> {
+public class Merchant extends AggregateRoot<Long> {
 
-    private final MerchantId id;
+    private final Long id;
     private final String country;
     private String businessName;
     private String firstName;
@@ -33,7 +31,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
 
-    public Merchant(MerchantId id, String country, String businessName, String firstName, String lastName,
+    public Merchant(Long id, String country, String businessName, String firstName, String lastName,
                     EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType) {
         
         this.id = id;
@@ -57,7 +55,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantRegistered(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now(),
             new MerchantRegistered.Payload(
                 this.businessName,
@@ -85,7 +83,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantEmailVerified(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now()
         ));
     }
@@ -100,7 +98,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantEmailVerificationResent(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now(),
             new MerchantEmailVerificationResent.Payload(
                 this.email.value(),
@@ -127,7 +125,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
         registerEvent(new MerchantComplianceStepCompleted(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now(),
             new MerchantComplianceStepCompleted.Payload(step)
         ));
@@ -168,7 +166,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceSubmitted(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now()
         ));
     }
@@ -183,8 +181,9 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceApproved(
             UUID.randomUUID().toString(),
-            id.value(),
-            ZonedDateTime.now()
+            String.valueOf(id),
+            ZonedDateTime.now(),
+            new MerchantComplianceApproved.Payload(this.firstName + " " + this.lastName)
         ));
     }
 
@@ -198,7 +197,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantComplianceRejected(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now(),
             new MerchantComplianceRejected.Payload(reason)
         ));
@@ -213,7 +212,7 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantProfileUpdated(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now(),
             new MerchantProfileUpdated.Payload(
                 this.firstName,
@@ -230,25 +229,30 @@ public class Merchant extends AggregateRoot<MerchantId> {
         
         registerEvent(new MerchantPasswordChanged(
             UUID.randomUUID().toString(),
-            id.value(),
+            String.valueOf(id),
             ZonedDateTime.now()
         ));
     }
-
-    public ComplianceStatus getComplianceStatus() {
-        return complianceStatus;
-    }
-
-    public String getHashedPassword() {
-        return hashedPassword;
-    }
-
-    public EmailAddress getEmail() {
-        return email;
+    
+    public void ban(String reason) {
+        if (this.complianceStatus == ComplianceStatus.REJECTED) {
+            throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_SUBMITTED, "Merchant is already rejected/banned");
+        }
+        
+        // We will repurpose REJECTED for now or just emit the event
+        this.complianceStatus = ComplianceStatus.REJECTED;
+        this.updatedAt = ZonedDateTime.now();
+        
+        registerEvent(new MerchantBanned(
+            UUID.randomUUID().toString(),
+            String.valueOf(id),
+            ZonedDateTime.now(),
+            new MerchantBanned.Payload(reason)
+        ));
     }
 
     @Override
-    public MerchantId getId() {
+    public Long getId() {
         return id;
     }
 

@@ -23,7 +23,7 @@ public class MerchantJpaEntity {
 
     @Id
     @Column(name = "id", nullable = false)
-    private String id;
+    private Long id;
 
     @Column(name = "country", nullable = false)
     private String country;

@@ -4,7 +4,6 @@ import com.atlaspay.eventbus.domain.model.OutboxMessage;
 import com.atlaspay.eventbus.domain.model.OutboxStatus;
 import com.atlaspay.eventbus.domain.repository.OutboxMessageRepository;
 import com.atlaspay.eventbus.infrastructure.entity.OutboxMessageJpaEntity;
-import com.atlaspay.shared.domain.id.OutboxMessageId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +39,7 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     private OutboxMessageJpaEntity mapToEntity(OutboxMessage domain) {
         return new OutboxMessageJpaEntity(
-                domain.getId().value(),
+                domain.getId(),
                 domain.getTopic(),
                 domain.getPayload(),
                 domain.getStatus(),
@@ -51,7 +50,7 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     private OutboxMessage mapToDomain(OutboxMessageJpaEntity entity) {
         return new OutboxMessage(
-                new OutboxMessageId(entity.getId()),
+                entity.getId(),
                 entity.getTopic(),
                 entity.getPayload(),
                 entity.getStatus(),

@@ -4,8 +4,6 @@ import com.atlaspay.identity.domain.model.Customer;
 import com.atlaspay.identity.domain.repository.CustomerRepository;
 import com.atlaspay.identity.infrastructure.entity.CustomerJpaEntity;
 import com.atlaspay.identity.infrastructure.repository.SpringDataCustomerRepository;
-import com.atlaspay.shared.domain.id.CustomerId;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import org.springframework.stereotype.Repository;
@@ -16,8 +14,10 @@ import java.util.Optional;
 public class CustomerRepositoryAdapter implements CustomerRepository {
 
     private final SpringDataCustomerRepository jpaRepository;
+    private final com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator;
 
-    public CustomerRepositoryAdapter(SpringDataCustomerRepository jpaRepository) {
+    public CustomerRepositoryAdapter(SpringDataCustomerRepository jpaRepository, com.atlaspay.shared.infrastructure.DomainSequenceGenerator sequenceGenerator) {
+        this.sequenceGenerator = sequenceGenerator;
         this.jpaRepository = jpaRepository;
     }
 
@@ -29,19 +29,26 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findById(CustomerId id) {
-        return jpaRepository.findById(id.value()).map(this::toDomain);
+    public Optional<Customer> findById(Long id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
-    public Optional<Customer> findByMerchantIdAndEmail(MerchantId merchantId, String email) {
-        return jpaRepository.findByMerchantIdAndEmail(merchantId.value(), email).map(this::toDomain);
+    public Optional<Customer> findByMerchantIdAndEmail(Long merchantId, String email) {
+        return jpaRepository.findByIntegrationAndEmail(merchantId, email).map(this::toDomain);
+    }
+
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("customer_seq");
     }
 
     private CustomerJpaEntity toEntity(Customer domain) {
         CustomerJpaEntity entity = new CustomerJpaEntity();
-        entity.setId(domain.getId().value());
-        entity.setMerchantId(domain.getMerchantId().value());
+        entity.setId(domain.getId());
+        entity.setCode(domain.getCode());
+        entity.setIntegration(domain.getIntegration());
         entity.setFirstName(domain.getFirstName());
         entity.setLastName(domain.getLastName());
         entity.setEmail(domain.getEmail().value());
@@ -53,8 +60,9 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
 
     private Customer toDomain(CustomerJpaEntity entity) {
         Customer customer = new Customer(
-                new CustomerId(entity.getId()),
-                new MerchantId(entity.getMerchantId()),
+                entity.getId(),
+                entity.getCode(),
+                entity.getIntegration(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 new EmailAddress(entity.getEmail()),

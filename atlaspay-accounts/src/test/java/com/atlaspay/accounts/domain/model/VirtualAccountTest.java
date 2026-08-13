@@ -1,7 +1,6 @@
 package com.atlaspay.accounts.domain.model;
 
 import com.atlaspay.accounts.domain.event.VirtualAccountCreatedEvent;
-import com.atlaspay.shared.domain.id.VirtualAccountId;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -14,7 +13,7 @@ class VirtualAccountTest {
     @Test
     void shouldCreateVirtualAccountSuccessfully() {
         VirtualAccount account = VirtualAccount.create(
-                new VirtualAccountId("acc_1"),
+                new Long("acc_1"),
                 "mer_1",
                 "Test Merchant Account",
                 OwnerType.MERCHANT,

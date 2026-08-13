@@ -16,12 +16,13 @@ public class GetVirtualAccountsUseCase extends BaseUseCase<GetVirtualAccountsQue
 
     @Override
     public List<VirtualAccountDto> execute(GetVirtualAccountsQuery query) {
-        List<VirtualAccount> accounts = repository.findByOwnerId(query.ownerId());
+        List<VirtualAccount> accounts = repository.findByIntegration(query.integration());
         
         return accounts.stream()
                 .map(account -> new VirtualAccountDto(
-                        account.getId().value(),
-                        account.getOwnerId(),
+                        account.getId(),
+                        account.getIntegration(),
+                        account.getCustomerCode(),
                         account.getAccountName(),
                         account.getNuban() != null ? account.getNuban().value() : null,
                         account.getBankName(),

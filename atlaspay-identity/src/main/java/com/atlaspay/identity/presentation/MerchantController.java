@@ -7,7 +7,6 @@ import com.atlaspay.identity.application.query.GetMerchantProfileQuery;
 import com.atlaspay.identity.application.usecase.*;
 import com.atlaspay.identity.domain.model.ComplianceStatus;
 import com.atlaspay.identity.presentation.dto.*;
-import com.atlaspay.shared.domain.id.MerchantId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -74,7 +73,7 @@ public class MerchantController {
     @Operation(summary = "Get merchant profile", description = "Retrieves the profile of the authenticated merchant")
     public ResponseEntity<MerchantProfileDto> getProfile(Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        GetMerchantProfileQuery query = new GetMerchantProfileQuery(new MerchantId(merchantIdStr));
+        GetMerchantProfileQuery query = new GetMerchantProfileQuery(Long.valueOf(merchantIdStr));
         MerchantProfileDto result = getMerchantProfileUseCase.execute(query);
         return ResponseEntity.ok(result);
     }
@@ -84,7 +83,7 @@ public class MerchantController {
     public ResponseEntity<Map<String, Boolean>> verifyEmail(@Valid @RequestBody VerifyMerchantEmailRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         VerifyMerchantEmailCommand command = new VerifyMerchantEmailCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.code()
         );
         verifyMerchantEmailUseCase.execute(command);
@@ -95,7 +94,7 @@ public class MerchantController {
     @Operation(summary = "Get compliance status")
     public ResponseEntity<ComplianceStatus> getComplianceStatus(Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        GetMerchantProfileQuery query = new GetMerchantProfileQuery(new MerchantId(merchantIdStr));
+        GetMerchantProfileQuery query = new GetMerchantProfileQuery(Long.valueOf(merchantIdStr));
         MerchantProfileDto result = getMerchantProfileUseCase.execute(query);
         return ResponseEntity.ok(ComplianceStatus.valueOf(result.kycStatus()));
     }
@@ -105,7 +104,7 @@ public class MerchantController {
     public ResponseEntity<Void> completeProfile(@Valid @RequestBody CompleteComplianceProfileRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         CompleteComplianceProfileCommand command = new CompleteComplianceProfileCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.description(),
             request.staffSize(),
             request.industry(),
@@ -122,7 +121,7 @@ public class MerchantController {
     public ResponseEntity<Void> completeContact(@Valid @RequestBody CompleteComplianceContactRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         CompleteComplianceContactCommand command = new CompleteComplianceContactCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.supportEmail(),
             request.disputeEmail(),
             request.whatsappPhone(),
@@ -145,7 +144,7 @@ public class MerchantController {
     public ResponseEntity<Void> completeOwner(@Valid @RequestBody CompleteComplianceOwnerRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         CompleteComplianceOwnerCommand command = new CompleteComplianceOwnerCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.bvn(),
             request.nin(),
             request.dateOfBirth(),
@@ -163,7 +162,7 @@ public class MerchantController {
     public ResponseEntity<Void> completeAccount(@Valid @RequestBody CompleteComplianceAccountRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         CompleteComplianceAccountCommand command = new CompleteComplianceAccountCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.bankCode(),
             request.accountNumber()
         );
@@ -176,7 +175,7 @@ public class MerchantController {
     public ResponseEntity<Void> completeServiceAgreement(@Valid @RequestBody CompleteComplianceServiceAgreementRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         CompleteComplianceServiceAgreementCommand command = new CompleteComplianceServiceAgreementCommand(
-            new MerchantId(merchantIdStr),
+            Long.valueOf(merchantIdStr),
             request.agreed()
         );
         completeComplianceServiceAgreementUseCase.execute(command);
@@ -187,7 +186,7 @@ public class MerchantController {
     @Operation(summary = "Submit compliance for review")
     public ResponseEntity<Void> submitCompliance(Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        SubmitComplianceCommand command = new SubmitComplianceCommand(new MerchantId(merchantIdStr));
+        SubmitComplianceCommand command = new SubmitComplianceCommand(Long.valueOf(merchantIdStr));
         submitComplianceUseCase.execute(command);
         return ResponseEntity.ok().build();
     }

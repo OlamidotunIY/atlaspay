@@ -7,5 +7,8 @@ public record VirtualAccountActivatedEvent(
         String eventId,
         String aggregateId,
         ZonedDateTime occurredAt,
-        String payload // NUBAN value
-) implements DomainEvent<String> {}
+        Payload payload
+) implements DomainEvent<VirtualAccountActivatedEvent.Payload> {
+    
+    public record Payload(Long integration, String nuban) {}
+}

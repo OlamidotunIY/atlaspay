@@ -11,7 +11,7 @@ public record CustomerCreated(
     Payload payload
 ) implements DomainEvent<CustomerCreated.Payload> {
     public record Payload(
-        String merchantId,
+        Long integration,
         String email,
         String firstName,
         String lastName

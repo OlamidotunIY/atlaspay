@@ -3,8 +3,6 @@ package com.atlaspay.identity.infrastructure.query;
 import com.atlaspay.identity.application.dto.SubAccountDto;
 import com.atlaspay.identity.application.port.SubAccountQueryService;
 import com.atlaspay.identity.infrastructure.repository.SpringDataSubAccountRepository;
-import com.atlaspay.shared.domain.id.MerchantId;
-import com.atlaspay.shared.domain.id.SubAccountId;
 import com.atlaspay.shared.util.PageResult;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +19,12 @@ public class SubAccountQueryServiceImpl implements SubAccountQueryService {
     }
 
     @Override
-    public Optional<SubAccountDto> findById(MerchantId merchantId, SubAccountId subAccountId) {
-        return repository.findById(subAccountId.value())
-                .filter(s -> s.getMerchantId().equals(merchantId.value()))
+    public Optional<SubAccountDto> findById(Long merchantId, Long subAccountId) {
+        return repository.findById(subAccountId)
+                .filter(s -> s.getIntegration().equals(merchantId))
                 .map(s -> new SubAccountDto(
                         s.getId(),
-                        s.getMerchantId(),
+                        s.getIntegration(),
                         s.getBankCode(),
                         s.getAccountNumber(),
                         s.getAccountName(),
@@ -37,7 +35,7 @@ public class SubAccountQueryServiceImpl implements SubAccountQueryService {
     }
 
     @Override
-    public PageResult<SubAccountDto> findAllByMerchantId(MerchantId merchantId, int page, int size) {
+    public PageResult<SubAccountDto> findAllByMerchantId(Long merchantId, int page, int size) {
         return new PageResult<>(Collections.emptyList(), page, size, 0L, 0);
     }
 }

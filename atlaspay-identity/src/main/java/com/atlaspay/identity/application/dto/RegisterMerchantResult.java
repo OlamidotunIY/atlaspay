@@ -1,9 +1,8 @@
 package com.atlaspay.identity.application.dto;
 
-import com.atlaspay.shared.domain.id.MerchantId;
 
 public record RegisterMerchantResult(
-    MerchantId merchantId,
+    Long merchantId,
     String testPublicKey,
     String testSecretKey
 ) {}

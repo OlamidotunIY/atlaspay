@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataApiKeyRepository extends JpaRepository<ApiKeyJpaEntity, String> {
+public interface SpringDataApiKeyRepository extends JpaRepository<ApiKeyJpaEntity, Long> {
     Optional<ApiKeyJpaEntity> findByKeyHash(String keyHash);
-    Optional<ApiKeyJpaEntity> findByMerchantIdAndKeyTypeAndEnvironmentAndActiveTrue(String merchantId, KeyType keyType, ApiEnvironment environment);
-    List<ApiKeyJpaEntity> findAllByMerchantId(String merchantId);
+    Optional<ApiKeyJpaEntity> findByIntegrationAndKeyTypeAndEnvironmentAndActiveTrue(Long merchantId, KeyType keyType, ApiEnvironment environment);
+    List<ApiKeyJpaEntity> findAllByIntegration(Long merchantId);
 }

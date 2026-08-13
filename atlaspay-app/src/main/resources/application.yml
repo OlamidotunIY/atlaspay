@@ -13,7 +13,7 @@ spring:
       max-lifetime: 1800000
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -21,7 +21,7 @@ spring:
         jdbc:
           time_zone: UTC
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: false
   data:
@@ -32,6 +32,9 @@ spring:
   threads:
     virtual:
       enabled: true   # Java 21 virtual threads for all Tomcat request threads
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
 
 # ── Actuator ──────────────────────────────────────────────────────────────────
 management:
