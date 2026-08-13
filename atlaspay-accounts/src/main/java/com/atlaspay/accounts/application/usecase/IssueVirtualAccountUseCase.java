@@ -18,6 +18,13 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
 
     @Override
     public VirtualAccountId execute(IssueVirtualAccountCommand command) {
+        if (!"NG".equalsIgnoreCase(command.country()) && !"Nigeria".equalsIgnoreCase(command.country())) {
+            throw new com.atlaspay.shared.exception.BusinessRuleException(
+                    com.atlaspay.accounts.domain.exception.AccountsErrorCode.UNSUPPORTED_COUNTRY, 
+                    "System only supports Nigerian merchants"
+            );
+        }
+
         VirtualAccountId accountId = new VirtualAccountId(UUID.randomUUID().toString());
         VirtualAccount account = VirtualAccount.create(
                 accountId, 

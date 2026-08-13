@@ -4,5 +4,7 @@ import com.atlaspay.shared.exception.ErrorCode;
 
 public enum AccountsErrorCode implements ErrorCode {
     INVALID_ACCOUNT_STATE,
-    ACCOUNT_NOT_FOUND
+    ACCOUNT_NOT_FOUND,
+    UNSUPPORTED_COUNTRY,
+    UNSUPPORTED_BANK
 }
