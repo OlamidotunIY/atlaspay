@@ -9,4 +9,7 @@ dependencies {
 
     // SLF4J for MDC tracing
     implementation 'org.slf4j:slf4j-api'
+
+    // Spring JDBC for DomainSequenceGenerator
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 }
