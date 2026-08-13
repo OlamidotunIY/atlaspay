@@ -7,7 +7,15 @@ import lombok.Setter;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "customers", 
+    indexes = {
+        @Index(name = "idx_customer_merchant", columnList = "merchant_id"),
+        @Index(name = "idx_customer_email", columnList = "email")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_customer_merchant_email", columnNames = {"merchant_id", "email"})
+    }
+)
 @Getter
 @Setter
 public class CustomerJpaEntity {

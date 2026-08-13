@@ -13,8 +13,19 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
 @Entity
-@Table(name = "virtual_accounts")
+@Table(name = "virtual_accounts", 
+    indexes = {
+        @Index(name = "idx_va_owner", columnList = "ownerId"),
+        @Index(name = "idx_va_nuban", columnList = "nuban")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_va_nuban", columnNames = {"nuban"}),
+        @UniqueConstraint(name = "uk_va_idempotency", columnNames = {"idempotencyKey"})
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
