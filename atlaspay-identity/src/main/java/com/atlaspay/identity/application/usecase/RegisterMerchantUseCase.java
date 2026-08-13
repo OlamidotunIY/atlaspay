@@ -7,7 +7,7 @@ import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
 import com.atlaspay.identity.application.dto.RegisterMerchantResult;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;

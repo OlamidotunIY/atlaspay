@@ -1,0 +1,20 @@
+# Production / Docker profile overrides
+# These supplement (not replace) application.yml
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none          # Flyway manages schema — never let Hibernate touch it
+  flyway:
+    enabled: true            # Disabled until migrations are written; remove this when identity
+                              # persistence layer is implemented with Flyway SQL files
+  security:
+    user:
+      # Disable Spring Security's auto-generated user (will be replaced by full SecurityConfig)
+      name: atlaspay
+      password: ${ATLASPAY_DEFAULT_PASSWORD:atlaspay}
+
+logging:
+  level:
+    root: INFO
+    com.atlaspay: INFO

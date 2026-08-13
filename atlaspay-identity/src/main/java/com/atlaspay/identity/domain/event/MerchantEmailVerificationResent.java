@@ -7,10 +7,11 @@ import java.time.ZonedDateTime;
 public record MerchantEmailVerificationResent(
     String eventId,
     String aggregateId,
-    ZonedDateTime occurredAt
-) implements DomainEvent<Void> {
-    @Override
-    public Void payload() {
-        return null;
-    }
+    ZonedDateTime occurredAt,
+    Payload payload
+) implements DomainEvent<MerchantEmailVerificationResent.Payload> {
+    public record Payload(
+        String email,
+        String verificationCode
+    ) {}
 }

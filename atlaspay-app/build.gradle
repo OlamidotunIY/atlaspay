@@ -1,0 +1,57 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    // ── Active modules (add more here as they are implemented) ──────────────
+    implementation project(':atlaspay-shared-kernel')
+    implementation project(':atlaspay-identity')
+
+    // ── Planned modules — uncomment each one as it is implemented ───────────
+    implementation project(':atlaspay-accounts')
+    // implementation project(':atlaspay-ledger')
+    // implementation project(':atlaspay-transfers')
+    // implementation project(':atlaspay-charges')
+    // implementation project(':atlaspay-subscriptions')
+    // implementation project(':atlaspay-escrow')
+    // implementation project(':atlaspay-settlement')
+    // implementation project(':atlaspay-transaction-splits')
+    // implementation project(':atlaspay-transactions-query')
+    implementation project(':atlaspay-notifications')
+    implementation project(':atlaspay-rate-limiter')
+    implementation project(':atlaspay-eventbus')
+
+    // ── Spring Boot ─────────────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // ── Observability ────────────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation "net.logstash.logback:logstash-logback-encoder:${logstashEncoderVersion}"
+
+    // ── Database ─────────────────────────────────────────────────────────────
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.flywaydb:flyway-mysql'
+
+    // ── JWT ───────────────────────────────────────────────────────────────────
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly  'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly  'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // ── Cache / Rate limiting ─────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // ── Integration tests ─────────────────────────────────────────────────────
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'com.h2database:h2'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+bootJar {
+    archiveFileName = 'atlaspay.jar'
+}

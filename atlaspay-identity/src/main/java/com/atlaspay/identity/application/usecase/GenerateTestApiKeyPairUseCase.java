@@ -5,7 +5,7 @@ import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
 import com.atlaspay.identity.domain.model.KeyType;
@@ -42,7 +42,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
             "pk_test_"
         );
 
-        String secretKeyHash = passwordEncoder.encode(rawSecretKey);
+        String secretKeyHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_test_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
         ApiKey secretKey = new ApiKey(

@@ -16,7 +16,7 @@ import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
-import com.atlaspay.identity.application.port.out.PasswordEncoder;
+import com.atlaspay.identity.application.port.PasswordEncoder;
 
 import java.util.UUID;
 
@@ -60,7 +60,7 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
                 "pk_live_"
         );
 
-        String secretHash = passwordEncoder.encode(rawSecretKey);
+        String secretHash = com.atlaspay.shared.util.HashingUtils.sha256Hex(rawSecretKey);
         String secretDisplay = "sk_live_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
         ApiKey secretKey = new ApiKey(

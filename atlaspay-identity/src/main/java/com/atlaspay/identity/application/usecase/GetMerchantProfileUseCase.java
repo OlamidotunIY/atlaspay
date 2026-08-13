@@ -1,7 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.dto.MerchantProfileDto;
-import com.atlaspay.identity.application.port.out.MerchantQueryService;
+import com.atlaspay.identity.application.port.MerchantQueryService;
 import com.atlaspay.identity.application.query.GetMerchantProfileQuery;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.exception.NotFoundException;

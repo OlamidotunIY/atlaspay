@@ -15,7 +15,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class ApiKey extends AggregateRoot<ApiKeyId> {
 
     private final ApiKeyId id;
@@ -84,6 +84,10 @@ public class ApiKey extends AggregateRoot<ApiKeyId> {
 
     public MerchantId getMerchantId() {
         return merchantId;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     @Override

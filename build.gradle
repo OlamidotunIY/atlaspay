@@ -7,6 +7,14 @@ plugins {
 group = 'com.atlaspay'
 version = '1.0-SNAPSHOT'
 
+// ─── Shared version catalogue ───────────────────────────────────────────────
+ext {
+    testcontainersVersion = '1.20.4'
+    wiremockVersion       = '3.10.0'
+    logstashEncoderVersion = '8.0'
+    opentelemetryVersion  = '2.12.0'
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
@@ -24,6 +32,7 @@ subprojects {
     dependencyManagement {
         imports {
             mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.4"
+            mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
         }
     }
 
@@ -36,12 +45,20 @@ subprojects {
 
         // Testing baseline
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.testcontainers:junit-jupiter'
+        testImplementation 'org.testcontainers:mysql'
+        testImplementation "org.wiremock:wiremock-standalone:${wiremockVersion}"
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
     tasks.named('test') {
         useJUnitPlatform()
         jvmArgs '-XX:+EnableDynamicAgentLoading'
+        // Surface individual test names in CI output
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+            exceptionFormat 'full'
+        }
     }
 
     // Compatibility task required by IntelliJ Kotlin DSL model

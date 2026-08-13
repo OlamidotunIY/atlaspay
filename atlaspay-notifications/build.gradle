@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(':atlaspay-shared-kernel')
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+}

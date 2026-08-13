@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: atlaspay
+  datasource:
+    url: ${ATLASPAY_DB_URL:jdbc:mysql://localhost:3306/atlaspay?createDatabaseIfNotExist=true&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${ATLASPAY_DB_USERNAME:atlaspay}
+    password: ${ATLASPAY_DB_PASSWORD:atlaspay}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  threads:
+    virtual:
+      enabled: true   # Java 21 virtual threads for all Tomcat request threads
+
+# ── Actuator ──────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${ATLASPAY_ENV:local}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s
+  tracing:
+    sampling:
+      probability: ${ATLASPAY_TRACE_SAMPLING:1.0}
+
+# ── JWT ────────────────────────────────────────────────────────────────────────
+atlaspay:
+  jwt:
+    secret: ${ATLASPAY_JWT_SECRET:changeme-in-production-must-be-at-least-256-bits-long}
+    expiry-minutes: ${ATLASPAY_JWT_EXPIRY_MINUTES:60}
+  api-key:
+    hmac-secret: ${ATLASPAY_APIKEY_HMAC_SECRET:changeme-in-production}
+  anchor:
+    base-url: ${ANCHOR_BASE_URL:https://api.getanchor.co}
+    api-key: ${ANCHOR_API_KEY:}
+  dojah:
+    base-url: ${DOJAH_BASE_URL:https://sandbox.dojah.io}
+    app-id: ${DOJAH_APP_ID:}
+    private-key: ${DOJAH_PRIVATE_KEY:}
+
+# ── Logging ────────────────────────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.atlaspay: DEBUG
+    org.hibernate.SQL: INFO
+  config: classpath:logback-spring.xml

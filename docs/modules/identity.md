@@ -797,7 +797,7 @@ public record RegenerateApiKeyCommand(
 
 ### Query Services (Read Models)
 
-Package: `application/port/out/`
+Package: `application/port/`
 
 These ports allow query use cases to retrieve data transfer objects (`DTOs`) directly, bypassing aggregate roots.
 
@@ -814,7 +814,7 @@ These ports allow query use cases to retrieve data transfer objects (`DTOs`) dir
 
 ### `AccountNameResolutionPort`
 
-Package: `application/port/out/`
+Package: `application/port/`
 
 ```java
 public interface AccountNameResolutionPort {

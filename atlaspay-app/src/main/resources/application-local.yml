@@ -1,0 +1,16 @@
+# Local development profile (IDE / IntelliJ)
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      jakarta.persistence.schema-generation.scripts.action: create
+      jakarta.persistence.schema-generation.scripts.create-target: src/main/resources/db/migration/V1__init_schema.sql
+    show-sql: true
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    com.atlaspay: DEBUG
+    org.hibernate.SQL: DEBUG

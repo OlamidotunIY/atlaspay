@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -18,6 +19,7 @@
             <option value="$PROJECT_DIR$/atlaspay-rate-limiter" />
             <option value="$PROJECT_DIR$/atlaspay-settlement" />
             <option value="$PROJECT_DIR$/atlaspay-shared-kernel" />
+            <option value="$PROJECT_DIR$/atlaspay-simulator" />
             <option value="$PROJECT_DIR$/atlaspay-subscriptions" />
             <option value="$PROJECT_DIR$/atlaspay-transaction-splits" />
             <option value="$PROJECT_DIR$/atlaspay-transactions-query" />

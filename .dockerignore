@@ -1,0 +1,25 @@
+# Build outputs
+**/build/
+**/.gradle/
+**/.idea/
+**/*.iml
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in the image)
+docs/
+*.md
+!README.md
+
+# Local env — NEVER include secrets in the image
+.env
+*.env
+
+# Test files
+**/src/test/
+
+# Temporary files
+replace_secrets.py
+*.log

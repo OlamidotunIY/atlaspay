@@ -13,7 +13,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 public class Merchant extends AggregateRoot<MerchantId> {
 
     private final MerchantId id;
@@ -63,7 +63,8 @@ public class Merchant extends AggregateRoot<MerchantId> {
                 this.businessName,
                 this.email.value(),
                 this.country,
-                this.businessType
+                this.businessType,
+                this.emailVerificationCode.getCode()
             )
         ));
     }
@@ -100,7 +101,11 @@ public class Merchant extends AggregateRoot<MerchantId> {
         registerEvent(new MerchantEmailVerificationResent(
             UUID.randomUUID().toString(),
             id.value(),
-            ZonedDateTime.now()
+            ZonedDateTime.now(),
+            new MerchantEmailVerificationResent.Payload(
+                this.email.value(),
+                this.emailVerificationCode.getCode()
+            )
         ));
     }
     
@@ -232,6 +237,14 @@ public class Merchant extends AggregateRoot<MerchantId> {
 
     public ComplianceStatus getComplianceStatus() {
         return complianceStatus;
+    }
+
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public EmailAddress getEmail() {
+        return email;
     }
 
     @Override
