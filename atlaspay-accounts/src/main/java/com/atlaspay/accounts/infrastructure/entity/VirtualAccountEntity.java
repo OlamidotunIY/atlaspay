@@ -8,6 +8,7 @@ import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -15,10 +16,14 @@ import java.time.ZonedDateTime;
 
 import jakarta.persistence.Index;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
 @Entity
 @Table(name = "virtual_accounts", 
     indexes = {
-        @Index(name = "idx_va_owner", columnList = "ownerId"),
+        @Index(name = "idx_va_integration", columnList = "integration"),
+        @Index(name = "idx_va_customer", columnList = "customer_code"),
         @Index(name = "idx_va_nuban", columnList = "nuban")
     },
     uniqueConstraints = {
@@ -27,20 +32,21 @@ import jakarta.persistence.UniqueConstraint;
     }
 )
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class VirtualAccountEntity {
 
     @Id
-    @Column(length = 50)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @Column(nullable = false, length = 50)
-    private String ownerId;
+    @Column(nullable = false)
+    private Long integration;
     
-    @Column(nullable = false, length = 20)
-    private String ownerType;
+    @Column(name = "customer_code", nullable = false, length = 50)
+    private String customerCode;
     
     @Column(nullable = false, length = 100)
     private String accountName;

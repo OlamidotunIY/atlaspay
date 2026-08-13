@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JpaVirtualAccountRepository extends JpaRepository<VirtualAccountEntity, String> {
-    List<VirtualAccountEntity> findByOwnerId(String ownerId);
+public interface JpaVirtualAccountRepository extends JpaRepository<VirtualAccountEntity, Long> {
+    List<VirtualAccountEntity> findByIntegration(Long integration);
     Optional<VirtualAccountEntity> findByNuban(String nuban);
     boolean existsByNuban(String nuban);
 }
