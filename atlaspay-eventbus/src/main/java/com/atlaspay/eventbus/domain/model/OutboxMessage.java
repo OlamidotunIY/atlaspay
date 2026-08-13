@@ -3,8 +3,8 @@ package com.atlaspay.eventbus.domain.model;
 import com.atlaspay.shared.domain.AggregateRoot;
 import java.time.ZonedDateTime;
 
-public class OutboxMessage extends AggregateRoot<Long> {
-    private final Long id;
+public class OutboxMessage extends AggregateRoot<String> {
+    private final String id;
     private final String topic;
     private final String payload;
     private OutboxStatus status;
@@ -12,7 +12,7 @@ public class OutboxMessage extends AggregateRoot<Long> {
     private ZonedDateTime processedAt;
     
     // For mapping from DB
-    public OutboxMessage(Long id, String topic, String payload, OutboxStatus status, ZonedDateTime createdAt, ZonedDateTime processedAt) {
+    public OutboxMessage(String id, String topic, String payload, OutboxStatus status, ZonedDateTime createdAt, ZonedDateTime processedAt) {
         this.id = id;
         this.topic = topic;
         this.payload = payload;
@@ -21,8 +21,8 @@ public class OutboxMessage extends AggregateRoot<Long> {
         this.processedAt = processedAt;
     }
 
-    public OutboxMessage(Long id, String topic, String payload) {
-        this.id = id != null ? id : Long.generate();
+    public OutboxMessage(String id, String topic, String payload) {
+        this.id = id != null ? id : java.util.UUID.randomUUID().toString();
         this.topic = topic;
         this.payload = payload;
         this.status = OutboxStatus.PENDING;
@@ -40,7 +40,7 @@ public class OutboxMessage extends AggregateRoot<Long> {
     }
 
     @Override
-    public Long getId() { return id; }
+    public String getId() { return id; }
     public String getTopic() { return topic; }
     public String getPayload() { return payload; }
     public OutboxStatus getStatus() { return status; }

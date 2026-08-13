@@ -39,7 +39,7 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     private OutboxMessageJpaEntity mapToEntity(OutboxMessage domain) {
         return new OutboxMessageJpaEntity(
-                domain.getId().value(),
+                domain.getId(),
                 domain.getTopic(),
                 domain.getPayload(),
                 domain.getStatus(),
@@ -50,7 +50,7 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     private OutboxMessage mapToDomain(OutboxMessageJpaEntity entity) {
         return new OutboxMessage(
-                new Long(entity.getId()),
+                entity.getId(),
                 entity.getTopic(),
                 entity.getPayload(),
                 entity.getStatus(),
