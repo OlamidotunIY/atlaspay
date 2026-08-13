@@ -3,8 +3,8 @@ package com.atlaspay.identity.application.dto;
 import java.time.ZonedDateTime;
 
 public record SubAccountDto(
-    String subAccountId,
-    String merchantId,
+    Long id,
+    Long integration,
     String bankCode,
     String accountNumber,
     String accountName,

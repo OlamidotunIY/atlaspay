@@ -1,8 +1,7 @@
 package com.atlaspay.identity.application.dto;
 
-import com.atlaspay.shared.domain.id.SubAccountId;
 
 public record RegisterSubAccountResult(
-    SubAccountId subAccountId,
+    Long subAccountId,
     String accountName
 ) {}

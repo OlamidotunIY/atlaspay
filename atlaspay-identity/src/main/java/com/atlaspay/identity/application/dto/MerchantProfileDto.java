@@ -3,7 +3,7 @@ package com.atlaspay.identity.application.dto;
 import java.time.ZonedDateTime;
 
 public record MerchantProfileDto(
-    String merchantId,
+    Long id,
     String businessName,
     String email,
     String phone,

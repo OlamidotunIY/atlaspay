@@ -4,8 +4,9 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 public record CustomerDto(
-    String customerId,
-    String merchantId,
+    Long id,
+    String code,
+    Long integration,
     String firstName,
     String lastName,
     String email,

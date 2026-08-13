@@ -3,7 +3,7 @@ package com.atlaspay.identity.application.dto;
 import java.time.ZonedDateTime;
 
 public record ApiKeyDto(
-    String keyId,
+    Long id,
     String keyType,
     String environment,
     String displayValue,
