@@ -183,7 +183,7 @@ public class Merchant extends AggregateRoot<Long> {
             UUID.randomUUID().toString(),
             String.valueOf(id),
             ZonedDateTime.now(),
-            new MerchantComplianceApproved.Payload(this.profile != null ? this.profile.businessName() : "Main Account")
+            new MerchantComplianceApproved.Payload(this.firstName + " " + this.lastName)
         ));
     }
 

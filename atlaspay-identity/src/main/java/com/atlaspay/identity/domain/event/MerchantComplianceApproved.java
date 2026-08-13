@@ -11,5 +11,5 @@ public record MerchantComplianceApproved(
     Payload payload
 ) implements DomainEvent<MerchantComplianceApproved.Payload> {
     
-    public record Payload(String businessName) {}
+    public record Payload(String merchantName) {}
 }
