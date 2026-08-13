@@ -12,7 +12,6 @@ import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
-import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
@@ -51,7 +50,7 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
         String rawSecretKey = "sk_live_" + UUID.randomUUID().toString().replace("-", "");
 
         ApiKey publicKey = new ApiKey(
-                ApiKeyId.generate(),
+                null,
                 command.merchantId(),
                 KeyType.PUBLIC,
                 ApiEnvironment.LIVE,
@@ -64,7 +63,7 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
         String secretDisplay = "sk_live_****" + rawSecretKey.substring(rawSecretKey.length() - 4);
 
         ApiKey secretKey = new ApiKey(
-                ApiKeyId.generate(),
+                null,
                 command.merchantId(),
                 KeyType.SECRET,
                 ApiEnvironment.LIVE,

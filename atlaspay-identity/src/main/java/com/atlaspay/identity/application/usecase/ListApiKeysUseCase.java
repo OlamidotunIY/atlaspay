@@ -17,6 +17,6 @@ public class ListApiKeysUseCase extends BaseUseCase<ListApiKeysQuery, List<ApiKe
 
     @Override
     public List<ApiKeyDto> execute(ListApiKeysQuery query) {
-        return queryService.findAllByMerchantId(query.merchantId());
+        return queryService.findAllByIntegration(query.merchantId());
     }
 }

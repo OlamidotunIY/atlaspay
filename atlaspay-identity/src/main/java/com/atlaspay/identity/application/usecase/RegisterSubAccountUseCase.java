@@ -31,7 +31,7 @@ public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCom
         String accountName = accountNameResolutionPort.resolve(input.bankCode(), input.accountNumber());
         
         SubAccount subAccount = new SubAccount(
-                new com.atlaspay.shared.domain.id.SubAccountId(java.util.UUID.randomUUID().toString()),
+                null,
                 input.merchantId(),
                 input.bankCode(),
                 input.accountNumber(),

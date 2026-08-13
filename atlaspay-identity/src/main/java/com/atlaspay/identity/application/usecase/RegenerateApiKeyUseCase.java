@@ -12,7 +12,6 @@ import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
-import com.atlaspay.shared.domain.id.ApiKeyId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
@@ -74,7 +73,7 @@ public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand
         }
 
         ApiKey newKey = new ApiKey(
-                ApiKeyId.generate(),
+                null,
                 command.authenticatedMerchantId(),
                 command.keyType(),
                 command.environment(),

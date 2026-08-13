@@ -11,7 +11,6 @@ import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.event.DomainEventPublisher;
@@ -44,7 +43,7 @@ public class RegisterMerchantUseCase extends BaseUseCase<RegisterMerchantCommand
         String hashedPassword = passwordEncoder.encode(command.password());
 
         Merchant merchant = new Merchant(
-            MerchantId.generate(),
+            null,
             command.country(),
             command.businessName(),
             command.firstName(),
