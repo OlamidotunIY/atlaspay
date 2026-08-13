@@ -1,4 +1,6 @@
 package com.atlaspay.accounts.application.query;
 
-public record GetVirtualAccountsQuery() {
+import com.atlaspay.shared.usecase.Query;
+
+public record GetVirtualAccountsQuery(String ownerId) implements Query {
 }

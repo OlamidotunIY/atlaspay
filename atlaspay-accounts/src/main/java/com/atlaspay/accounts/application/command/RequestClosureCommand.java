@@ -1,4 +1,6 @@
 package com.atlaspay.accounts.application.command;
 
-public record RequestClosureCommand() {
+import com.atlaspay.shared.usecase.Command;
+
+public record RequestClosureCommand(String accountId) implements Command {
 }
