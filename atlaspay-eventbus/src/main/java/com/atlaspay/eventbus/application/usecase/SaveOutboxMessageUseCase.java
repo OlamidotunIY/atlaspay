@@ -3,7 +3,6 @@ package com.atlaspay.eventbus.application.usecase;
 import com.atlaspay.eventbus.application.command.SaveOutboxMessageCommand;
 import com.atlaspay.eventbus.domain.model.OutboxMessage;
 import com.atlaspay.eventbus.domain.repository.OutboxMessageRepository;
-import com.atlaspay.shared.domain.id.OutboxMessageId;
 import com.atlaspay.shared.usecase.BaseUseCase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +30,7 @@ public class SaveOutboxMessageUseCase extends BaseUseCase<SaveOutboxMessageComma
         try {
             String payload = objectMapper.writeValueAsString(command.event());
             OutboxMessage message = new OutboxMessage(
-                OutboxMessageId.generate(),
+                Long.generate(),
                 command.topic(),
                 payload
             );
