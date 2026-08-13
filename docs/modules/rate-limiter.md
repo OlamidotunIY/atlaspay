@@ -14,8 +14,9 @@ The `atlaspay-rate-limiter` module provides a distributed rate-limiting infrastr
 
 ### 1.2 Scope — What This Module Does
 - Provides the core Rate Limiter abstraction interfaces.
-- Implements the **Token Bucket** algorithm (for general API traffic) and **Sliding Window Counter** algorithm (for strict protection on sensitive endpoints).
+- Implements the **Token Bucket** algorithm (for general API traffic) and **Sliding Window Counter** algorithm (for strict O(1) memory protection on sensitive endpoints).
 - Manages distributed state using **Redis** to ensure limits are enforced consistently across multiple application instances.
+- Implements a **Fail-Open** resilience strategy so that Redis unavailability does not cause a total platform outage for legitimate traffic.
 - Exposes a custom `@RateLimit` annotation and Spring AOP Aspect for declarative, business-specific rate limiting on controllers or use cases.
 - Provides a global HandlerInterceptor/Filter for IP-based DDOS protection on the API Gateway layer (`atlaspay-app`).
 
@@ -63,8 +64,15 @@ This module provides infrastructural services and AOP aspects rather than tradit
 ### Abstraction Ports
 
 ```java
-public interface RateLimiter {
-    boolean isAllowed(String key, RateLimitPolicy policy);
+public record RateLimitResult(
+    boolean isAllowed,
+    long remainingRequests,
+    long limit,
+    long retryAfterSeconds
+) {}
+
+public interface RateLimiterPort {
+    RateLimitResult evaluate(String key, RateLimitPolicy policy);
 }
 ```
 
@@ -105,8 +113,9 @@ The global exception handler in the composition root (`atlaspay-app`) will inter
 ```
 
 **Headers:**
-- `X-RateLimit-Remaining: 0`
-- `X-RateLimit-Reset: [timestamp]`
+- `X-RateLimit-Limit: [capacity/limit]`
+- `X-RateLimit-Remaining: [remaining_tokens]`
+- `Retry-After: [seconds_until_refill]` (Only if 429 is returned)
 
 ---
 
@@ -116,8 +125,8 @@ The global exception handler in the composition root (`atlaspay-app`) will inter
 
 ### Redis Key Structures
 
-- **Token Bucket Key:** `rate_limit:tb:{key}` -> hash containing `tokens` and `lastRefill`
-- **Sliding Window Key:** `rate_limit:sw:{key}` -> Sorted Set (ZSET) storing timestamps as scores.
+- **Token Bucket Key:** `rate_limit:tb:{key}` -> hash containing `tokens` and `lastRefill`. Returns an array `{allowed, remaining, retryAfter}`.
+- **Sliding Window Counter Keys:** `rate_limit:sw:{key}:{timestamp}` -> Simple string/hash tracking the count for a specific time window. The algorithm reads both the current window key and the previous window key to calculate an O(1) weighted overlap.
 
 ---
 
@@ -140,3 +149,6 @@ Instead of relying solely on hardcoded values in annotations, the rate limiter s
 
 ## 11. Implementation Decisions
 - **No external libraries**: We will not use Bucket4j or similar libraries. The Token Bucket and Sliding Window algorithms will be implemented using highly optimized, custom **Redis Lua scripts** to guarantee atomicity and performance.
+- **Lua Scripts File Isolation**: To maintain clean code, Lua scripts will be stored in separate `.lua` files within the `src/main/resources/lua` directory rather than hardcoded in Java classes.
+- **Sliding Window Counter over Log**: We explicitly implement the O(1) Counter algorithm instead of the O(N) ZSET Log algorithm to guarantee memory safety against massive bot-net attacks.
+- **Fail-Open Strategy**: Rate limiting is defensive. If the Redis caching layer fails (timeouts, connection issues), the interceptors will catch the exception and allow the request to proceed (Fail-Open). This prevents the Rate Limiter from becoming a Single Point of Failure (SPOF) for the entire payment gateway.
