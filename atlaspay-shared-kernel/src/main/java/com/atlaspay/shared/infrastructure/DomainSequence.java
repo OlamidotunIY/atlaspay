@@ -4,7 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 @Entity
 @Table(name = "domain_sequences")
 public class DomainSequence {
@@ -13,6 +16,7 @@ public class DomainSequence {
     @Column(name = "sequence_name", nullable = false)
     private String sequenceName;
 
+    @Setter
     @Column(name = "next_val", nullable = false)
     private Long nextVal;
 
@@ -25,15 +29,4 @@ public class DomainSequence {
         this.nextVal = nextVal;
     }
 
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
-    public Long getNextVal() {
-        return nextVal;
-    }
-
-    public void setNextVal(Long nextVal) {
-        this.nextVal = nextVal;
-    }
 }
