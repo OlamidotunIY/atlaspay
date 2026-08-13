@@ -3,7 +3,6 @@ package com.atlaspay.accounts.application.usecase;
 import com.atlaspay.accounts.application.command.RequestClosureCommand;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
-import com.atlaspay.shared.domain.id.VirtualAccountId;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 import com.atlaspay.accounts.domain.exception.AccountsErrorCode;
@@ -18,7 +17,7 @@ public class RequestClosureUseCase extends BaseUseCase<RequestClosureCommand, Vo
 
     @Override
     public Void execute(RequestClosureCommand command) {
-        VirtualAccount account = repository.findById(new VirtualAccountId(command.accountId()))
+        VirtualAccount account = repository.findById(Long.valueOf(command.accountId()))
                 .orElseThrow(() -> new NotFoundException(AccountsErrorCode.ACCOUNT_NOT_FOUND, "Account not found"));
         
         account.requestClosure();
