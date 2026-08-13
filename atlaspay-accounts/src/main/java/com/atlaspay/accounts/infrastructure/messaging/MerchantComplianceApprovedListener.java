@@ -2,6 +2,8 @@ package com.atlaspay.accounts.infrastructure.messaging;
 
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
 import com.atlaspay.accounts.application.usecase.IssueVirtualAccountUseCase;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,44 +17,49 @@ import java.util.UUID;
 public class MerchantComplianceApprovedListener {
 
     private final IssueVirtualAccountUseCase issueVirtualAccountUseCase;
+    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "merchant-events", groupId = "accounts-module-group")
     public void onMerchantComplianceApproved(String messagePayload) {
-        // In a real system, this string would be deserialized into a DTO.
-        // Assuming we deserialized it and confirmed the event type is MerchantComplianceApproved
-        // and extracted the merchantId (aggregateId).
-        
-        // For demonstration, let's assume we extracted merchantId:
-        String merchantId = extractMerchantId(messagePayload);
-        if (merchantId == null) return;
-        
-        log.info("Received compliance approval for merchant: {}. Issuing virtual accounts...", merchantId);
+        try {
+            if (!messagePayload.contains("\"eventType\":\"MerchantComplianceApproved\"") && 
+                !messagePayload.contains("\"MerchantComplianceApproved\"")) {
+                return;
+            }
 
-        // 1. Issue Wema Account
-        issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
-                Long.valueOf(merchantId),
-                "MERCHANT",
-                "Main Account",
-                "Wema Bank",
-                UUID.randomUUID().toString()
-        ));
-        
-        // 2. Issue Zenith Account
-        issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
-                Long.valueOf(merchantId),
-                "MERCHANT",
-                "Main Account",
-                "Zenith Bank",
-                UUID.randomUUID().toString()
-        ));
-    }
+            JsonNode root = objectMapper.readTree(messagePayload);
+            String aggregateId = root.path("aggregateId").asText(null);
+            if (aggregateId == null) {
+                return;
+            }
 
-    private String extractMerchantId(String payload) {
-        // Simplistic parsing for the mock. Real code uses ObjectMapper.
-        if (payload.contains("\"eventType\":\"MerchantComplianceApproved\"")) {
-            // parse JSON... (Mocking for now)
-            return "mer_mock123";
+            Long integrationId = Long.valueOf(aggregateId);
+            
+            JsonNode payloadNode = root.path("payload");
+            String businessName = payloadNode.path("businessName").asText("Main Account");
+
+            log.info("Received compliance approval for merchant {}. Issuing virtual accounts...", integrationId);
+
+            // 1. Issue Wema Account
+            issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
+                    integrationId,
+                    "MERCHANT", // Merchant's own account
+                    businessName,
+                    "Wema Bank",
+                    UUID.randomUUID().toString()
+            ));
+
+            // 2. Issue Zenith Account
+            issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
+                    integrationId,
+                    "MERCHANT", // Merchant's own account
+                    businessName,
+                    "Zenith Bank",
+                    UUID.randomUUID().toString()
+            ));
+            
+        } catch (Exception e) {
+            log.error("Failed to process MerchantComplianceApproved event: {}", messagePayload, e);
         }
-        return null;
     }
 }
