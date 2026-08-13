@@ -6,7 +6,6 @@ import com.atlaspay.shared.domain.AggregateRoot;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.exception.BusinessRuleException;
-import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
@@ -183,7 +182,8 @@ public class Merchant extends AggregateRoot<Long> {
         registerEvent(new MerchantComplianceApproved(
             UUID.randomUUID().toString(),
             String.valueOf(id),
-            ZonedDateTime.now()
+            ZonedDateTime.now(),
+            new MerchantComplianceApproved.Payload(this.profile != null ? this.profile.businessName() : "Main Account")
         ));
     }
 
@@ -232,18 +232,6 @@ public class Merchant extends AggregateRoot<Long> {
             String.valueOf(id),
             ZonedDateTime.now()
         ));
-    }
-
-    public ComplianceStatus getComplianceStatus() {
-        return complianceStatus;
-    }
-
-    public String getHashedPassword() {
-        return hashedPassword;
-    }
-
-    public EmailAddress getEmail() {
-        return email;
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ApiKeyRepository {
+    Long nextIdentity();
     ApiKey save(ApiKey key);
     Optional<ApiKey> findById(Long id);
     Optional<ApiKey> findByKeyHash(String keyHash);
