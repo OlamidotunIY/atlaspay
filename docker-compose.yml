@@ -201,12 +201,13 @@ services:
       ATLASPAY_DB_PASSWORD: atlaspay
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: local
       ATLASPAY_ENV: docker
       OTEL_EXPORTER_ENDPOINT: http://tempo:4318
       OTEL_TRACES_EXPORTER: otlp
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     env_file:
       - path: .env
         required: false
