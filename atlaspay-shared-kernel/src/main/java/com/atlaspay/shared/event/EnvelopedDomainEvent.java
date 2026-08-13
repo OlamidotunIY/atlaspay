@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
  * @param <T> The payload type of the wrapped DomainEvent
  */
 public record EnvelopedDomainEvent<T>(
+    String eventType,
     DomainEvent<T> event,
     String correlationId,
     ZonedDateTime dispatchedAt
@@ -28,6 +29,7 @@ public record EnvelopedDomainEvent<T>(
      */
     public static <T> EnvelopedDomainEvent<T> wrap(DomainEvent<T> event) {
         return new EnvelopedDomainEvent<>(
+            event.getClass().getSimpleName(),
             event,
             CorrelationId.getOrCreate(),
             ZonedDateTime.now()
