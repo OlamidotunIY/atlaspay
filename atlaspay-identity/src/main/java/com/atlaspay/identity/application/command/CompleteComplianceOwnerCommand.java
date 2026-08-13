@@ -1,11 +1,10 @@
 package com.atlaspay.identity.application.command;
 
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.identity.domain.model.GovernmentIdType;
 import java.time.LocalDate;
 
 public record CompleteComplianceOwnerCommand(
-    MerchantId merchantId,
+    Long merchantId,
     String ownerBvn,
     String ownerNin,
     LocalDate ownerDateOfBirth,
