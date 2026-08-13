@@ -25,4 +25,24 @@ public class AccountsUseCaseConfig {
             DomainEventPublisher eventPublisher) {
         return new ActivateVirtualAccountUseCase(repository, eventPublisher);
     }
+
+    @Bean
+    public com.atlaspay.accounts.application.usecase.ForceCloseAccountsUseCase forceCloseAccountsUseCase(
+            VirtualAccountDomainRepository repository,
+            DomainEventPublisher eventPublisher) {
+        return new com.atlaspay.accounts.application.usecase.ForceCloseAccountsUseCase(repository, eventPublisher);
+    }
+    
+    @Bean
+    public com.atlaspay.accounts.application.usecase.RequestClosureUseCase requestClosureUseCase(
+            VirtualAccountDomainRepository repository,
+            DomainEventPublisher eventPublisher) {
+        return new com.atlaspay.accounts.application.usecase.RequestClosureUseCase(repository, eventPublisher);
+    }
+    
+    @Bean
+    public com.atlaspay.accounts.application.usecase.GetVirtualAccountsUseCase getVirtualAccountsUseCase(
+            VirtualAccountDomainRepository repository) {
+        return new com.atlaspay.accounts.application.usecase.GetVirtualAccountsUseCase(repository);
+    }
 }

@@ -27,13 +27,13 @@ public class MerchantBannedEventListener extends BaseKafkaEventListener {
                 return;
             }
 
-            Long integrationId = Long.valueOf(aggregateId);
+            Long integration = Long.valueOf(aggregateId);
             
-            log.warn("Received MerchantBanned event for integration {}. Forcing closure of all virtual accounts...", integrationId);
+            log.warn("Received MerchantBanned event for integration {}. Forcing closure of all virtual accounts...", integration);
 
-            forceCloseAccountsUseCase.execute(new ForceCloseAccountsCommand(integrationId));
+            forceCloseAccountsUseCase.execute(new ForceCloseAccountsCommand(integration));
             
-            log.info("Successfully requested closure for all virtual accounts belonging to integration {}", integrationId);
+            log.info("Successfully requested closure for all virtual accounts belonging to integration {}", integration);
         });
     }
 }
