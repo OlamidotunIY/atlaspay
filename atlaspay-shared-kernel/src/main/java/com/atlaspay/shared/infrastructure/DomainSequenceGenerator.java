@@ -14,6 +14,24 @@ public class DomainSequenceGenerator {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        seedSequence("merchant_seq", 1000L);
+        seedSequence("customer_seq", 1000L);
+        seedSequence("virtual_account_seq", 1000L);
+        seedSequence("sub_account_seq", 1000L);
+        seedSequence("transaction_seq", 10000L);
+        seedSequence("wallet_seq", 1000L);
+    }
+
+    private void seedSequence(String sequenceName, Long initialValue) {
+        String checkSql = "SELECT COUNT(*) FROM domain_sequences WHERE sequence_name = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, sequenceName);
+        if (count != null && count == 0) {
+            jdbcTemplate.update("INSERT INTO domain_sequences (sequence_name, next_val) VALUES (?, ?)", sequenceName, initialValue);
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Long nextIdentity(String sequenceName) {
         String selectSql = "SELECT next_val FROM domain_sequences WHERE sequence_name = ? FOR UPDATE";

@@ -12,4 +12,7 @@ dependencies {
 
     // Spring JDBC for DomainSequenceGenerator
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    
+    // Jakarta Persistence API for DomainSequence entity
+    implementation 'jakarta.persistence:jakarta.persistence-api'
 }
