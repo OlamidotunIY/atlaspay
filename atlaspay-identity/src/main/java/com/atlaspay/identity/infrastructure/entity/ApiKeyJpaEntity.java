@@ -15,7 +15,6 @@ import java.time.ZonedDateTime;
 public class ApiKeyJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

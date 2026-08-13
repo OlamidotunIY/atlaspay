@@ -22,7 +22,6 @@ import java.time.ZonedDateTime;
 public class MerchantJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
