@@ -10,8 +10,6 @@ import com.atlaspay.identity.application.usecase.RevokeApiKeyUseCase;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.presentation.dto.RegenerateApiKeyRequest;
-import com.atlaspay.shared.domain.id.ApiKeyId;
-import com.atlaspay.shared.domain.id.MerchantId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,7 +41,7 @@ public class ApiKeyController {
     @Operation(summary = "List all API keys", description = "Retrieves all active and revoked API keys for the authenticated merchant")
     public ResponseEntity<Map<String, List<ApiKeyDto>>> listKeys(Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        ListApiKeysQuery query = new ListApiKeysQuery(new MerchantId(merchantIdStr));
+        ListApiKeysQuery query = new ListApiKeysQuery(Long.valueOf(merchantIdStr));
         List<ApiKeyDto> keys = listApiKeysUseCase.execute(query);
         return ResponseEntity.ok(Map.of("keys", keys));
     }
@@ -53,7 +51,7 @@ public class ApiKeyController {
     public ResponseEntity<Map<String, String>> regenerateKey(@Valid @RequestBody RegenerateApiKeyRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         RegenerateApiKeyCommand command = new RegenerateApiKeyCommand(
-                new MerchantId(merchantIdStr),
+                Long.valueOf(merchantIdStr),
                 KeyType.valueOf(request.keyType()),
                 ApiEnvironment.valueOf(request.environment())
         );
@@ -66,8 +64,8 @@ public class ApiKeyController {
     public ResponseEntity<Map<String, Object>> revokeKey(@PathVariable String keyId, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         RevokeApiKeyCommand command = new RevokeApiKeyCommand(
-                new MerchantId(merchantIdStr),
-                new ApiKeyId(keyId)
+                Long.valueOf(merchantIdStr),
+                Long.valueOf(keyId)
         );
         revokeApiKeyUseCase.execute(command);
         return ResponseEntity.ok(Map.of("keyId", keyId, "active", false));

@@ -9,8 +9,6 @@ import com.atlaspay.identity.application.usecase.CreateCustomerUseCase;
 import com.atlaspay.identity.application.usecase.GetCustomerUseCase;
 import com.atlaspay.identity.application.usecase.ListCustomersUseCase;
 import com.atlaspay.identity.presentation.dto.CreateCustomerRequest;
-import com.atlaspay.shared.domain.id.CustomerId;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.util.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +42,7 @@ public class CustomerController {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         
         CreateCustomerCommand command = new CreateCustomerCommand(
-                new MerchantId(merchantIdStr),
+                Long.valueOf(merchantIdStr),
                 request.firstName(),
                 request.lastName(),
                 request.email(),
@@ -59,7 +57,7 @@ public class CustomerController {
     @Operation(summary = "Get a customer", description = "Retrieves a customer by ID")
     public ResponseEntity<CustomerDto> get(@PathVariable String customerId, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        GetCustomerQuery query = new GetCustomerQuery(new MerchantId(merchantIdStr), new CustomerId(customerId));
+        GetCustomerQuery query = new GetCustomerQuery(Long.valueOf(merchantIdStr), Long.valueOf(customerId));
         CustomerDto result = getCustomerUseCase.execute(query);
         return ResponseEntity.ok(result);
     }
@@ -71,7 +69,7 @@ public class CustomerController {
             @RequestParam(defaultValue = "20") int size,
             Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        ListCustomersQuery query = new ListCustomersQuery(new MerchantId(merchantIdStr), page, size, null);
+        ListCustomersQuery query = new ListCustomersQuery(Long.valueOf(merchantIdStr), page, size, null);
         PageResult<CustomerDto> result = listCustomersUseCase.execute(query);
         return ResponseEntity.ok(result);
     }

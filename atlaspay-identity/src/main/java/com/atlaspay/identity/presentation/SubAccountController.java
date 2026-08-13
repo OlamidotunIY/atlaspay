@@ -9,8 +9,6 @@ import com.atlaspay.identity.application.usecase.GetSubAccountUseCase;
 import com.atlaspay.identity.application.usecase.ListSubAccountsUseCase;
 import com.atlaspay.identity.application.usecase.RegisterSubAccountUseCase;
 import com.atlaspay.identity.presentation.dto.RegisterSubAccountRequest;
-import com.atlaspay.shared.domain.id.MerchantId;
-import com.atlaspay.shared.domain.id.SubAccountId;
 import com.atlaspay.shared.util.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +41,7 @@ public class SubAccountController {
     public ResponseEntity<RegisterSubAccountResult> register(@Valid @RequestBody RegisterSubAccountRequest request, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
         RegisterSubAccountCommand command = new RegisterSubAccountCommand(
-                new MerchantId(merchantIdStr),
+                Long.valueOf(merchantIdStr),
                 request.bankCode(),
                 request.accountNumber(),
                 request.description()
@@ -56,7 +54,7 @@ public class SubAccountController {
     @Operation(summary = "Get a sub account", description = "Retrieves a sub account by ID")
     public ResponseEntity<SubAccountDto> get(@PathVariable String subAccountId, Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        GetSubAccountQuery query = new GetSubAccountQuery(new MerchantId(merchantIdStr), new SubAccountId(subAccountId));
+        GetSubAccountQuery query = new GetSubAccountQuery(Long.valueOf(merchantIdStr), Long.valueOf(subAccountId));
         SubAccountDto result = getSubAccountUseCase.execute(query);
         return ResponseEntity.ok(result);
     }
@@ -68,7 +66,7 @@ public class SubAccountController {
             @RequestParam(defaultValue = "20") int size,
             Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        ListSubAccountsQuery query = new ListSubAccountsQuery(new MerchantId(merchantIdStr), page, size);
+        ListSubAccountsQuery query = new ListSubAccountsQuery(Long.valueOf(merchantIdStr), page, size);
         PageResult<SubAccountDto> result = listSubAccountsUseCase.execute(query);
         return ResponseEntity.ok(result);
     }
