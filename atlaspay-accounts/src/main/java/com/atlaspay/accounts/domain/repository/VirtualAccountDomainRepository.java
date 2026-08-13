@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VirtualAccountDomainRepository extends Repository<VirtualAccount, Long> {
+    Long nextIdentity();
     Optional<VirtualAccount> findByNuban(NUBAN nuban);
     List<VirtualAccount> findByIntegration(Long integration);
     boolean existsByNuban(NUBAN nuban);
