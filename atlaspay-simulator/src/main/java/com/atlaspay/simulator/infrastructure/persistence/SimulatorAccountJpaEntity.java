@@ -9,10 +9,16 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+
 @Entity
 @Table(name = "simulator_accounts")
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class SimulatorAccountJpaEntity {
     @Id
     private String id;

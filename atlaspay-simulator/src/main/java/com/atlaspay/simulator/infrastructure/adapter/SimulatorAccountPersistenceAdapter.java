@@ -31,17 +31,9 @@ public class SimulatorAccountPersistenceAdapter implements SimulatorAccountRepos
     @Override
     @Transactional
     public void saveAccount(String id, String reference, String bankName, String bankCode, long accountSerial, String nuban, String accountName, String callbackUrl, String status) {
-        SimulatorAccountJpaEntity entity = new SimulatorAccountJpaEntity();
-        entity.setId(id);
-        entity.setReference(reference);
-        entity.setBankName(bankName);
-        entity.setBankCode(bankCode);
-        entity.setAccountSerial(accountSerial);
-        entity.setNuban(nuban);
-        entity.setAccountName(accountName);
-        entity.setCallbackUrl(callbackUrl);
-        entity.setStatus(status);
-        entity.setCreatedAt(ZonedDateTime.now(ZoneOffset.UTC));
+        SimulatorAccountJpaEntity entity = new SimulatorAccountJpaEntity(
+                id, reference, bankName, bankCode, accountSerial, nuban, accountName, callbackUrl, status, ZonedDateTime.now(ZoneOffset.UTC)
+        );
         
         jpaRepository.save(entity);
     }
