@@ -15,11 +15,12 @@ import java.time.ZonedDateTime;
 public class ApiKeyJpaEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private String id;
+    private Long id;
 
-    @Column(name = "merchant_id", nullable = false)
-    private String merchantId;
+    @Column(name = "integration", nullable = false)
+    private Long integration;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "key_type", nullable = false)

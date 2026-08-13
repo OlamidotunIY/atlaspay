@@ -9,11 +9,12 @@ import java.time.ZonedDateTime;
 @Entity
 @Table(name = "customers", 
     indexes = {
-        @Index(name = "idx_customer_merchant", columnList = "merchant_id"),
-        @Index(name = "idx_customer_email", columnList = "email")
+        @Index(name = "idx_customer_integration", columnList = "integration"),
+        @Index(name = "idx_customer_email", columnList = "email"),
+        @Index(name = "idx_customer_code", columnList = "code")
     },
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_customer_merchant_email", columnNames = {"merchant_id", "email"})
+        @UniqueConstraint(name = "uk_customer_integration_email", columnNames = {"integration", "email"})
     }
 )
 @Getter
@@ -21,11 +22,15 @@ import java.time.ZonedDateTime;
 public class CustomerJpaEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private String id;
+    private Long id;
+    
+    @Column(name = "code", nullable = false, unique = true)
+    private String code;
 
-    @Column(name = "merchant_id", nullable = false)
-    private String merchantId;
+    @Column(name = "integration", nullable = false)
+    private Long integration;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
