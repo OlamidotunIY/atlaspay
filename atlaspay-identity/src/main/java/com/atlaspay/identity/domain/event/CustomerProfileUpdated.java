@@ -11,7 +11,7 @@ public record CustomerProfileUpdated(
     Payload payload
 ) implements DomainEvent<CustomerProfileUpdated.Payload> {
     public record Payload(
-        String merchantId,
+        Long integration,
         String firstName,
         String lastName,
         String phone
