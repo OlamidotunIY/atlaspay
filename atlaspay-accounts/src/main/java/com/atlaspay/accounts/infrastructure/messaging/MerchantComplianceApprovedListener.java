@@ -2,7 +2,6 @@ package com.atlaspay.accounts.infrastructure.messaging;
 
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
 import com.atlaspay.accounts.application.usecase.IssueVirtualAccountUseCase;
-import com.atlaspay.accounts.domain.model.OwnerType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -31,18 +30,20 @@ public class MerchantComplianceApprovedListener {
 
         // 1. Issue Wema Account
         issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
-                UUID.randomUUID().toString(),
-                merchantId,
-                OwnerType.MERCHANT,
-                "Wema"
+                Long.valueOf(merchantId),
+                "MERCHANT",
+                "Main Account",
+                "Wema Bank",
+                UUID.randomUUID().toString()
         ));
         
         // 2. Issue Zenith Account
         issueVirtualAccountUseCase.execute(new IssueVirtualAccountCommand(
-                UUID.randomUUID().toString(),
-                merchantId,
-                OwnerType.MERCHANT,
-                "Zenith"
+                Long.valueOf(merchantId),
+                "MERCHANT",
+                "Main Account",
+                "Zenith Bank",
+                UUID.randomUUID().toString()
         ));
     }
 
