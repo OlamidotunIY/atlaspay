@@ -28,6 +28,9 @@ These terms have the **same meaning everywhere** in AtlasPay.
 | **Adapter** | An `infrastructure`-layer implementation of a `Port`. Translates between domain language and external system language (HTTP, DB, Kafka). |
 | **Wallet** | An owner's balance account within the AtlasPay ledger. Every merchant and sub-account has at least one wallet. Identified by `walletId`. |
 | **Timestamp** | All timestamps in AtlasPay are stored as `DATETIME(6)` UTC in MySQL and represented as `java.time.ZonedDateTime` (UTC) in Java. Never `java.util.Date`. Never `LocalDateTime` without timezone context. |
+| **Database ID (Internal)** | An internal, auto-incrementing `BIGINT` (`Long` in Java) used strictly as the primary key for all database tables. It must **never** be exposed in API payloads, URLs, or external events. |
+| **Reference Code (External)** | A unique string identifier prefixed by entity type (e.g., `CUS_uuid` for Customers) exposed to public APIs and webhooks. Prevents ID enumeration and hides database scale. Currently only implemented for `Customer`. |
+| **Integration** | The terminology used when an entity (like a `Customer` or `VirtualAccount`) links back to its owning `Merchant`. Represented by the `integration` property (holding the Merchant's database ID), acknowledging the B2B API relationship. |
 
 ---
 
