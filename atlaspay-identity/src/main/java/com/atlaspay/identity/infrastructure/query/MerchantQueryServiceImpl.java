@@ -3,7 +3,6 @@ package com.atlaspay.identity.infrastructure.query;
 import com.atlaspay.identity.application.dto.MerchantProfileDto;
 import com.atlaspay.identity.application.port.MerchantQueryService;
 import com.atlaspay.identity.infrastructure.repository.SpringDataMerchantRepository;
-import com.atlaspay.shared.domain.id.MerchantId;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,8 +17,8 @@ public class MerchantQueryServiceImpl implements MerchantQueryService {
     }
 
     @Override
-    public Optional<MerchantProfileDto> findProfileById(MerchantId merchantId) {
-        return repository.findById(merchantId.value())
+    public Optional<MerchantProfileDto> findProfileById(Long merchantId) {
+        return repository.findById(merchantId)
                 .map(entity -> new MerchantProfileDto(
                         entity.getId(),
                         entity.getBusinessName(),
