@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.CompleteComplianceServiceAgreementCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -12,6 +15,8 @@ import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
 
 public class CompleteComplianceServiceAgreementUseCase extends BaseUseCase<CompleteComplianceServiceAgreementCommand, Void> {
+    private static final Logger log = LoggerFactory.getLogger(CompleteComplianceServiceAgreementUseCase.class);
+
 
     private final MerchantRepository merchantRepository;
     private final DomainEventPublisher eventPublisher;
@@ -23,6 +28,8 @@ public class CompleteComplianceServiceAgreementUseCase extends BaseUseCase<Compl
 
     @Override
     public Void execute(CompleteComplianceServiceAgreementCommand command) {
+        log.info("Executing CompleteComplianceServiceAgreementUseCase");
+
         if (!command.agreed()) {
             throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_ALL_STEPS_COMPLETE, "Must agree to service agreement");
         }

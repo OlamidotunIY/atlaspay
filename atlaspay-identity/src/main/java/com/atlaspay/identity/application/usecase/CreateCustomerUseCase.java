@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.CreateCustomerCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -14,6 +17,8 @@ import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.ConflictException;
 
 public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, CreateCustomerResult> {
+    private static final Logger log = LoggerFactory.getLogger(CreateCustomerUseCase.class);
+
 
     private final CustomerRepository customerRepository;
     private final DomainEventPublisher eventPublisher;
@@ -25,6 +30,8 @@ public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, Cr
 
     @Override
     public CreateCustomerResult execute(CreateCustomerCommand command) {
+        log.info("Executing CreateCustomerUseCase");
+
         if (customerRepository.findByMerchantIdAndEmail(command.merchantId(), command.email()).isPresent()) {
             throw new ConflictException(IdentityErrorCode.CUSTOMER_EMAIL_ALREADY_EXISTS, "Customer with this email already exists for this merchant");
         }

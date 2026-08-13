@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.CompleteComplianceProfileCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -11,6 +14,8 @@ import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
 public class CompleteComplianceProfileUseCase extends BaseUseCase<CompleteComplianceProfileCommand, Void> {
+    private static final Logger log = LoggerFactory.getLogger(CompleteComplianceProfileUseCase.class);
+
 
     private final MerchantRepository merchantRepository;
     private final DomainEventPublisher eventPublisher;
@@ -22,6 +27,8 @@ public class CompleteComplianceProfileUseCase extends BaseUseCase<CompleteCompli
 
     @Override
     public Void execute(CompleteComplianceProfileCommand command) {
+        log.info("Executing CompleteComplianceProfileUseCase");
+
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
 

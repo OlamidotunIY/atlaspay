@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.dto.SubAccountDto;
 import com.atlaspay.identity.application.port.SubAccountQueryService;
 import com.atlaspay.identity.application.query.ListSubAccountsQuery;
@@ -7,6 +10,8 @@ import com.atlaspay.shared.usecase.BaseUseCase;
 import com.atlaspay.shared.util.PageResult;
 
 public class ListSubAccountsUseCase extends BaseUseCase<ListSubAccountsQuery, PageResult<SubAccountDto>> {
+    private static final Logger log = LoggerFactory.getLogger(ListSubAccountsUseCase.class);
+
 
     private final SubAccountQueryService queryService;
 
