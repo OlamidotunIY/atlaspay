@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataMerchantRepository extends JpaRepository<MerchantJpaEntity, String> {
+public interface SpringDataMerchantRepository extends JpaRepository<MerchantJpaEntity, Long> {
     Optional<MerchantJpaEntity> findByEmail(String email);
 }
