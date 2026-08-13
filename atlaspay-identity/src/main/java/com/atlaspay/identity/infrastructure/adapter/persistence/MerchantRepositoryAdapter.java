@@ -5,7 +5,6 @@ import com.atlaspay.identity.domain.model.ComplianceStep;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.identity.infrastructure.entity.MerchantJpaEntity;
 import com.atlaspay.identity.infrastructure.repository.SpringDataMerchantRepository;
-import com.atlaspay.shared.domain.id.MerchantId;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import org.springframework.stereotype.Repository;
@@ -29,8 +28,8 @@ public class MerchantRepositoryAdapter implements MerchantRepository {
     }
 
     @Override
-    public Optional<Merchant> findById(MerchantId id) {
-        return jpaRepository.findById(id.value()).map(this::toDomain);
+    public Optional<Merchant> findById(Long id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
@@ -40,7 +39,7 @@ public class MerchantRepositoryAdapter implements MerchantRepository {
 
     private MerchantJpaEntity toEntity(Merchant domain) {
         MerchantJpaEntity entity = new MerchantJpaEntity();
-        entity.setId(domain.getId().value());
+        entity.setId(domain.getId());
         entity.setCountry(domain.getCountry());
         entity.setBusinessName(domain.getBusinessName());
         entity.setFirstName(domain.getFirstName());
@@ -59,7 +58,7 @@ public class MerchantRepositoryAdapter implements MerchantRepository {
 
     private Merchant toDomain(MerchantJpaEntity entity) {
         Merchant merchant = new Merchant(
-                new MerchantId(entity.getId()),
+                entity.getId(),
                 entity.getCountry(),
                 entity.getBusinessName(),
                 entity.getFirstName(),

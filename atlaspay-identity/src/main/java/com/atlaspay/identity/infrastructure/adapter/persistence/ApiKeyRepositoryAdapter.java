@@ -6,8 +6,6 @@ import com.atlaspay.identity.domain.model.KeyType;
 import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.identity.infrastructure.entity.ApiKeyJpaEntity;
 import com.atlaspay.identity.infrastructure.repository.SpringDataApiKeyRepository;
-import com.atlaspay.shared.domain.id.ApiKeyId;
-import com.atlaspay.shared.domain.id.MerchantId;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,8 +29,8 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
     }
 
     @Override
-    public Optional<ApiKey> findById(ApiKeyId id) {
-        return jpaRepository.findById(id.value()).map(this::toDomain);
+    public Optional<ApiKey> findById(Long id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
@@ -41,21 +39,21 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
     }
 
     @Override
-    public Optional<ApiKey> findByMerchantIdAndKeyTypeAndEnvironmentAndActiveTrue(MerchantId merchantId, KeyType keyType, ApiEnvironment environment) {
-        return jpaRepository.findByMerchantIdAndKeyTypeAndEnvironmentAndActiveTrue(merchantId.value(), keyType, environment).map(this::toDomain);
+    public Optional<ApiKey> findByMerchantIdAndKeyTypeAndEnvironmentAndActiveTrue(Long merchantId, KeyType keyType, ApiEnvironment environment) {
+        return jpaRepository.findByIntegrationAndKeyTypeAndEnvironmentAndActiveTrue(merchantId, keyType, environment).map(this::toDomain);
     }
 
     @Override
-    public List<ApiKey> findAllByMerchantId(MerchantId merchantId) {
-        return jpaRepository.findAllByMerchantId(merchantId.value()).stream()
+    public List<ApiKey> findAllByMerchantId(Long merchantId) {
+        return jpaRepository.findAllByIntegration(merchantId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
 
     private ApiKeyJpaEntity toEntity(ApiKey domain) {
         ApiKeyJpaEntity entity = new ApiKeyJpaEntity();
-        entity.setId(domain.getId().value());
-        entity.setMerchantId(domain.getMerchantId().value());
+        entity.setId(domain.getId());
+        entity.setIntegration(domain.getMerchantId());
         entity.setKeyType(domain.getKeyType());
         entity.setEnvironment(domain.getEnvironment());
         entity.setKeyHash(domain.getKeyHash());
@@ -69,8 +67,8 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
 
     private ApiKey toDomain(ApiKeyJpaEntity entity) {
         ApiKey key = new ApiKey(
-                new ApiKeyId(entity.getId()),
-                new MerchantId(entity.getMerchantId()),
+                entity.getId(),
+                entity.getIntegration(),
                 entity.getKeyType(),
                 entity.getEnvironment(),
                 entity.getKeyHash(),
