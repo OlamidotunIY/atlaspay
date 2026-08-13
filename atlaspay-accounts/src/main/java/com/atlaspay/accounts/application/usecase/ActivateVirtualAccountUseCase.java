@@ -21,7 +21,7 @@ public class ActivateVirtualAccountUseCase extends BaseUseCase<ActivateVirtualAc
         VirtualAccount account = repository.findById(Long.valueOf(command.referenceId()))
                 .orElseThrow(() -> new NotFoundException(AccountsErrorCode.ACCOUNT_NOT_FOUND, "Account not found"));
         
-        account.assignIdAndNuban(Long.valueOf(command.referenceId()), new NUBAN(command.nuban()));
+        account.activate(new NUBAN(command.nuban()));
         
         repository.save(account);
         publishEvents(account, eventPublisher);

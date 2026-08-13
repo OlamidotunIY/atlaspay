@@ -6,6 +6,7 @@ import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
 import com.atlaspay.accounts.infrastructure.entity.VirtualAccountEntity;
 import com.atlaspay.accounts.infrastructure.repository.JpaVirtualAccountRepository;
 import com.atlaspay.shared.domain.valueobject.NUBAN;
+import com.atlaspay.shared.infrastructure.DomainSequenceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRepository {
 
     private final JpaVirtualAccountRepository repository;
+    private final DomainSequenceGenerator sequenceGenerator;
 
     @Override
     public VirtualAccount save(VirtualAccount account) {
@@ -56,6 +58,12 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
     @Override
     public boolean existsByNuban(NUBAN nuban) {
         return repository.existsByNuban(nuban.value());
+    }
+
+
+    @Override
+    public Long nextIdentity() {
+        return sequenceGenerator.nextIdentity("virtual_account_seq");
     }
 
     private VirtualAccountEntity toEntity(VirtualAccount domain) {

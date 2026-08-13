@@ -28,7 +28,7 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
             throw new BusinessRuleException(AccountsErrorCode.INVALID_ACCOUNT_STATE, "Merchant already has an account with Wema Bank");
         }
 
-        VirtualAccount account = VirtualAccount.create(
+        VirtualAccount account = VirtualAccount.create(repository.nextIdentity(), 
                 command.integration(), 
                 command.customerCode(), 
                 command.accountName(), 
