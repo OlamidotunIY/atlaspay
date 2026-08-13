@@ -19,9 +19,10 @@ public class DomainSequenceGenerator {
         seedSequence("merchant_seq", 1000L);
         seedSequence("customer_seq", 1000L);
         seedSequence("virtual_account_seq", 1000L);
-        seedSequence("sub_account_seq", 1000L);
+        seedSequence("subaccount_seq", 1000L);
         seedSequence("transaction_seq", 10000L);
         seedSequence("wallet_seq", 1000L);
+        seedSequence("apikey_seq", 1000L);
     }
 
     private void seedSequence(String sequenceName, Long initialValue) {
