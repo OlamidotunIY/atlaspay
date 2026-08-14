@@ -1,7 +1,10 @@
 package com.atlaspay.identity.infrastructure.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
@@ -18,7 +21,8 @@ import java.time.ZonedDateTime;
     }
 )
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomerJpaEntity {
 
     @Id
@@ -46,6 +50,7 @@ public class CustomerJpaEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;
 
+    @Setter
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
 }
