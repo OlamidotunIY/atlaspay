@@ -34,8 +34,30 @@ public class GenerateSimulatorAccountUseCase extends BaseUseCase<GenerateSimulat
                 "COMPLETED"
         );
         
-        // Note: Realistically, we'd also fire a webhook here to the callbackUrl,
-        // but for now we focus on the NUBAN generation part.
+        Thread.startVirtualThread(() -> {
+            try {
+                Thread.sleep(java.time.Duration.ofSeconds(new java.util.Random().nextInt(3) + 1));
+                
+                java.util.Map<String, Object> webhookPayload = java.util.Map.of(
+                        "event", "virtual_account.created",
+                        "data", java.util.Map.of(
+                                "reference", command.referenceId(),
+                                "nuban", nuban
+                        )
+                );
+
+                org.springframework.web.client.RestClient.create().post()
+                        .uri(command.callbackUrl())
+                        .header("X-Simulator-Signature", "dummy")
+                        .body(webhookPayload)
+                        .retrieve()
+                        .toBodilessEntity();
+                        
+                System.out.println("Simulator successfully fired webhook to " + command.callbackUrl());
+            } catch (Exception e) {
+                System.err.println("Simulator failed to fire webhook: " + e.getMessage());
+            }
+        });
         
         return null;
     }
