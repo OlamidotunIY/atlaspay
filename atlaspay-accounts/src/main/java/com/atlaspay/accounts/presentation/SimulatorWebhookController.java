@@ -2,6 +2,7 @@ package com.atlaspay.accounts.presentation;
 
 import com.atlaspay.accounts.application.command.ActivateVirtualAccountCommand;
 import com.atlaspay.accounts.application.usecase.ActivateVirtualAccountUseCase;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/accounts/webhooks")
+@Tag(name = "Simulator Webhooks", description = "Mock banking provider webhooks (For testing)")
 @RequiredArgsConstructor
 public class SimulatorWebhookController {
 

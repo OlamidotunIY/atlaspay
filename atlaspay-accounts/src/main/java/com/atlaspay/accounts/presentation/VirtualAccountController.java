@@ -1,7 +1,7 @@
 package com.atlaspay.accounts.presentation;
 
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
-import com.atlaspay.accounts.application.command.ForceCloseAccountsCommand;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.atlaspay.accounts.application.query.GetVirtualAccountsQuery;
 import com.atlaspay.accounts.application.usecase.IssueVirtualAccountUseCase;
 import com.atlaspay.accounts.application.usecase.GetVirtualAccountsUseCase;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/dedicated_account")
+@Tag(name = "Dedicated Accounts", description = "Dedicated virtual account management")
 @RequiredArgsConstructor
 public class VirtualAccountController {
 
