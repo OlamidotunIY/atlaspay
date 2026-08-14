@@ -59,6 +59,22 @@ public class ApiKey extends AggregateRoot<Long> {
         ));
     }
 
+    // Reconstitution constructor for Mappers
+    public ApiKey(Long id, Long merchantId, KeyType keyType, ApiEnvironment environment, 
+                  String keyHash, String displayValue, String prefix, boolean active, 
+                  ZonedDateTime createdAt, ZonedDateTime revokedAt) {
+        this.id = id;
+        this.merchantId = merchantId;
+        this.keyType = keyType;
+        this.environment = environment;
+        this.keyHash = keyHash;
+        this.displayValue = displayValue;
+        this.prefix = prefix;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.revokedAt = revokedAt;
+    }
+
     public void revoke() {
         if (!this.active) {
             throw new BusinessRuleException(IdentityErrorCode.API_KEY_ALREADY_REVOKED, "API Key is already revoked");
