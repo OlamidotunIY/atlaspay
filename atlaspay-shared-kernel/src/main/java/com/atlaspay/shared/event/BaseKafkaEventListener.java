@@ -39,7 +39,9 @@ public abstract class BaseKafkaEventListener {
                 return;
             }
 
-            action.accept(root);
+            // Pass the inner 'event' node so consumers don't have to deal with the Enveloped wrapper
+            JsonNode eventNode = root.has("event") ? root.get("event") : root;
+            action.accept(eventNode);
         } catch (Exception e) {
             log.error("Failed to parse or process event. Expected type: {}. Payload: {}", expectedEventType, messagePayload, e);
         }
