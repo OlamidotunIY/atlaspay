@@ -48,4 +48,9 @@ public class OutboxMessageJpaEntity {
         this.processedAt = processedAt;
     }
 
+    public void updateStatus(OutboxStatus status, ZonedDateTime processedAt) {
+        this.status = status;
+        this.processedAt = processedAt;
+    }
+
 }

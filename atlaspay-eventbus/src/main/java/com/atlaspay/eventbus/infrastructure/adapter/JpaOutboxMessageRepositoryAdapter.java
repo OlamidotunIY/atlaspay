@@ -21,7 +21,13 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     @Override
     public void save(OutboxMessage message) {
-        repository.save(mapToEntity(message));
+        OutboxMessageJpaEntity entity = repository.findById(message.getId()).orElse(null);
+        if (entity != null) {
+            entity.updateStatus(message.getStatus(), message.getProcessedAt());
+            repository.save(entity);
+        } else {
+            repository.save(mapToEntity(message));
+        }
     }
 
     @Override
@@ -34,7 +40,16 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
     @Override
     public void saveAll(List<OutboxMessage> messages) {
-        repository.saveAll(messages.stream().map(this::mapToEntity).collect(Collectors.toList()));
+        List<OutboxMessageJpaEntity> entitiesToSave = messages.stream().map(domain -> {
+            OutboxMessageJpaEntity entity = repository.findById(domain.getId()).orElse(null);
+            if (entity != null) {
+                entity.updateStatus(domain.getStatus(), domain.getProcessedAt());
+                return entity;
+            } else {
+                return mapToEntity(domain);
+            }
+        }).collect(Collectors.toList());
+        repository.saveAll(entitiesToSave);
     }
 
     private OutboxMessageJpaEntity mapToEntity(OutboxMessage domain) {
