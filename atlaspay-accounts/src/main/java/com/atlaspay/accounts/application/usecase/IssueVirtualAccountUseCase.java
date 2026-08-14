@@ -24,15 +24,15 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
         if (queryService.countByIntegration(command.integration()) >= 2) {
             throw new BusinessRuleException(AccountsErrorCode.INVALID_ACCOUNT_STATE, "Merchant can have at most 2 accounts");
         }
-        if (queryService.existsByIntegrationAndBankName(command.integration(), "Wema Bank")) {
-            throw new BusinessRuleException(AccountsErrorCode.INVALID_ACCOUNT_STATE, "Merchant already has an account with Wema Bank");
+        if (queryService.existsByIntegrationAndBankName(command.integration(), command.bankName())) {
+            throw new BusinessRuleException(AccountsErrorCode.INVALID_ACCOUNT_STATE, "Merchant already has an account with " + command.bankName());
         }
 
         VirtualAccount account = VirtualAccount.create(repository.nextIdentity(), 
                 command.integration(), 
                 command.customerCode(), 
                 command.accountName(), 
-                "Wema Bank", // Assuming default bank for now
+                command.bankName(),
                 command.idempotencyKey()
         );
         

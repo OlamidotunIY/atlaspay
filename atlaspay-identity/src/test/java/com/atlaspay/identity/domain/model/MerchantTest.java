@@ -18,7 +18,7 @@ class MerchantTest {
 
     @Test
     void shouldRegisterSuccessfully() {
-        Merchant merchant = new Merchant(Long.valueOf("mer_1"), "NG", "Test Inc", "John", "Doe", new EmailAddress("test@atlaspay.com"), new PhoneNumber("+2348000000000"), "hashedPass", BusinessType.REGISTERED);
+        Merchant merchant = new Merchant(1L, "NG", "Test Inc", "John", "Doe", new EmailAddress("test@atlaspay.com"), new PhoneNumber("+2348000000000"), "hashedPass", BusinessType.REGISTERED);
         
         assertEquals(ComplianceStatus.NOT_STARTED, merchant.getComplianceStatus());
         assertEquals("Test Inc", merchant.getBusinessName());
@@ -27,7 +27,7 @@ class MerchantTest {
 
     @Test
     void shouldCompleteComplianceStep() {
-        Merchant merchant = new Merchant(Long.valueOf("mer_1"), "NG", "Test Inc", "John", "Doe", new EmailAddress("test@atlaspay.com"), new PhoneNumber("+2348000000000"), "hashedPass", BusinessType.REGISTERED);
+        Merchant merchant = new Merchant(1L, "NG", "Test Inc", "John", "Doe", new EmailAddress("test@atlaspay.com"), new PhoneNumber("+2348000000000"), "hashedPass", BusinessType.REGISTERED);
         merchant.pullDomainEvents(); // clear initial events
         
         merchant.updateComplianceProfile("Desc", StaffSize.ONE_TO_TEN, "IT", "Tech", java.math.BigDecimal.valueOf(1000), "NGN");
