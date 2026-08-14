@@ -13,6 +13,8 @@ dependencies {
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
