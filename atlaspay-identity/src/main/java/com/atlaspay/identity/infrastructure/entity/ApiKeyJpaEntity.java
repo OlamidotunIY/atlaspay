@@ -8,10 +8,18 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "api_keys")
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ApiKeyJpaEntity {
 
     @Id
@@ -38,12 +46,14 @@ public class ApiKeyJpaEntity {
     @Column(name = "prefix", nullable = false)
     private String prefix;
 
+    @Setter
     @Column(name = "active", nullable = false)
     private boolean active;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;
 
+    @Setter
     @Column(name = "revoked_at")
     private ZonedDateTime revokedAt;
 }
