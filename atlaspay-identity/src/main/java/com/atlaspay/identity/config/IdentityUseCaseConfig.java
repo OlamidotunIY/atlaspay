@@ -14,8 +14,8 @@ public class IdentityUseCaseConfig {
     @Bean
     public RegisterMerchantUseCase registerMerchantUseCase(
             MerchantRepository merchantRepository, PasswordEncoder passwordEncoder, 
-            GenerateTestApiKeyPairUseCase generateTestApiKeyPairUseCase, DomainEventPublisher eventPublisher) {
-        return new RegisterMerchantUseCase(merchantRepository, passwordEncoder, generateTestApiKeyPairUseCase, eventPublisher);
+            DomainEventPublisher eventPublisher) {
+        return new RegisterMerchantUseCase(merchantRepository, passwordEncoder, eventPublisher);
     }
 
     @Bean

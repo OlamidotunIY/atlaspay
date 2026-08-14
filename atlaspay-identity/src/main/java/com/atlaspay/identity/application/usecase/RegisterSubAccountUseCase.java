@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.RegisterSubAccountCommand;
 import com.atlaspay.identity.application.dto.SubAccountDto;
 import com.atlaspay.identity.application.port.AccountNameResolutionPort;
@@ -13,6 +16,8 @@ import com.atlaspay.identity.application.dto.RegisterSubAccountResult;
 
 @Component
 public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCommand, RegisterSubAccountResult> {
+    private static final Logger log = LoggerFactory.getLogger(RegisterSubAccountUseCase.class);
+
 
     private final SubAccountRepository subAccountRepository;
     private final AccountNameResolutionPort accountNameResolutionPort;
@@ -28,6 +33,8 @@ public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCom
 
     @Override
     public RegisterSubAccountResult execute(RegisterSubAccountCommand input) {
+        log.info("Executing RegisterSubAccountUseCase");
+
         String accountName = accountNameResolutionPort.resolve(input.bankCode(), input.accountNumber());
         
         SubAccount subAccount = new SubAccount(subAccountRepository.nextIdentity(),

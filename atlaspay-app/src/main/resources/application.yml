@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   application:
     name: atlaspay
   datasource:
@@ -29,12 +31,22 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   threads:
     virtual:
       enabled: true   # Java 21 virtual threads for all Tomcat request threads
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 # ── Actuator ──────────────────────────────────────────────────────────────────
 management:
@@ -76,6 +88,9 @@ atlaspay:
     base-url: ${DOJAH_BASE_URL:https://sandbox.dojah.io}
     app-id: ${DOJAH_APP_ID:}
     private-key: ${DOJAH_PRIVATE_KEY:}
+  simulator:
+    base-url: ${SIMULATOR_BASE_URL:http://localhost:8080}
+    callback-url: ${SIMULATOR_CALLBACK_URL:http://localhost:8080/api/v1/accounts/webhooks/simulator}
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 logging:
@@ -83,4 +98,5 @@ logging:
     root: INFO
     com.atlaspay: DEBUG
     org.hibernate.SQL: INFO
+    org.apache.kafka: WARN
   config: classpath:logback-spring.xml

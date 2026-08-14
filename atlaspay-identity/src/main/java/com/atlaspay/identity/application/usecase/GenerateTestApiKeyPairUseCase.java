@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -15,6 +18,8 @@ import com.atlaspay.shared.event.DomainEventPublisher;
 import java.util.UUID;
 
 public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKeyPairCommand, ApiKeyPairResult> {
+    private static final Logger log = LoggerFactory.getLogger(GenerateTestApiKeyPairUseCase.class);
+
 
     private final ApiKeyRepository apiKeyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -28,6 +33,8 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
 
     @Override
     public ApiKeyPairResult execute(GenerateTestApiKeyPairCommand command) {
+        log.info("Executing GenerateTestApiKeyPairUseCase");
+
         String rawPublicKey = "pk_test_" + UUID.randomUUID().toString().replace("-", "");
         String rawSecretKey = "sk_test_" + UUID.randomUUID().toString().replace("-", "");
 

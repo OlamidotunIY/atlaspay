@@ -16,10 +16,15 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/v1/merchants")
 @Tag(name = "Merchants", description = "Merchant onboarding and profile management")
 public class MerchantController {
+
+    private static final Logger log = LoggerFactory.getLogger(MerchantController.class);
 
     private final RegisterMerchantUseCase registerMerchantUseCase;
     private final GetMerchantProfileUseCase getMerchantProfileUseCase;
@@ -53,8 +58,9 @@ public class MerchantController {
     }
 
     @PostMapping
-    @Operation(summary = "Register a new merchant", description = "Creates a new merchant account and returns initial API keys")
+    @Operation(summary = "Register a new merchant", description = "Creates a new merchant account")
     public ResponseEntity<RegisterMerchantResult> register(@Valid @RequestBody RegisterMerchantRequest request) {
+        log.info("Received request to register merchant with email: {}", request.email());
         RegisterMerchantCommand command = new RegisterMerchantCommand(
                 request.country(),
                 request.businessName(),
@@ -66,6 +72,7 @@ public class MerchantController {
                 request.businessType()
         );
         RegisterMerchantResult result = registerMerchantUseCase.execute(command);
+        log.info("Successfully processed registration for merchant ID: {}", result.merchantId());
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
@@ -73,6 +80,7 @@ public class MerchantController {
     @Operation(summary = "Get merchant profile", description = "Retrieves the profile of the authenticated merchant")
     public ResponseEntity<MerchantProfileDto> getProfile(Principal principal) {
         String merchantIdStr = principal != null ? principal.getName() : "anonymous";
+        log.debug("Fetching profile for merchant ID: {}", merchantIdStr);
         GetMerchantProfileQuery query = new GetMerchantProfileQuery(Long.valueOf(merchantIdStr));
         MerchantProfileDto result = getMerchantProfileUseCase.execute(query);
         return ResponseEntity.ok(result);

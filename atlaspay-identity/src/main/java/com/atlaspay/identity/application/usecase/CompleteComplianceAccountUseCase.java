@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.CompleteComplianceAccountCommand;
 import com.atlaspay.identity.application.port.AccountNameResolutionPort;
 import com.atlaspay.identity.domain.model.ComplianceStatus;
@@ -15,6 +18,8 @@ import java.util.Map;
 
 @Component
 public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteComplianceAccountCommand, ComplianceStatus> {
+    private static final Logger log = LoggerFactory.getLogger(CompleteComplianceAccountUseCase.class);
+
 
     private final MerchantRepository merchantRepository;
     private final AccountNameResolutionPort accountNameResolutionPort;
@@ -31,6 +36,8 @@ public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteCompli
 
     @Override
     public ComplianceStatus execute(CompleteComplianceAccountCommand command) {
+        log.info("Executing CompleteComplianceAccountUseCase");
+
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
 

@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.RegenerateApiKeyCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -19,6 +22,8 @@ import com.atlaspay.shared.exception.NotFoundException;
 import java.util.UUID;
 
 public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand, String> {
+    private static final Logger log = LoggerFactory.getLogger(RegenerateApiKeyUseCase.class);
+
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
@@ -38,6 +43,8 @@ public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand
 
     @Override
     public String execute(RegenerateApiKeyCommand command) {
+        log.info("Executing RegenerateApiKeyUseCase");
+
         if (command.environment() == ApiEnvironment.LIVE) {
             Merchant merchant = merchantRepository.findById(command.authenticatedMerchantId())
                     .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));

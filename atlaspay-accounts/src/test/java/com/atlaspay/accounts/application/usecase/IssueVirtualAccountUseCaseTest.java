@@ -2,7 +2,6 @@ package com.atlaspay.accounts.application.usecase;
 
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
 import com.atlaspay.accounts.application.port.out.VirtualAccountQueryService;
-import com.atlaspay.accounts.domain.model.OwnerType;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
@@ -31,9 +30,9 @@ class IssueVirtualAccountUseCaseTest {
 
     @Test
     void shouldThrowExceptionWhenMerchantHasTwoAccounts() {
-        when(queryService.countByOwnerId("mer_1")).thenReturn(2L);
+        when(queryService.countByIntegration(1L)).thenReturn(2);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand("idem1", "mer_1", OwnerType.MERCHANT, "Wema");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", "idem1");
         
         assertThrows(BusinessRuleException.class, () -> useCase.execute(cmd));
         verify(repository, never()).save(any());
@@ -41,10 +40,10 @@ class IssueVirtualAccountUseCaseTest {
 
     @Test
     void shouldThrowExceptionWhenMerchantHasDuplicateBank() {
-        when(queryService.countByOwnerId("mer_1")).thenReturn(1L);
-        when(queryService.existsByOwnerIdAndBankName("mer_1", "Wema")).thenReturn(true);
+        when(queryService.countByIntegration(1L)).thenReturn(1);
+        when(queryService.existsByIntegrationAndBankName(1L, "Wema")).thenReturn(true);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand("idem2", "mer_1", OwnerType.MERCHANT, "Wema");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", "idem2");
         
         assertThrows(BusinessRuleException.class, () -> useCase.execute(cmd));
         verify(repository, never()).save(any());
@@ -52,11 +51,11 @@ class IssueVirtualAccountUseCaseTest {
 
     @Test
     void shouldSaveAccountWhenValid() {
-        when(queryService.countByOwnerId("mer_1")).thenReturn(0L);
-        when(queryService.existsByOwnerIdAndBankName(any(), any())).thenReturn(false);
+        when(queryService.countByIntegration(1L)).thenReturn(0);
+        when(queryService.existsByIntegrationAndBankName(any(), any())).thenReturn(false);
         when(repository.save(any(VirtualAccount.class))).thenAnswer(i -> i.getArguments()[0]);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand("idem3", "mer_1", OwnerType.MERCHANT, "Zenith");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Zenith", "idem3");
         
         useCase.execute(cmd);
         

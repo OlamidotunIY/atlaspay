@@ -1,8 +1,6 @@
 package com.atlaspay.identity.application.usecase;
 
-import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 import com.atlaspay.identity.application.command.RegisterMerchantCommand;
-import com.atlaspay.identity.application.dto.ApiKeyPairResult;
 import com.atlaspay.identity.application.dto.RegisterMerchantResult;
 import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.BusinessType;
@@ -42,7 +40,6 @@ class RegisterMerchantUseCaseTest {
 
     @Mock private MerchantRepository merchantRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private GenerateTestApiKeyPairUseCase generateTestApiKeyPairUseCase;
     @Mock private DomainEventPublisher eventPublisher;
 
     private RegisterMerchantUseCase useCase;
@@ -63,7 +60,6 @@ class RegisterMerchantUseCaseTest {
         useCase = new RegisterMerchantUseCase(
                 merchantRepository,
                 passwordEncoder,
-                generateTestApiKeyPairUseCase,
                 eventPublisher
         );
     }
@@ -71,21 +67,17 @@ class RegisterMerchantUseCaseTest {
     // ── Happy path ────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("should register a new merchant and return test API key pair")
-    void shouldRegisterMerchantAndReturnApiKeys() {
+    @DisplayName("should register a new merchant and return merchant id")
+    void shouldRegisterMerchantAndReturnId() {
         // Arrange
         when(merchantRepository.findByEmail(VALID_COMMAND.email())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(VALID_COMMAND.password())).thenReturn("hashed_password");
-        when(generateTestApiKeyPairUseCase.execute(any(GenerateTestApiKeyPairCommand.class)))
-                .thenReturn(new ApiKeyPairResult("pk_test_abc123", "sk_test_xyz789"));
 
         // Act
         RegisterMerchantResult result = useCase.execute(VALID_COMMAND);
 
         // Assert
         assertThat(result.merchantId()).isNotNull();
-        assertThat(result.testPublicKey()).isEqualTo("pk_test_abc123");
-        assertThat(result.testSecretKey()).isEqualTo("sk_test_xyz789");
 
         // Verify the merchant was persisted exactly once
         ArgumentCaptor<Merchant> captor = ArgumentCaptor.forClass(Merchant.class);
@@ -101,33 +93,12 @@ class RegisterMerchantUseCaseTest {
         // Arrange
         when(merchantRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(passwordEncoder.encode("secureP@ss123")).thenReturn("bcrypt_hashed");
-        when(generateTestApiKeyPairUseCase.execute(any())).thenReturn(
-                new ApiKeyPairResult("pk_test_abc", "sk_test_abc"));
 
         // Act
         useCase.execute(VALID_COMMAND);
 
         // Assert
         verify(passwordEncoder).encode("secureP@ss123");
-    }
-
-    @Test
-    @DisplayName("should generate test API keys for the newly created merchant")
-    void shouldGenerateTestApiKeysForNewMerchant() {
-        // Arrange
-        when(merchantRepository.findByEmail(any())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(any())).thenReturn("hashed");
-        when(generateTestApiKeyPairUseCase.execute(any())).thenReturn(
-                new ApiKeyPairResult("pk_test_X", "sk_test_X"));
-
-        // Act
-        useCase.execute(VALID_COMMAND);
-
-        // Assert — verify keys were generated for the saved merchant's ID
-        ArgumentCaptor<GenerateTestApiKeyPairCommand> cmdCaptor =
-                ArgumentCaptor.forClass(GenerateTestApiKeyPairCommand.class);
-        verify(generateTestApiKeyPairUseCase).execute(cmdCaptor.capture());
-        assertThat(cmdCaptor.getValue().merchantId()).isNotNull();
     }
 
     // ── Conflict ──────────────────────────────────────────────────────────────

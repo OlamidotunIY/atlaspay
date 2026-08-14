@@ -1,5 +1,8 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlaspay.identity.application.command.GenerateLiveApiKeyPairCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
@@ -20,6 +23,8 @@ import com.atlaspay.identity.application.port.PasswordEncoder;
 import java.util.UUID;
 
 public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKeyPairCommand, ApiKeyPairResult> {
+    private static final Logger log = LoggerFactory.getLogger(GenerateLiveApiKeyPairUseCase.class);
+
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
@@ -39,6 +44,8 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
 
     @Override
     public ApiKeyPairResult execute(GenerateLiveApiKeyPairCommand command) {
+        log.info("Executing GenerateLiveApiKeyPairUseCase");
+
         Merchant merchant = merchantRepository.findById(command.merchantId())
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.MERCHANT_NOT_FOUND, "Merchant not found"));
 
