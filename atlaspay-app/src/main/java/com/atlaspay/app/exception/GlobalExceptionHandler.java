@@ -47,6 +47,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex);
     }
 
+    @ExceptionHandler(com.atlaspay.shared.exception.AuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(com.atlaspay.shared.exception.AuthorizationException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex);
+    }
+
     @ExceptionHandler(AtlasPayException.class)
     public ResponseEntity<ErrorResponse> handleAtlasPayException(AtlasPayException ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
