@@ -155,9 +155,9 @@ atlaspay-accounts/
 
 ### 5.2 Simulator Adapter (`SimulatorAccountAdapter`)
 *   Implements `AccountIssuancePort`.
-*   Uses `org.springframework.web.client.RestClient` (Java 21).
-*   Makes an outbound `POST` request to the Simulator's URL (configured via `@Value("${atlaspay.simulator.url}")`).
-*   Handles timeouts using Resilience4j `CircuitBreaker`.
+*   Injects a centralized `simulatorRestClient` configured in `atlaspay-app` (via `SimulatorConfig`).
+*   Makes an outbound `POST` request to `/simulator/mock/accounts/issue`.
+*   Passes the `callbackUrl` (e.g. `/api/v1/accounts/webhooks/simulator`) to the simulator to enable asynchronous webhook responses.
 
 ---
 
