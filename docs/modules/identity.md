@@ -849,6 +849,35 @@ Admin-scoped endpoints (`/admin/**`) require `ROLE_ADMIN` and do accept `merchan
 
 ---
 
+### Auth Endpoints
+
+#### `POST /auth/login` — Merchant Login
+
+**Auth:** Public
+
+**Request Body:**
+```json
+{
+  "email": "admin@acmecorp.com",
+  "password": "securePassword123!"
+}
+```
+
+**Response `200 OK`:**
+```json
+{
+  "token": "eyJ..."
+}
+```
+
+**Error Responses:**
+
+| Status | Error Code | Condition |
+|---|---|---|
+| `401` | `INVALID_CREDENTIALS` | Incorrect email or password |
+
+---
+
 ### Merchant Endpoints
 
 #### `POST /merchants` — Register a new Merchant
