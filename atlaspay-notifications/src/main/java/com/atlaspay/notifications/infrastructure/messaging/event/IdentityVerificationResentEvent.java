@@ -1,4 +1,4 @@
-package com.atlaspay.notifications.infrastructure.messaging.dto;
+package com.atlaspay.notifications.infrastructure.messaging.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

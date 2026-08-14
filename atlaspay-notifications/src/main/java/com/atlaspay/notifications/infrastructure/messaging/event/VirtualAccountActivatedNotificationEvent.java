@@ -1,4 +1,4 @@
-package com.atlaspay.notifications.infrastructure.messaging.dto;
+package com.atlaspay.notifications.infrastructure.messaging.event;
 
 public record VirtualAccountActivatedNotificationEvent(
         String eventId,
