@@ -34,6 +34,10 @@ public class Merchant extends AggregateRoot<Long> {
     public Merchant(Long id, String country, String businessName, String firstName, String lastName,
                     EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType) {
         
+        if (country == null || (!country.equalsIgnoreCase("NG") && !country.equalsIgnoreCase("Nigeria"))) {
+            throw new BusinessRuleException(IdentityErrorCode.UNSUPPORTED_COUNTRY, "Currently, only merchants in Nigeria (NG) are supported.");
+        }
+
         this.id = id;
         this.country = country;
         this.businessName = businessName;
@@ -65,6 +69,29 @@ public class Merchant extends AggregateRoot<Long> {
                 this.emailVerificationCode.getCode()
             )
         ));
+    }
+
+    // Reconstitution constructor for Mappers
+    public Merchant(Long id, String country, String businessName, String firstName, String lastName,
+                    EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType,
+                    boolean emailVerified, ComplianceStatus complianceStatus, ComplianceStep complianceStep,
+                    ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+        this.id = id;
+        this.country = country;
+        this.businessName = businessName;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.hashedPassword = hashedPassword;
+        this.businessType = businessType;
+        this.emailVerified = emailVerified;
+        this.emailVerificationCode = null; // Normally loaded from DB, simplified for MVP
+        this.complianceStatus = complianceStatus;
+        this.complianceStep = complianceStep;
+        this.compliance = new MerchantCompliance();
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public void verifyEmail(String code) {
