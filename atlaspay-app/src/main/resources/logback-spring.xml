@@ -29,7 +29,7 @@
     </appender>
 
     <!-- ── Profile-specific selection ───────────────────────────────────── -->
-    <springProfile name="local,test">
+    <springProfile name="local,test,default">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
