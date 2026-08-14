@@ -9,7 +9,7 @@ dependencies {
 
     // ── Planned modules — uncomment each one as it is implemented ───────────
     implementation project(':atlaspay-accounts')
-    // implementation project(':atlaspay-ledger')
+    implementation project(':atlaspay-ledger')
     // implementation project(':atlaspay-transfers')
     // implementation project(':atlaspay-charges')
     // implementation project(':atlaspay-subscriptions')
@@ -22,6 +22,7 @@ dependencies {
     implementation project(':atlaspay-eventbus')
 
     // ── Spring Boot ─────────────────────────────────────────────────────────
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
