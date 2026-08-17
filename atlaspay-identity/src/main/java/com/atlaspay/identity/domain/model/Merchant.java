@@ -3,6 +3,7 @@ package com.atlaspay.identity.domain.model;
 import com.atlaspay.identity.domain.event.*;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.domain.AggregateRoot;
+import com.atlaspay.shared.domain.valueobject.Country;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.exception.BusinessRuleException;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public class Merchant extends AggregateRoot<Long> {
 
     private final Long id;
-    private final String country;
+    private final Country country;
     private String businessName;
     private String firstName;
     private String lastName;
@@ -31,10 +32,10 @@ public class Merchant extends AggregateRoot<Long> {
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
 
-    public Merchant(Long id, String country, String businessName, String firstName, String lastName,
+    public Merchant(Long id, Country country, String businessName, String firstName, String lastName,
                     EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType) {
         
-        if (country == null || (!country.equalsIgnoreCase("NG") && !country.equalsIgnoreCase("Nigeria"))) {
+        if (country == null || country != Country.NIGERIA) {
             throw new BusinessRuleException(IdentityErrorCode.UNSUPPORTED_COUNTRY, "Currently, only merchants in Nigeria (NG) are supported.");
         }
 
@@ -64,7 +65,7 @@ public class Merchant extends AggregateRoot<Long> {
             new MerchantRegistered.Payload(
                 this.businessName,
                 this.email.value(),
-                this.country,
+                this.country.name(),
                 this.businessType,
                 this.emailVerificationCode.getCode()
             )
@@ -72,7 +73,7 @@ public class Merchant extends AggregateRoot<Long> {
     }
 
     // Reconstitution constructor for Mappers
-    public Merchant(Long id, String country, String businessName, String firstName, String lastName,
+    public Merchant(Long id, Country country, String businessName, String firstName, String lastName,
                     EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType,
                     boolean emailVerified, ComplianceStatus complianceStatus, ComplianceStep complianceStep,
                     ZonedDateTime createdAt, ZonedDateTime updatedAt) {
@@ -210,7 +211,7 @@ public class Merchant extends AggregateRoot<Long> {
             UUID.randomUUID().toString(),
             String.valueOf(id),
             ZonedDateTime.now(),
-            new MerchantComplianceApproved.Payload(this.firstName + " " + this.lastName)
+            new MerchantComplianceApproved.Payload(this.firstName + " " + this.lastName, this.country)
         ));
     }
 

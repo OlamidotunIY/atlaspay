@@ -4,6 +4,7 @@ import com.atlaspay.identity.domain.model.ComplianceStatus;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.model.ComplianceStep;
 import com.atlaspay.identity.infrastructure.entity.MerchantJpaEntity;
+import com.atlaspay.shared.domain.valueobject.Country;
 import com.atlaspay.shared.domain.valueobject.EmailAddress;
 import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class MerchantMapper {
 
         return new MerchantJpaEntity(
                 domain.getId(),
-                domain.getCountry(),
+                domain.getCountry().name(),
                 domain.getBusinessName(),
                 domain.getFirstName(),
                 domain.getLastName(),
@@ -37,7 +38,7 @@ public class MerchantMapper {
 
         return new Merchant(
                 entity.getId(),
-                entity.getCountry(),
+                mapCountry(entity.getCountry()),
                 entity.getBusinessName(),
                 entity.getFirstName(),
                 entity.getLastName(),
@@ -51,5 +52,10 @@ public class MerchantMapper {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
+    }
+
+    private Country mapCountry(String countryStr) {
+        Country country = Country.fromString(countryStr);
+        return country != null ? country : Country.NIGERIA;
     }
 }
