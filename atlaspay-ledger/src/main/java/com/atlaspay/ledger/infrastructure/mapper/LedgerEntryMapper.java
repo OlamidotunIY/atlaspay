@@ -6,6 +6,7 @@ import com.atlaspay.ledger.domain.model.TransactionReference;
 import com.atlaspay.ledger.infrastructure.entity.LedgerEntryJpaEntity;
 import com.atlaspay.shared.money.CurrencyCode;
 import com.atlaspay.shared.money.Money;
+import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,6 +22,7 @@ public class LedgerEntryMapper {
                 domain.getAmount().currency().name(),
                 domain.getType().name(),
                 domain.getDescription(),
+                domain.getRunningBalance() != null ? domain.getRunningBalance().amount() : BigDecimal.ZERO,
                 domain.getCreatedAt(),
                 null
         );
@@ -44,6 +46,7 @@ public class LedgerEntryMapper {
                 EntryType.valueOf(entity.getType()),
                 reference,
                 entity.getDescription(),
+                Money.of(entity.getRunningBalance(), CurrencyCode.valueOf(entity.getCurrency())),
                 entity.getCreatedAt()
         );
     }

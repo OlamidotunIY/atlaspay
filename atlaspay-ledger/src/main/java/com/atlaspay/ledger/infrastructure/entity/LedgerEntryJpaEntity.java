@@ -37,6 +37,9 @@ public class LedgerEntryJpaEntity {
     @Column(nullable = false)
     private String description;
 
+    @Column(name = "running_balance", nullable = false, precision = 19, scale = 4)
+    private BigDecimal runningBalance;
+
     @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt;
 

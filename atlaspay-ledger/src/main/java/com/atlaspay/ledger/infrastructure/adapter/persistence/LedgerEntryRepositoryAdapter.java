@@ -13,6 +13,9 @@ import com.atlaspay.shared.infrastructure.DomainSequenceGenerator;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import com.atlaspay.shared.util.PageResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @Repository
 public class LedgerEntryRepositoryAdapter implements LedgerEntryRepository {
@@ -44,6 +47,26 @@ public class LedgerEntryRepositoryAdapter implements LedgerEntryRepository {
         return jpaRepository.findByAccountId(accountId).stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public PageResult<LedgerEntry> findByAccountIds(List<Long> accountIds, int page, int perPage) {
+        Page<LedgerEntryJpaEntity> entityPage = jpaRepository.findByAccountIdInOrderByCreatedAtDesc(
+                accountIds, 
+                PageRequest.of(page - 1, perPage)
+        );
+        
+        List<LedgerEntry> entries = entityPage.getContent().stream()
+                .map(mapper::toDomain)
+                .toList();
+                
+        return new PageResult<>(
+                entries,
+                page,
+                perPage,
+                entityPage.getTotalElements(),
+                entityPage.getTotalPages()
+        );
     }
 
 

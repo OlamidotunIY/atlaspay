@@ -13,4 +13,6 @@ public interface SpringDataLedgerEntryRepository extends JpaRepository<LedgerEnt
     List<LedgerEntryJpaEntity> findEntriesAfter(@Param("accountId") Long accountId, @Param("lastEntryId") Long lastEntryId);
 
     List<LedgerEntryJpaEntity> findByAccountId(Long accountId);
+
+    org.springframework.data.domain.Page<LedgerEntryJpaEntity> findByAccountIdInOrderByCreatedAtDesc(List<Long> accountIds, org.springframework.data.domain.Pageable pageable);
 }

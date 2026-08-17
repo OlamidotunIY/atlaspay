@@ -37,6 +37,12 @@ public class BalanceSnapshotRepositoryAdapter implements BalanceSnapshotReposito
     }
 
     @Override
+    public Optional<BalanceSnapshot> findLatestByAccountIdForUpdate(Long accountId) {
+        return jpaRepository.findLatestSnapshotForUpdate(accountId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public BalanceSnapshot save(BalanceSnapshot snapshot) {
         BalanceSnapshotJpaEntity entity = mapper.toEntity(snapshot);
         jpaRepository.save(entity);
