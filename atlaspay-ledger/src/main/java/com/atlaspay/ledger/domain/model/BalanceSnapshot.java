@@ -11,9 +11,9 @@ public class BalanceSnapshot extends AggregateRoot<Long> {
     
     private final Long id;
     private final Long accountId;
-    private final Money balance;
-    private final Long lastLedgerEntryId;
-    private final ZonedDateTime snapshotAt;
+    private Money balance;
+    private Long lastLedgerEntryId;
+    private ZonedDateTime snapshotAt;
 
     public BalanceSnapshot(Long id, Long accountId, Money balance, Long lastLedgerEntryId, ZonedDateTime snapshotAt) {
         if (accountId == null) {
@@ -36,5 +36,17 @@ public class BalanceSnapshot extends AggregateRoot<Long> {
     @Override
     public Long getId() {
         return id;
+    }
+
+    public void updateBalance(Money newBalance, Long entryId) {
+        if (newBalance == null) {
+            throw new IllegalArgumentException("Balance cannot be null");
+        }
+        if (entryId == null) {
+            throw new IllegalArgumentException("Entry ID cannot be null");
+        }
+        this.balance = newBalance;
+        this.lastLedgerEntryId = entryId;
+        this.snapshotAt = ZonedDateTime.now();
     }
 }

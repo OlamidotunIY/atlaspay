@@ -16,8 +16,8 @@ class LedgerTransactionTest {
     void shouldCreateTransactionWhenBalanced() {
         TransactionReference ref = new TransactionReference("TX-123", "TRANSFERS");
         
-        LedgerEntry debit = new LedgerEntry(1L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", ZonedDateTime.now());
-        LedgerEntry credit = new LedgerEntry(2L, 200L, Money.of("500.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", ZonedDateTime.now());
+        LedgerEntry debit = new LedgerEntry(1L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", Money.of("0.00", CurrencyCode.NGN), ZonedDateTime.now());
+        LedgerEntry credit = new LedgerEntry(2L, 200L, Money.of("500.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", Money.of("500.00", CurrencyCode.NGN), ZonedDateTime.now());
         
         LedgerTransaction transaction = new LedgerTransaction(10L, ref, List.of(debit, credit), ZonedDateTime.now());
         
@@ -30,8 +30,8 @@ class LedgerTransactionTest {
     void shouldThrowExceptionWhenUnbalanced() {
         TransactionReference ref = new TransactionReference("TX-124", "TRANSFERS");
         
-        LedgerEntry debit = new LedgerEntry(3L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", ZonedDateTime.now());
-        LedgerEntry credit = new LedgerEntry(4L, 200L, Money.of("400.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", ZonedDateTime.now());
+        LedgerEntry debit = new LedgerEntry(3L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
+        LedgerEntry credit = new LedgerEntry(4L, 200L, Money.of("400.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", Money.of("400.00", CurrencyCode.NGN), ZonedDateTime.now());
         
         BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
             new LedgerTransaction(11L, ref, List.of(debit, credit), ZonedDateTime.now());
@@ -44,7 +44,7 @@ class LedgerTransactionTest {
     void shouldThrowExceptionWhenLessThanTwoEntries() {
         TransactionReference ref = new TransactionReference("TX-125", "CHARGES");
         
-        LedgerEntry debit = new LedgerEntry(5L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Charge", ZonedDateTime.now());
+        LedgerEntry debit = new LedgerEntry(5L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Charge", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
         
         BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
             new LedgerTransaction(12L, ref, List.of(debit), ZonedDateTime.now());
@@ -57,8 +57,8 @@ class LedgerTransactionTest {
     void shouldThrowExceptionWhenMissingCreditOrDebit() {
         TransactionReference ref = new TransactionReference("TX-126", "TRANSFERS");
         
-        LedgerEntry debit1 = new LedgerEntry(6L, 100L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 1", ZonedDateTime.now());
-        LedgerEntry debit2 = new LedgerEntry(7L, 200L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 2", ZonedDateTime.now());
+        LedgerEntry debit1 = new LedgerEntry(6L, 100L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 1", Money.of("250", CurrencyCode.NGN), ZonedDateTime.now());
+        LedgerEntry debit2 = new LedgerEntry(7L, 200L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 2", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
         
         BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
             new LedgerTransaction(13L, ref, List.of(debit1, debit2), ZonedDateTime.now());

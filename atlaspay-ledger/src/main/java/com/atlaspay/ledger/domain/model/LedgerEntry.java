@@ -15,9 +15,10 @@ public class LedgerEntry extends AggregateRoot<Long> {
     private final EntryType type;
     private final TransactionReference transactionReference;
     private final String description;
+    private final Money runningBalance;
     private final ZonedDateTime createdAt;
 
-    public LedgerEntry(Long id, Long accountId, Money amount, EntryType type, TransactionReference transactionReference, String description, ZonedDateTime createdAt) {
+    public LedgerEntry(Long id, Long accountId, Money amount, EntryType type, TransactionReference transactionReference, String description, Money runningBalance, ZonedDateTime createdAt) {
         if (amount == null || amount.isNegative() || amount.isZero()) {
             throw new IllegalArgumentException("Amount must be greater than zero");
         }
@@ -34,6 +35,7 @@ public class LedgerEntry extends AggregateRoot<Long> {
         this.type = type;
         this.transactionReference = transactionReference;
         this.description = description;
+        this.runningBalance = runningBalance;
         this.createdAt = createdAt != null ? createdAt : ZonedDateTime.now();
     }
 

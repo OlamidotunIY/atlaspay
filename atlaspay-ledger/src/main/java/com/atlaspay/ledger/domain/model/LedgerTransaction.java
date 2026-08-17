@@ -3,6 +3,7 @@ package com.atlaspay.ledger.domain.model;
 import com.atlaspay.shared.domain.AggregateRoot;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.ledger.domain.exception.LedgerErrorCode;
+import com.atlaspay.ledger.domain.event.LedgerTransactionPostedEvent;
 import com.atlaspay.shared.money.Money;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class LedgerTransaction extends AggregateRoot<Long> {
     private final Long id;
@@ -32,6 +34,16 @@ public class LedgerTransaction extends AggregateRoot<Long> {
         this.transactionReference = transactionReference;
         this.entries = new ArrayList<>(entries);
         this.postedAt = postedAt != null ? postedAt : ZonedDateTime.now();
+
+        registerEvent(new LedgerTransactionPostedEvent(
+                UUID.randomUUID().toString(),
+                String.valueOf(this.id),
+                this.postedAt,
+                new LedgerTransactionPostedEvent.Payload(
+                        this.transactionReference.transactionId(),
+                        this.transactionReference.sourceSystem()
+                )
+        ));
     }
 
     private void validateEntriesBalance(List<LedgerEntry> entriesToValidate) {
