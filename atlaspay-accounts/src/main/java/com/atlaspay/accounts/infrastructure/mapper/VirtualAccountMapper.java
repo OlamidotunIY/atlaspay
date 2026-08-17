@@ -4,6 +4,8 @@ import com.atlaspay.accounts.domain.model.AccountStatus;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.infrastructure.entity.VirtualAccountEntity;
 import com.atlaspay.shared.domain.valueobject.NUBAN;
+import com.atlaspay.shared.money.CurrencyCode;
+import java.time.ZonedDateTime;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,9 +23,10 @@ public class VirtualAccountMapper {
                 domain.getNuban() != null ? domain.getNuban().value() : null,
                 domain.getStatus().name(),
                 domain.getIdempotencyKey(),
+                domain.getCurrency().name(),
                 0, // version
-                java.time.ZonedDateTime.now(), // createdAt
-                java.time.ZonedDateTime.now() // updatedAt
+                ZonedDateTime.now(), // createdAt
+                ZonedDateTime.now() // updatedAt
         );
     }
 
@@ -37,6 +40,7 @@ public class VirtualAccountMapper {
                 entity.getAccountName(),
                 entity.getBankName(),
                 entity.getIdempotencyKey(),
+                CurrencyCode.valueOf(entity.getCurrency()),
                 AccountStatus.valueOf(entity.getStatus()),
                 entity.getNuban() != null ? new NUBAN(entity.getNuban()) : null
         );

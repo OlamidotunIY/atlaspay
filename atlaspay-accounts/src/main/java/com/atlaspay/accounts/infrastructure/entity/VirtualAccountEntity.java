@@ -59,6 +59,9 @@ public class VirtualAccountEntity {
     @Column(length = 100, unique = true)
     private String idempotencyKey;
     
+    @Column(nullable = false, length = 3)
+    private String currency;
+    
     @Setter
     @Version
     @Column(nullable = false)
@@ -71,7 +74,7 @@ public class VirtualAccountEntity {
     @Column(nullable = false)
     private ZonedDateTime updatedAt;
 
-    public VirtualAccountEntity(Long id, Long integration, String customerCode, String accountName, String bankName, String nuban, String status, String idempotencyKey, Integer version, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+    public VirtualAccountEntity(Long id, Long integration, String customerCode, String accountName, String bankName, String nuban, String status, String idempotencyKey, String currency, Integer version, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
         this.id = id;
         this.integration = integration;
         this.customerCode = customerCode;
@@ -80,6 +83,7 @@ public class VirtualAccountEntity {
         this.nuban = nuban;
         this.status = status;
         this.idempotencyKey = idempotencyKey;
+        this.currency = currency;
         this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

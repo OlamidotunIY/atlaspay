@@ -30,6 +30,7 @@ public class VirtualAccountController {
                 command.customerCode(),
                 command.accountName(),
                 command.bankName(),
+                command.currency(),
                 command.idempotencyKey()
         ));
         

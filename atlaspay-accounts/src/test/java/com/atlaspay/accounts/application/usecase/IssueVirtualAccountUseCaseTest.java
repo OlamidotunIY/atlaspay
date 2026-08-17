@@ -32,7 +32,7 @@ class IssueVirtualAccountUseCaseTest {
     void shouldThrowExceptionWhenMerchantHasTwoAccounts() {
         when(queryService.countByIntegration(1L)).thenReturn(2);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", "idem1");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", com.atlaspay.shared.money.CurrencyCode.NGN, "idem1");
         
         assertThrows(BusinessRuleException.class, () -> useCase.execute(cmd));
         verify(repository, never()).save(any());
@@ -43,7 +43,7 @@ class IssueVirtualAccountUseCaseTest {
         when(queryService.countByIntegration(1L)).thenReturn(1);
         when(queryService.existsByIntegrationAndBankName(1L, "Wema")).thenReturn(true);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", "idem2");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Wema", com.atlaspay.shared.money.CurrencyCode.NGN, "idem2");
         
         assertThrows(BusinessRuleException.class, () -> useCase.execute(cmd));
         verify(repository, never()).save(any());
@@ -55,7 +55,7 @@ class IssueVirtualAccountUseCaseTest {
         when(queryService.existsByIntegrationAndBankName(any(), any())).thenReturn(false);
         when(repository.save(any(VirtualAccount.class))).thenAnswer(i -> i.getArguments()[0]);
         
-        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Zenith", "idem3");
+        IssueVirtualAccountCommand cmd = new IssueVirtualAccountCommand(1L, "CUST-1", "Test Account", "Zenith", com.atlaspay.shared.money.CurrencyCode.NGN, "idem3");
         
         useCase.execute(cmd);
         

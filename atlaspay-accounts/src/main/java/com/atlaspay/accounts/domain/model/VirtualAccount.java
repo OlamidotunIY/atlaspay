@@ -5,6 +5,7 @@ import com.atlaspay.shared.domain.valueobject.NUBAN;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.accounts.domain.exception.AccountsErrorCode;
 import com.atlaspay.accounts.domain.event.*;
+import com.atlaspay.shared.money.CurrencyCode;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
@@ -19,22 +20,24 @@ public class VirtualAccount extends AggregateRoot<Long> {
     private final String accountName;
     private final String bankName;
     private final String idempotencyKey;
+    private final CurrencyCode currency;
     private AccountStatus status;
     private NUBAN nuban;
 
-    public VirtualAccount(Long id, Long integration, String customerCode, String accountName, String bankName, String idempotencyKey, AccountStatus status, NUBAN nuban) {
+    public VirtualAccount(Long id, Long integration, String customerCode, String accountName, String bankName, String idempotencyKey, CurrencyCode currency, AccountStatus status, NUBAN nuban) {
         this.id = id;
         this.integration = integration;
         this.customerCode = customerCode;
         this.accountName = accountName;
         this.bankName = bankName;
         this.idempotencyKey = idempotencyKey;
+        this.currency = currency;
         this.status = status;
         this.nuban = nuban;
     }
 
-    public static VirtualAccount create(Long id, Long integration, String customerCode, String accountName, String bankName, String idempotencyKey) {
-        VirtualAccount account = new VirtualAccount(id, integration, customerCode, accountName, bankName, idempotencyKey, AccountStatus.PENDING_ISSUANCE, null);
+    public static VirtualAccount create(Long id, Long integration, String customerCode, String accountName, String bankName, String idempotencyKey, CurrencyCode currency) {
+        VirtualAccount account = new VirtualAccount(id, integration, customerCode, accountName, bankName, idempotencyKey, currency, AccountStatus.PENDING_ISSUANCE, null);
         account.registerEvent(new VirtualAccountCreatedEvent(
                 UUID.randomUUID().toString(),
                 String.valueOf(id),

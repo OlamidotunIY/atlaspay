@@ -17,7 +17,8 @@ class VirtualAccountTest {
                 "CUST-1",
                 "Test Merchant Account",
                 "Wema",
-                "idempotency_123"
+                "idempotency_123",
+                com.atlaspay.shared.money.CurrencyCode.NGN
         );
         
         assertEquals(AccountStatus.PENDING_ISSUANCE, account.getStatus());

@@ -8,6 +8,7 @@ public record IssueVirtualAccountCommand(
         String customerCode,
         String accountName,
         String bankName,
+        com.atlaspay.shared.money.CurrencyCode currency,
         @IdempotencyKey String idempotencyKey
 ) implements Command {
 }
