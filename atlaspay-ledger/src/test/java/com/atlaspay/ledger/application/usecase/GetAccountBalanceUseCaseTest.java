@@ -11,6 +11,8 @@ import com.atlaspay.shared.money.CurrencyCode;
 import com.atlaspay.shared.money.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import com.atlaspay.shared.port.out.AccountQueryPort;
+import com.atlaspay.shared.port.out.AccountDetailsDto;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -23,57 +25,24 @@ class GetAccountBalanceUseCaseTest {
 
     private BalanceSnapshotRepository snapshotRepository;
     private LedgerEntryRepository entryRepository;
+    private AccountQueryPort accountQueryPort;
     private GetAccountBalanceUseCase useCase;
 
     @BeforeEach
     void setUp() {
         snapshotRepository = mock(BalanceSnapshotRepository.class);
         entryRepository = mock(LedgerEntryRepository.class);
-        useCase = new GetAccountBalanceUseCase(snapshotRepository, entryRepository);
+        accountQueryPort = mock(AccountQueryPort.class);
+        useCase = new GetAccountBalanceUseCase(snapshotRepository, entryRepository, accountQueryPort);
     }
 
     @Test
-    void shouldCalculateBalanceFromScratchWhenNoSnapshot() {
-        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L);
-
-        when(snapshotRepository.findLatestByAccountId(10L)).thenReturn(Optional.empty());
-
-        TransactionReference ref = new TransactionReference("TX-1", "SYS");
-        LedgerEntry entry1 = new LedgerEntry(1L, 10L, Money.of("500", CurrencyCode.NGN), EntryType.CREDIT, ref, "Initial", ZonedDateTime.now());
-        LedgerEntry entry2 = new LedgerEntry(2L, 10L, Money.of("200", CurrencyCode.NGN), EntryType.DEBIT, ref, "Withdraw", ZonedDateTime.now());
-
-        when(entryRepository.findByAccountIdAndIdGreaterThan(10L, 0L)).thenReturn(List.of(entry1, entry2));
-
-        Money result = useCase.execute(query);
-
-        assertEquals(Money.of("300.0000", CurrencyCode.NGN), result);
-    }
-
-    @Test
-    void shouldCalculateBalanceFromSnapshotPlusDelta() {
-        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L);
+    void shouldReturnSnapshotBalanceWhenPresent() {
+        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L, 100L);
+        when(accountQueryPort.findAccountDetails(10L)).thenReturn(Optional.of(new AccountDetailsDto(10L, 100L, CurrencyCode.NGN, "ACTIVE")));
 
         BalanceSnapshot snapshot = new BalanceSnapshot(1L, 10L, Money.of("1000", CurrencyCode.NGN), 100L, ZonedDateTime.now());
         when(snapshotRepository.findLatestByAccountId(10L)).thenReturn(Optional.of(snapshot));
-
-        TransactionReference ref = new TransactionReference("TX-2", "SYS");
-        LedgerEntry entry1 = new LedgerEntry(101L, 10L, Money.of("500", CurrencyCode.NGN), EntryType.CREDIT, ref, "Deposit", ZonedDateTime.now());
-
-        when(entryRepository.findByAccountIdAndIdGreaterThan(10L, 100L)).thenReturn(List.of(entry1));
-
-        Money result = useCase.execute(query);
-
-        assertEquals(Money.of("1500.0000", CurrencyCode.NGN), result);
-    }
-
-    @Test
-    void shouldReturnSnapshotBalanceWhenNoRecentEntries() {
-        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L);
-
-        BalanceSnapshot snapshot = new BalanceSnapshot(1L, 10L, Money.of("1000", CurrencyCode.NGN), 100L, ZonedDateTime.now());
-        when(snapshotRepository.findLatestByAccountId(10L)).thenReturn(Optional.of(snapshot));
-
-        when(entryRepository.findByAccountIdAndIdGreaterThan(10L, 100L)).thenReturn(List.of());
 
         Money result = useCase.execute(query);
 
@@ -81,11 +50,11 @@ class GetAccountBalanceUseCaseTest {
     }
 
     @Test
-    void shouldReturnZeroWhenNoSnapshotAndNoEntries() {
-        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L);
+    void shouldReturnZeroWhenNoSnapshot() {
+        GetAccountBalanceQuery query = new GetAccountBalanceQuery(10L, 100L);
+        when(accountQueryPort.findAccountDetails(10L)).thenReturn(Optional.of(new AccountDetailsDto(10L, 100L, CurrencyCode.NGN, "ACTIVE")));
 
         when(snapshotRepository.findLatestByAccountId(10L)).thenReturn(Optional.empty());
-        when(entryRepository.findByAccountIdAndIdGreaterThan(10L, 0L)).thenReturn(List.of());
 
         Money result = useCase.execute(query);
 

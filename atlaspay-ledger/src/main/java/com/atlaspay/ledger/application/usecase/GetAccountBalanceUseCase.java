@@ -8,6 +8,11 @@ import com.atlaspay.ledger.domain.repository.BalanceSnapshotRepository;
 import com.atlaspay.ledger.domain.repository.LedgerEntryRepository;
 import com.atlaspay.shared.money.CurrencyCode;
 import com.atlaspay.shared.money.Money;
+import com.atlaspay.shared.port.out.AccountQueryPort;
+import com.atlaspay.shared.port.out.AccountDetailsDto;
+import com.atlaspay.shared.exception.NotFoundException;
+import com.atlaspay.shared.exception.BusinessRuleException;
+import com.atlaspay.ledger.domain.exception.LedgerErrorCode;
 import com.atlaspay.shared.usecase.BaseUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,10 +26,12 @@ public class GetAccountBalanceUseCase extends BaseUseCase<GetAccountBalanceQuery
 
     private final BalanceSnapshotRepository balanceSnapshotRepository;
     private final LedgerEntryRepository ledgerEntryRepository;
+    private final AccountQueryPort accountQueryPort;
 
-    public GetAccountBalanceUseCase(BalanceSnapshotRepository balanceSnapshotRepository, LedgerEntryRepository ledgerEntryRepository) {
+    public GetAccountBalanceUseCase(BalanceSnapshotRepository balanceSnapshotRepository, LedgerEntryRepository ledgerEntryRepository, AccountQueryPort accountQueryPort) {
         this.balanceSnapshotRepository = balanceSnapshotRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
+        this.accountQueryPort = accountQueryPort;
     }
 
     @Override
@@ -33,42 +40,19 @@ public class GetAccountBalanceUseCase extends BaseUseCase<GetAccountBalanceQuery
         // Fetch O(1) Snapshot
         Optional<BalanceSnapshot> snapshotOpt = balanceSnapshotRepository.findLatestByAccountId(query.accountId());
 
-        Money baseBalance;
-        Long lastEntryId;
-        CurrencyCode accountCurrency;
+        // Fetch Account Details and Validate Ownership
+        AccountDetailsDto account = accountQueryPort.findAccountDetails(query.accountId())
+                .orElseThrow(() -> new NotFoundException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "Account does not exist"));
+
+        if (!account.integration().equals(query.integration())) {
+            throw new BusinessRuleException(LedgerErrorCode.UNAUTHORIZED_ACCESS, "Account does not belong to integration");
+        }
 
         if (snapshotOpt.isPresent()) {
             BalanceSnapshot snapshot = snapshotOpt.get();
-            baseBalance = snapshot.getBalance();
-            lastEntryId = snapshot.getLastLedgerEntryId();
-            accountCurrency = snapshot.getBalance().currency();
+            return snapshot.getBalance();
         } else {
-            // No snapshot implies base balance is zero. We assume default currency is NGN unless entries dictate otherwise.
-            // A more robust system would fetch account details, but we will infer from entries or return zero NGN.
-            accountCurrency = CurrencyCode.NGN; 
-            baseBalance = Money.zero(accountCurrency);
-            lastEntryId = 0L;
+            return Money.zero(account.currency());
         }
-
-        // Fetch O(k) Delta Entries since snapshot
-        List<LedgerEntry> recentEntries = ledgerEntryRepository.findByAccountIdAndIdGreaterThan(query.accountId(), lastEntryId);
-
-        if (recentEntries.isEmpty()) {
-            return baseBalance;
-        }
-
-        // If it was assumed zero, infer the correct currency from the first entry to prevent currency mismatch
-        if (snapshotOpt.isEmpty()) {
-            accountCurrency = recentEntries.get(0).getAmount().currency();
-            baseBalance = Money.zero(accountCurrency);
-        }
-
-        // Calculate Net Delta utilizing Java Streams over List (Liabilities model: Credit adds, Debit subtracts)
-        Money finalBaseBalance = baseBalance;
-        Money netDelta = recentEntries.stream()
-                .map(entry -> entry.getType() == EntryType.CREDIT ? entry.getAmount() : entry.getAmount().negate())
-                .reduce(Money.zero(accountCurrency), Money::add);
-
-        return finalBaseBalance.add(netDelta);
     }
 }

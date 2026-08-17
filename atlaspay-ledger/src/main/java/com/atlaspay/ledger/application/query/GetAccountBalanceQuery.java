@@ -1,3 +1,3 @@
 package com.atlaspay.ledger.application.query;
 
-public record GetAccountBalanceQuery(Long accountId) {}
+public record GetAccountBalanceQuery(Long accountId, Long integration) {}
