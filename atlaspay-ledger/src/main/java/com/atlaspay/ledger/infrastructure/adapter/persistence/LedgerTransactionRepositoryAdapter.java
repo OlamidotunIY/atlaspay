@@ -5,6 +5,7 @@ import com.atlaspay.ledger.domain.repository.LedgerTransactionRepository;
 import com.atlaspay.ledger.infrastructure.entity.LedgerTransactionJpaEntity;
 import com.atlaspay.ledger.infrastructure.mapper.LedgerTransactionMapper;
 import com.atlaspay.ledger.infrastructure.repository.SpringDataLedgerTransactionRepository;
+import com.atlaspay.ledger.domain.model.SourceSystem;
 import com.atlaspay.shared.infrastructure.DomainSequenceGenerator;
 import org.springframework.stereotype.Repository;
 
@@ -36,7 +37,7 @@ public class LedgerTransactionRepositoryAdapter implements LedgerTransactionRepo
     }
 
     @Override
-    public boolean existsByReference(String transactionId, String sourceSystem) {
-        return jpaRepository.existsBySourceTransaction(transactionId, sourceSystem);
+    public boolean existsByReference(String transactionId, SourceSystem sourceSystem) {
+        return jpaRepository.existsBySourceTransaction(transactionId, sourceSystem.name());
     }
 }

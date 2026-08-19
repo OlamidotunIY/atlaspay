@@ -26,7 +26,7 @@ public class LedgerTransactionMapper {
         return new LedgerTransactionJpaEntity(
                 domain.getId(),
                 domain.getTransactionReference().transactionId(),
-                domain.getTransactionReference().sourceSystem(),
+                domain.getTransactionReference().sourceSystem().name(),
                 domain.getPostedAt(),
                 entryEntities
         );
