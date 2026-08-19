@@ -1,5 +1,5 @@
 # ── Stage 1: Build ─────────────────────────────────────────────────────────────
-FROM eclipse-temurin:21-jdk-jammy AS builder
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
 WORKDIR /workspace
 
@@ -35,7 +35,7 @@ COPY . .
 RUN ./gradlew :atlaspay-app:bootJar --no-daemon -x test
 
 # ── Stage 2: Extract layers for efficient layer caching ───────────────────────
-FROM eclipse-temurin:21-jre-jammy AS extractor
+FROM eclipse-temurin:25-jre-jammy AS extractor
 
 WORKDIR /workspace
 COPY --from=builder /workspace/atlaspay-app/build/libs/atlaspay.jar atlaspay.jar
@@ -44,7 +44,7 @@ COPY --from=builder /workspace/atlaspay-app/build/libs/atlaspay.jar atlaspay.jar
 RUN java -Djarmode=layertools -jar atlaspay.jar extract
 
 # ── Stage 3: Final minimal runtime image ──────────────────────────────────────
-FROM eclipse-temurin:21-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 
 # Security: non-root user
 RUN groupadd -r atlaspay && useradd -r -g atlaspay atlaspay
