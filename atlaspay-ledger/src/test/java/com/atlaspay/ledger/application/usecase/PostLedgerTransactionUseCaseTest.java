@@ -4,6 +4,7 @@ import com.atlaspay.ledger.application.command.PostLedgerTransactionCommand;
 import com.atlaspay.ledger.application.command.PostLedgerTransactionCommand.EntryCommand;
 import com.atlaspay.ledger.domain.model.EntryType;
 import com.atlaspay.ledger.domain.model.LedgerTransaction;
+import com.atlaspay.ledger.domain.model.SourceSystem;
 import com.atlaspay.ledger.domain.repository.LedgerEntryRepository;
 import com.atlaspay.ledger.domain.repository.LedgerTransactionRepository;
 import com.atlaspay.ledger.domain.repository.BalanceSnapshotRepository;
@@ -21,7 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PostLedgerTransactionUseCaseTest {
@@ -45,14 +46,15 @@ class PostLedgerTransactionUseCaseTest {
     void shouldSuccessfullyPostBalancedTransaction() {
         PostLedgerTransactionCommand command = new PostLedgerTransactionCommand(
                 "TX-100",
-                "100",
+                SourceSystem.SYSTEM,
+                100L,
                 List.of(
                         new EntryCommand(1L, new BigDecimal("100.00"), CurrencyCode.NGN, EntryType.DEBIT, "Debit Account A"),
                         new EntryCommand(2L, new BigDecimal("100.00"), CurrencyCode.NGN, EntryType.CREDIT, "Credit Account B")
                 )
         );
 
-        when(repository.existsByReference("TX-100", "100")).thenReturn(false);
+        when(repository.existsByReference("TX-100", SourceSystem.SYSTEM)).thenReturn(false);
         when(repository.nextIdentity()).thenReturn(999L);
         when(entryRepository.nextIdentity()).thenReturn(101L, 102L);
         when(accountQueryPort.findAccountDetails(1L)).thenReturn(Optional.of(new AccountDetailsDto(1L, 100L, CurrencyCode.NGN, "ACTIVE")));
@@ -68,7 +70,7 @@ class PostLedgerTransactionUseCaseTest {
 
         LedgerTransaction savedTransaction = captor.getValue();
         assertEquals("TX-100", savedTransaction.getTransactionReference().transactionId());
-        assertEquals("100", savedTransaction.getTransactionReference().sourceSystem());
+        assertEquals(SourceSystem.SYSTEM, savedTransaction.getTransactionReference().sourceSystem());
         assertEquals(2, savedTransaction.getEntries().size());
     }
 
@@ -76,11 +78,12 @@ class PostLedgerTransactionUseCaseTest {
     void shouldThrowConflictExceptionWhenIdempotencyKeyExists() {
         PostLedgerTransactionCommand command = new PostLedgerTransactionCommand(
                 "TX-100",
-                "100",
+                SourceSystem.SYSTEM,
+                100L,
                 List.of()
         );
 
-        when(repository.existsByReference("TX-100", "100")).thenReturn(true);
+        when(repository.existsByReference("TX-100", SourceSystem.SYSTEM)).thenReturn(true);
 
         ConflictException ex = assertThrows(ConflictException.class, () -> useCase.execute(command));
         assertEquals("Transaction already posted", ex.getMessage());
