@@ -6,10 +6,15 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "sub_accounts")
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SubAccountJpaEntity {
 
     @Id
@@ -31,6 +36,7 @@ public class SubAccountJpaEntity {
     @Column(name = "description")
     private String description;
 
+    @Setter
     @Column(name = "active", nullable = false)
     private boolean active;
 

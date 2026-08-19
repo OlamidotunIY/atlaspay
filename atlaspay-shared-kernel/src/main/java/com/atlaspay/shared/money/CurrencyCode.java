@@ -4,5 +4,6 @@ public enum CurrencyCode {
     NGN,
     USD,
     GBP,
-    EUR
+    EUR,
+    KES
 }

@@ -33,7 +33,8 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
                 command.customerCode(), 
                 command.accountName(), 
                 command.bankName(),
-                command.idempotencyKey()
+                command.idempotencyKey(),
+                command.currency()
         );
         
         VirtualAccount savedAccount = repository.save(account);

@@ -6,7 +6,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -32,10 +31,7 @@ import jakarta.persistence.GenerationType;
     }
 )
 @Getter
-@Builder
-@AllArgsConstructor
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VirtualAccountEntity {
 
     @Id
@@ -56,12 +52,17 @@ public class VirtualAccountEntity {
     @Column(length = 10, unique = true)
     private String nuban;
     
+    @Setter
     @Column(nullable = false, length = 30)
     private String status;
     
     @Column(length = 100, unique = true)
     private String idempotencyKey;
     
+    @Column(nullable = false, length = 3)
+    private String currency;
+    
+    @Setter
     @Version
     @Column(nullable = false)
     private Integer version;
@@ -69,6 +70,22 @@ public class VirtualAccountEntity {
     @Column(nullable = false)
     private ZonedDateTime createdAt;
     
+    @Setter
     @Column(nullable = false)
     private ZonedDateTime updatedAt;
+
+    public VirtualAccountEntity(Long id, Long integration, String customerCode, String accountName, String bankName, String nuban, String status, String idempotencyKey, String currency, Integer version, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+        this.id = id;
+        this.integration = integration;
+        this.customerCode = customerCode;
+        this.accountName = accountName;
+        this.bankName = bankName;
+        this.nuban = nuban;
+        this.status = status;
+        this.idempotencyKey = idempotencyKey;
+        this.currency = currency;
+        this.version = version;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

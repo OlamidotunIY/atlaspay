@@ -9,4 +9,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // Spring Kafka for messaging
     implementation 'org.springframework.kafka:spring-kafka'
+    // Swagger annotations for OpenAPI
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
 }

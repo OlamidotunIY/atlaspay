@@ -1,5 +1,6 @@
 package com.atlaspay.identity.domain.event;
 
+import com.atlaspay.shared.domain.valueobject.Country;
 import com.atlaspay.shared.event.DomainEvent;
 
 import java.time.ZonedDateTime;
@@ -10,6 +11,5 @@ public record MerchantComplianceApproved(
     ZonedDateTime occurredAt,
     Payload payload
 ) implements DomainEvent<MerchantComplianceApproved.Payload> {
-    
-    public record Payload(String merchantName) {}
+    public record Payload(String merchantName, Country country) {}
 }

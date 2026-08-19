@@ -1,11 +1,17 @@
 package com.atlaspay.notifications.infrastructure.adapter;
 
 import com.atlaspay.notifications.application.port.EmailSenderPort;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Year;
 
 @Component
 public class SmtpEmailSenderAdapter implements EmailSenderPort {
@@ -14,24 +20,126 @@ public class SmtpEmailSenderAdapter implements EmailSenderPort {
 
     private final JavaMailSender javaMailSender;
 
+    @Value("${atlaspay.mail.from:noreply@iyandadotun.name.ng}")
+    private String fromEmail;
+
     public SmtpEmailSenderAdapter(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
     @Override
     public void sendVerificationEmail(String toEmail, String verificationCode) {
+        log.info("Preparing to send HTML verification email to {}", toEmail);
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("noreply@atlaspay.com");
-            message.setTo(toEmail);
-            message.setSubject("AtlasPay - Verify your email address");
-            message.setText("Welcome to AtlasPay!\n\nYour email verification code is: " + verificationCode + 
-                            "\n\nThis code will expire in 24 hours.");
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("AtlasPay - Verify your email address");
+            
+            String htmlContent = buildVerificationEmailHtml(verificationCode);
+            helper.setText(htmlContent, true);
             
             javaMailSender.send(message);
-            log.info("Sent verification email to {}", toEmail);
+            log.info("Successfully sent HTML verification email to {}", toEmail);
+        } catch (MessagingException e) {
+            log.error("MessagingException occurred while constructing/sending verification email to {}", toEmail, e);
         } catch (Exception e) {
-            log.error("Failed to send verification email to {}", toEmail, e);
+            log.error("Unexpected error occurred while sending verification email to {}", toEmail, e);
         }
+    }
+
+    private String buildVerificationEmailHtml(String verificationCode) {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        background-color: #f4f7f6;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 40px auto;
+                        background-color: #ffffff;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                    }
+                    .header {
+                        background-color: #0d1117;
+                        padding: 30px 20px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        color: #ffffff;
+                        margin: 0;
+                        font-size: 24px;
+                        letter-spacing: 1px;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                        color: #333333;
+                        line-height: 1.6;
+                    }
+                    .content h2 {
+                        font-size: 20px;
+                        color: #1a1a1a;
+                        margin-top: 0;
+                    }
+                    .code-box {
+                        background-color: #f8f9fa;
+                        border: 1px dashed #ced4da;
+                        border-radius: 6px;
+                        padding: 20px;
+                        text-align: center;
+                        margin: 30px 0;
+                    }
+                    .code {
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #0056b3;
+                        letter-spacing: 5px;
+                        margin: 0;
+                    }
+                    .footer {
+                        background-color: #f8f9fa;
+                        padding: 20px;
+                        text-align: center;
+                        font-size: 13px;
+                        color: #6c757d;
+                        border-top: 1px solid #eeeeee;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>ATLASPAY</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Verify Your Email Address</h2>
+                        <p>Welcome to AtlasPay! We're excited to have you on board.</p>
+                        <p>To continue setting up your account, please enter the following verification code:</p>
+                        
+                        <div class="code-box">
+                            <p class="code">%s</p>
+                        </div>
+                        
+                        <p>This code will expire in 24 hours.</p>
+                        <p>If you didn't request this email, you can safely ignore it.</p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; %d AtlasPay Inc. All rights reserved.</p>
+                        <p>This is an automated message, please do not reply.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(verificationCode, Year.now().getValue());
     }
 }

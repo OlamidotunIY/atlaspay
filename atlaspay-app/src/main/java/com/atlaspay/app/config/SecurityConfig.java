@@ -38,6 +38,10 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    org.springframework.http.HttpMethod.POST,
+                    "/api/v1/merchants"
+                ).permitAll()
+                .requestMatchers(
                     "/api/v1/auth/login",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",

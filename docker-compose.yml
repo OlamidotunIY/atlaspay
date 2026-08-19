@@ -178,45 +178,46 @@ services:
       retries: 3
 
   # ── AtlasPay Application ─────────────────────────────────────────────────
-  app:
-    build:
-      context: .
-      target: runtime
-    container_name: atlaspay-app
-    restart: unless-stopped
-    networks:
-      - atlaspay-net
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    environment:
-      ATLASPAY_DB_URL: jdbc:mysql://mysql:3306/atlaspay?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-      ATLASPAY_DB_USERNAME: atlaspay
-      ATLASPAY_DB_PASSWORD: atlaspay
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      SPRING_PROFILES_ACTIVE: local
-      ATLASPAY_ENV: docker
-      OTEL_EXPORTER_ENDPOINT: http://tempo:4318
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-    env_file:
-      - path: .env
-        required: false
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+  # Commented out — run the app locally with: ./gradlew bootRun
+  # app:
+  #   build:
+  #     context: .
+  #     target: runtime
+  #   container_name: atlaspay-app
+  #   restart: unless-stopped
+  #   networks:
+  #     - atlaspay-net
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     ATLASPAY_DB_URL: jdbc:mysql://mysql:3306/atlaspay?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+  #     ATLASPAY_DB_USERNAME: atlaspay
+  #     ATLASPAY_DB_PASSWORD: atlaspay
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: 6379
+  #     SPRING_PROFILES_ACTIVE: local
+  #     ATLASPAY_ENV: docker
+  #     OTEL_EXPORTER_ENDPOINT: http://tempo:4318
+  #     OTEL_TRACES_EXPORTER: otlp
+  #     OTEL_METRICS_EXPORTER: none
+  #     OTEL_LOGS_EXPORTER: none
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #   env_file:
+  #     - path: .env
+  #       required: false
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 60s
 
 
 # ── Shared network — all containers talk to each other by service name ────────

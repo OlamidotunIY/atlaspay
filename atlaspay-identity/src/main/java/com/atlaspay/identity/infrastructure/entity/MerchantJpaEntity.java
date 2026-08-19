@@ -8,6 +8,10 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "merchants", 
     indexes = {
@@ -18,7 +22,8 @@ import java.time.ZonedDateTime;
     }
 )
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MerchantJpaEntity {
 
     @Id
@@ -50,19 +55,23 @@ public class MerchantJpaEntity {
     @Column(name = "business_type", nullable = false)
     private BusinessType businessType;
 
+    @Setter
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "compliance_status", nullable = false)
     private ComplianceStatus complianceStatus;
 
+    @Setter
     @Column(name = "compliance_step")
     private String complianceStep;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;
 
+    @Setter
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
 }

@@ -2,7 +2,9 @@ package com.atlaspay.accounts.infrastructure.messaging;
 
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
 import com.atlaspay.accounts.application.usecase.IssueVirtualAccountUseCase;
+import com.atlaspay.shared.domain.valueobject.Country;
 import com.atlaspay.shared.event.BaseKafkaEventListener;
+import com.atlaspay.shared.money.CurrencyCode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,11 @@ public class MerchantComplianceApprovedListener extends BaseKafkaEventListener {
             
             JsonNode payloadNode = root.path("payload");
             String merchantName = payloadNode.path("merchantName").asText("Main Account");
+            String countryStr = payloadNode.path("country").asText("NIGERIA");
+            
+            CurrencyCode currency = Country.fromString(countryStr) != null 
+                    ? Country.fromString(countryStr).getDefaultCurrency() 
+                    : CurrencyCode.NGN;
 
             log.info("Received compliance approval for merchant {}. Issuing virtual accounts...", integrationId);
 
@@ -43,6 +50,7 @@ public class MerchantComplianceApprovedListener extends BaseKafkaEventListener {
                     null, // Merchant's own account
                     merchantName,
                     "Wema Bank",
+                    currency,
                     UUID.randomUUID().toString()
             ));
 
@@ -52,6 +60,7 @@ public class MerchantComplianceApprovedListener extends BaseKafkaEventListener {
                     null, // Merchant's own account
                     merchantName,
                     "Zenith Bank",
+                    currency,
                     UUID.randomUUID().toString()
             ));
         });

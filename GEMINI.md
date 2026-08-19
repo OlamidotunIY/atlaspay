@@ -37,3 +37,11 @@ This project uses Hexagonal Architecture (Ports and Adapters) combined with Doma
 
 ## 6. Git Commits
 - Commit changes in small, logical, atomic chunks. Do not lump massive refactors and new features into a single commit.
+
+## 7. Code Style
+- **NO INLINE IMPORTS**: You must NEVER use inline imports in Java files (e.g., `java.util.Map<...>`). All imports MUST be placed at the top of the file. NEVER FORGET THIS RULE.
+
+## 8. Entities and Mappers
+- **JPA Entities**: MUST have their own explicit constructors (or Lombok `@AllArgsConstructor` / `@NoArgsConstructor` where strictly required by JPA). ONLY fields that can be legitimately updated should have a `@Setter`. Do NOT put `@Setter` at the class level unless every single field is mutable.
+- **Mappers**: The `infrastructure` layer must contain a `mapper` package. For every Entity/Aggregate, you must define a specific Mapper class responsible for converting between Domain and JPA Entity. Adapters MUST use these mapper classes rather than mapping inline.
+- **Mappers & Domain Events**: Domain events must ONLY be pulled from the application layer (e.g. inside Use Cases). You MUST NEVER call `.pullDomainEvents()` inside the Mappers. Mappers should ONLY map data. To safely map database entities into Domain Aggregates without triggering business events, implement a "Reconstitution Constructor" or static factory in the aggregate specifically for the Mapper to use.

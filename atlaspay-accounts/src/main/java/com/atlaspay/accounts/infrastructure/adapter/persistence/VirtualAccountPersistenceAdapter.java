@@ -5,6 +5,7 @@ import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
 import com.atlaspay.accounts.infrastructure.entity.VirtualAccountEntity;
 import com.atlaspay.accounts.infrastructure.repository.JpaVirtualAccountRepository;
+import com.atlaspay.accounts.infrastructure.mapper.VirtualAccountMapper;
 import com.atlaspay.shared.domain.valueobject.NUBAN;
 import com.atlaspay.shared.infrastructure.DomainSequenceGenerator;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +21,18 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
 
     private final JpaVirtualAccountRepository repository;
     private final DomainSequenceGenerator sequenceGenerator;
+    private final VirtualAccountMapper mapper;
 
     @Override
     public VirtualAccount save(VirtualAccount account) {
-        VirtualAccountEntity entity = toEntity(account);
+        VirtualAccountEntity entity = mapper.toEntity(account);
         VirtualAccountEntity savedEntity = repository.save(entity);
-        return toDomain(savedEntity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<VirtualAccount> findById(Long id) {
-        return repository.findById(id).map(this::toDomain);
+        return repository.findById(id).map(mapper::toDomain);
     }
 
     @Override
@@ -45,13 +47,13 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
 
     @Override
     public Optional<VirtualAccount> findByNuban(NUBAN nuban) {
-        return repository.findByNuban(nuban.value()).map(this::toDomain);
+        return repository.findByNuban(nuban.value()).map(mapper::toDomain);
     }
 
     @Override
     public List<VirtualAccount> findByIntegration(Long integration) {
         return repository.findByIntegration(integration).stream()
-                .map(this::toDomain)
+                .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
@@ -66,31 +68,4 @@ public class VirtualAccountPersistenceAdapter implements VirtualAccountDomainRep
         return sequenceGenerator.nextIdentity("virtual_account_seq");
     }
 
-    private VirtualAccountEntity toEntity(VirtualAccount domain) {
-        return VirtualAccountEntity.builder()
-                .id(domain.getId())
-                .integration(domain.getIntegration())
-                .customerCode(domain.getCustomerCode())
-                .accountName(domain.getAccountName())
-                .bankName(domain.getBankName())
-                .nuban(domain.getNuban() != null ? domain.getNuban().value() : null)
-                .status(domain.getStatus().name())
-                .idempotencyKey(domain.getIdempotencyKey())
-                .build();
-    }
-
-    private VirtualAccount toDomain(VirtualAccountEntity entity) {
-        VirtualAccount account = new VirtualAccount(
-                entity.getId(),
-                entity.getIntegration(),
-                entity.getCustomerCode(),
-                entity.getAccountName(),
-                entity.getBankName(),
-                entity.getIdempotencyKey(),
-                AccountStatus.valueOf(entity.getStatus()),
-                entity.getNuban() != null ? new NUBAN(entity.getNuban()) : null
-        );
-        account.pullDomainEvents();
-        return account;
-    }
 }

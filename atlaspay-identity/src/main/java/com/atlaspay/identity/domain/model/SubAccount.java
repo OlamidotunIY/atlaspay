@@ -54,6 +54,19 @@ public class SubAccount extends AggregateRoot<Long> {
         ));
     }
 
+    // Reconstitution constructor for Mappers
+    public SubAccount(Long id, Long merchantId, String bankCode, String accountNumber, 
+                      String accountName, String description, boolean active, ZonedDateTime createdAt) {
+        this.id = id;
+        this.merchantId = merchantId;
+        this.bankCode = bankCode;
+        this.accountNumber = accountNumber;
+        this.accountName = accountName;
+        this.description = description;
+        this.active = active;
+        this.createdAt = createdAt;
+    }
+
     public void deactivate() {
         if (!this.active) {
             throw new BusinessRuleException(IdentityErrorCode.SUBACCOUNT_ALREADY_INACTIVE, "SubAccount is already inactive");
