@@ -14,7 +14,7 @@ class LedgerTransactionTest {
 
     @Test
     void shouldCreateTransactionWhenBalanced() {
-        TransactionReference ref = new TransactionReference("TX-123", "TRANSFERS");
+        TransactionReference ref = new TransactionReference("TX-123", SourceSystem.TRANSFERS);
         
         LedgerEntry debit = new LedgerEntry(1L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", Money.of("0.00", CurrencyCode.NGN), ZonedDateTime.now());
         LedgerEntry credit = new LedgerEntry(2L, 200L, Money.of("500.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", Money.of("500.00", CurrencyCode.NGN), ZonedDateTime.now());
@@ -28,7 +28,7 @@ class LedgerTransactionTest {
 
     @Test
     void shouldThrowExceptionWhenUnbalanced() {
-        TransactionReference ref = new TransactionReference("TX-124", "TRANSFERS");
+        TransactionReference ref = new TransactionReference("TX-124", SourceSystem.TRANSFERS);
         
         LedgerEntry debit = new LedgerEntry(3L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Transfer out", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
         LedgerEntry credit = new LedgerEntry(4L, 200L, Money.of("400.00", CurrencyCode.NGN), EntryType.CREDIT, ref, "Transfer in", Money.of("400.00", CurrencyCode.NGN), ZonedDateTime.now());
@@ -42,7 +42,7 @@ class LedgerTransactionTest {
 
     @Test
     void shouldThrowExceptionWhenLessThanTwoEntries() {
-        TransactionReference ref = new TransactionReference("TX-125", "CHARGES");
+        TransactionReference ref = new TransactionReference("TX-125", SourceSystem.CHARGES);
         
         LedgerEntry debit = new LedgerEntry(5L, 100L, Money.of("500.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Charge", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
         
@@ -55,7 +55,7 @@ class LedgerTransactionTest {
 
     @Test
     void shouldThrowExceptionWhenMissingCreditOrDebit() {
-        TransactionReference ref = new TransactionReference("TX-126", "TRANSFERS");
+        TransactionReference ref = new TransactionReference("TX-126", SourceSystem.TRANSFERS);
         
         LedgerEntry debit1 = new LedgerEntry(6L, 100L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 1", Money.of("250", CurrencyCode.NGN), ZonedDateTime.now());
         LedgerEntry debit2 = new LedgerEntry(7L, 200L, Money.of("250.00", CurrencyCode.NGN), EntryType.DEBIT, ref, "Split out 2", Money.of("0", CurrencyCode.NGN), ZonedDateTime.now());
