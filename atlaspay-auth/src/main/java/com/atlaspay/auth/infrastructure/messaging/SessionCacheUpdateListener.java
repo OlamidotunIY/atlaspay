@@ -1,4 +1,4 @@
-package com.atlaspay.auth.application.service;
+package com.atlaspay.auth.infrastructure.messaging;
 
 import com.atlaspay.auth.application.port.out.TokenCachePort;
 import com.atlaspay.auth.domain.event.SessionCreatedEvent;
