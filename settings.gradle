@@ -16,3 +16,7 @@ include 'atlaspay-rate-limiter'
 include 'atlaspay-eventbus'
 include 'atlaspay-simulator'
 include 'atlaspay-app'
+include 'atlaspay-audit'
+include 'atlaspay-admin'
+include 'atlaspay-auth'
+

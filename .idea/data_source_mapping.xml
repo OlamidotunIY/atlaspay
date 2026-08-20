@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/atlaspay-shared-kernel/src/main/java/com/atlaspay/shared/infrastructure/DomainSequenceGenerator.java" value="41589cab-ab15-43df-a6a7-63dbd77e6080" />
-  </component>
-</project>
