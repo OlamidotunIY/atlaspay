@@ -12,5 +12,6 @@ public interface SessionRepository {
     Optional<Session> findById(Long id);
     Optional<Session> findByToken(String token);
     List<Session> findByAuthAccountIdAndStatus(Long authAccountId, SessionStatus status);
+    List<Session> findByAuthAccountId(Long authAccountId);
     List<Session> saveAll(List<Session> sessions);
 }
