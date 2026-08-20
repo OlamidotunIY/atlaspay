@@ -1,6 +1,7 @@
 package com.atlaspay.auth.domain.model;
 
 import com.atlaspay.auth.domain.event.SessionCreatedEvent;
+import com.atlaspay.auth.domain.event.SessionPayload;
 import com.atlaspay.auth.domain.event.SessionRevokedEvent;
 import com.atlaspay.shared.domain.AggregateRoot;
 import lombok.Getter;
@@ -42,9 +43,9 @@ public class Session extends AggregateRoot<Long> {
         session.registerEvent(
                 new SessionCreatedEvent(
                         UUID.randomUUID().toString(),
-                        String.valueOf(principalId),
+                        String.valueOf(session.getId()),
                         ZonedDateTime.now(),
-                        null
+                        new SessionPayload(jti, expiresAt)
                 ));
         return session;
     }
@@ -57,9 +58,9 @@ public class Session extends AggregateRoot<Long> {
             this.registerEvent(
                 new SessionRevokedEvent(
                         UUID.randomUUID().toString(),
-                        String.valueOf(this.principalId),
+                        String.valueOf(this.getId()),
                         ZonedDateTime.now(),
-                        null
+                        new SessionPayload(this.token, this.expiresAt)
                 ));
         }
     }

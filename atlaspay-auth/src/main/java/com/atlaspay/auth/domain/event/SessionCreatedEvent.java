@@ -7,5 +7,5 @@ public record SessionCreatedEvent(
         String eventId,
         String aggregateId,
         ZonedDateTime occurredAt,
-        Void payload
-) implements DomainEvent<Void> {}
+        SessionPayload payload
+) implements DomainEvent<SessionPayload> {}
