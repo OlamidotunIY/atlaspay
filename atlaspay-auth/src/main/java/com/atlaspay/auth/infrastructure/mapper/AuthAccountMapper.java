@@ -22,7 +22,7 @@ public class AuthAccountMapper {
                 .accessTokenExpiresAt(domain.getAccessTokenExpiresAt())
                 .refreshTokenExpiresAt(domain.getRefreshTokenExpiresAt())
                 .totpSecret(domain.getTotpSecret())
-                .totpEnabled(domain.isTotpEnabled())
+                .totpEnabled(domain.getTotpEnabled() != null ? domain.getTotpEnabled() : false)
                 .status(domain.getStatus())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())

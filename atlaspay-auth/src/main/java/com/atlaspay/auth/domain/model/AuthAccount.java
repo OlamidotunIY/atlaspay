@@ -43,6 +43,24 @@ public class AuthAccount extends AggregateRoot<Long> {
         this.updatedAt = ZonedDateTime.now();
     }
 
+    public AuthAccount(Long id, Long principalId, PrincipalType principalType, AuthProvider provider, String credentialHash, String scope, String accessToken, String refreshToken, ZonedDateTime accessTokenExpiresAt, ZonedDateTime refreshTokenExpiresAt, String totpSecret, Boolean totpEnabled, AuthStatus status, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+        this.id = id;
+        this.principalId = principalId;
+        this.principalType = principalType;
+        this.provider = provider;
+        this.credentialHash = credentialHash;
+        this.scope = scope;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.accessTokenExpiresAt = accessTokenExpiresAt;
+        this.refreshTokenExpiresAt = refreshTokenExpiresAt;
+        this.totpSecret = totpSecret;
+        this.totpEnabled = totpEnabled;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public static AuthAccount create(Long id, Long principalId, PrincipalType principalType, AuthProvider provider, String credentialHash, String scope) {
         AuthAccount authAccount = new AuthAccount(id, principalId, principalType, provider, credentialHash, scope, AuthStatus.ACTIVE);
 
