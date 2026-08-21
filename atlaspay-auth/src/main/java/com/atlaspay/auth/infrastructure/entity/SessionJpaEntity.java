@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,10 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "sessions")
+@Table(name = "sessions", indexes = {
+        @Index(name = "idx_session_token", columnList = "token"),
+        @Index(name = "idx_session_auth_account_status", columnList = "authAccountId, status")
+})
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -56,3 +60,4 @@ public class SessionJpaEntity {
 
     private ZonedDateTime revokedAt;
 }
+

@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,10 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "verifications")
+@Table(name = "verifications", indexes = {
+        @Index(name = "idx_verification_identifier", columnList = "identifier"),
+        @Index(name = "idx_verification_type_value_status", columnList = "type, value, status")
+})
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -59,3 +63,4 @@ public class VerificationJpaEntity {
     
     private ZonedDateTime verifiedAt;
 }
+

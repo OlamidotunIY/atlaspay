@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,9 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "auth_accounts")
+@Table(name = "auth_accounts", indexes = {
+        @Index(name = "idx_auth_account_principal", columnList = "principalId, principalType")
+})
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -66,3 +69,4 @@ public class AuthAccountJpaEntity {
     @Column(nullable = false)
     private ZonedDateTime updatedAt;
 }
+
