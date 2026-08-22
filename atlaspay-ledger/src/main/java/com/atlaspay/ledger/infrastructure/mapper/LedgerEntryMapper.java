@@ -8,6 +8,7 @@ import com.atlaspay.shared.money.CurrencyCode;
 import com.atlaspay.shared.money.Money;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
+import com.atlaspay.ledger.domain.model.SourceSystem;
 
 @Component
 public class LedgerEntryMapper {
@@ -35,7 +36,7 @@ public class LedgerEntryMapper {
         if (entity.getTransaction() != null) {
             reference = new TransactionReference(
                     entity.getTransaction().getTransactionId(),
-                    entity.getTransaction().getSourceSystem()
+                    SourceSystem.valueOf(entity.getTransaction().getSourceSystem())
             );
         }
 

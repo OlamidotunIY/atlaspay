@@ -6,9 +6,12 @@ import com.atlaspay.shared.money.CurrencyCode;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.atlaspay.ledger.domain.model.SourceSystem;
+
 public record PostLedgerTransactionCommand(
         String transactionId,
-        String sourceSystem,
+        SourceSystem sourceSystem,
+        Long integrationId,
         List<EntryCommand> entries
 ) {
     public record EntryCommand(

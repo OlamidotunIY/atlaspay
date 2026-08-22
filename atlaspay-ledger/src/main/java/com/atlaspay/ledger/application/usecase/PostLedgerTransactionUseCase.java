@@ -2,26 +2,24 @@ package com.atlaspay.ledger.application.usecase;
 
 import com.atlaspay.ledger.application.command.PostLedgerTransactionCommand;
 import com.atlaspay.ledger.domain.exception.LedgerErrorCode;
-import com.atlaspay.ledger.domain.model.LedgerEntry;
-import com.atlaspay.ledger.domain.model.LedgerTransaction;
-import com.atlaspay.ledger.domain.model.TransactionReference;
+import com.atlaspay.ledger.domain.model.*;
+import com.atlaspay.ledger.domain.repository.BalanceSnapshotRepository;
 import com.atlaspay.ledger.domain.repository.LedgerEntryRepository;
 import com.atlaspay.ledger.domain.repository.LedgerTransactionRepository;
-import com.atlaspay.ledger.domain.model.BalanceSnapshot;
-import com.atlaspay.ledger.domain.model.EntryType;
-import com.atlaspay.ledger.domain.repository.BalanceSnapshotRepository;
-import com.atlaspay.shared.exception.ConflictException;
 import com.atlaspay.shared.exception.BusinessRuleException;
+import com.atlaspay.shared.exception.ConflictException;
 import com.atlaspay.shared.exception.NotFoundException;
-import com.atlaspay.shared.port.out.AccountQueryPort;
-import com.atlaspay.shared.port.out.AccountDetailsDto;
 import com.atlaspay.shared.money.Money;
+import com.atlaspay.shared.port.out.AccountDetailsDto;
+import com.atlaspay.shared.port.out.AccountQueryPort;
 import com.atlaspay.shared.usecase.BaseUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostLedgerTransactionUseCase extends BaseUseCase<PostLedgerTransactionCommand, Void> {
@@ -52,14 +50,13 @@ public class PostLedgerTransactionUseCase extends BaseUseCase<PostLedgerTransact
 
         TransactionReference reference = new TransactionReference(command.transactionId(), command.sourceSystem());
         
-        Long integrationId;
-        try {
-            integrationId = Long.valueOf(command.sourceSystem());
-        } catch (NumberFormatException e) {
-            throw new BusinessRuleException(LedgerErrorCode.UNAUTHORIZED_ACCESS, "Invalid source system format");
+        Long integrationId = command.integrationId();
+        if (integrationId == null) {
+            throw new BusinessRuleException(LedgerErrorCode.UNAUTHORIZED_ACCESS, "Integration ID is required");
         }
 
         // Validate entries against account invariants
+        Map<Long, AccountDetailsDto> validatedAccounts = new HashMap<>();
         for (PostLedgerTransactionCommand.EntryCommand entry : command.entries()) {
             AccountDetailsDto account = accountQueryPort.findAccountDetails(entry.accountId())
                     .orElseThrow(() -> new NotFoundException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "Account does not exist"));
@@ -70,6 +67,7 @@ public class PostLedgerTransactionUseCase extends BaseUseCase<PostLedgerTransact
             if (account.currency() != entry.currency()) {
                 throw new BusinessRuleException(LedgerErrorCode.CURRENCY_MISMATCH, "Entry currency does not match account currency");
             }
+            validatedAccounts.put(entry.accountId(), account);
         }
 
         // Lock accounts in a consistent order to prevent deadlocks
@@ -79,13 +77,13 @@ public class PostLedgerTransactionUseCase extends BaseUseCase<PostLedgerTransact
                 .sorted()
                 .toList();
 
-        java.util.Map<Long, BalanceSnapshot> snapshots = new java.util.HashMap<>();
+        Map<Long, BalanceSnapshot> snapshots = new HashMap<>();
         for (Long accountId : accountIds) {
             BalanceSnapshot snapshot = balanceSnapshotRepository.findLatestByAccountIdForUpdate(accountId)
-                    .orElse(new BalanceSnapshot(
+                    .orElseGet(() -> new BalanceSnapshot(
                             balanceSnapshotRepository.nextIdentity(),
                             accountId,
-                            Money.zero(command.entries().stream().filter(e -> e.accountId().equals(accountId)).findFirst().get().currency()),
+                            Money.zero(validatedAccounts.get(accountId).currency()),
                             0L,
                             ZonedDateTime.now()
                     ));

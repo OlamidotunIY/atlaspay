@@ -5,11 +5,15 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="25" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/atlaspay-accounts" />
+            <option value="$PROJECT_DIR$/atlaspay-admin" />
             <option value="$PROJECT_DIR$/atlaspay-app" />
+            <option value="$PROJECT_DIR$/atlaspay-audit" />
+            <option value="$PROJECT_DIR$/atlaspay-auth" />
             <option value="$PROJECT_DIR$/atlaspay-charges" />
             <option value="$PROJECT_DIR$/atlaspay-escrow" />
             <option value="$PROJECT_DIR$/atlaspay-eventbus" />
