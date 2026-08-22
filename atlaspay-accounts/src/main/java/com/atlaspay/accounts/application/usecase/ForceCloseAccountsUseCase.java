@@ -1,5 +1,7 @@
 package com.atlaspay.accounts.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import com.atlaspay.accounts.application.command.ForceCloseAccountsCommand;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
@@ -9,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Service
 public class ForceCloseAccountsUseCase extends BaseUseCase<ForceCloseAccountsCommand, Void> {
 
     private final VirtualAccountDomainRepository repository;
     private final DomainEventPublisher eventPublisher;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Void execute(ForceCloseAccountsCommand command) {
         List<VirtualAccount> accounts = repository.findByIntegration(command.integration());
         
@@ -27,3 +31,6 @@ public class ForceCloseAccountsUseCase extends BaseUseCase<ForceCloseAccountsCom
         return null;
     }
 }
+
+
+

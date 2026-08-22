@@ -1,5 +1,7 @@
 package com.atlaspay.accounts.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import com.atlaspay.accounts.application.dto.VirtualAccountDto;
 import com.atlaspay.accounts.application.query.GetVirtualAccountsQuery;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Service
 public class GetVirtualAccountsUseCase extends BaseUseCase<GetVirtualAccountsQuery, List<VirtualAccountDto>> {
 
     private final VirtualAccountDomainRepository repository;
@@ -31,3 +34,5 @@ public class GetVirtualAccountsUseCase extends BaseUseCase<GetVirtualAccountsQue
                 .collect(Collectors.toList());
     }
 }
+
+

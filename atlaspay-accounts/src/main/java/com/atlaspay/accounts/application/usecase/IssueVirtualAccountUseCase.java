@@ -1,5 +1,7 @@
 package com.atlaspay.accounts.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import com.atlaspay.accounts.application.command.IssueVirtualAccountCommand;
 import com.atlaspay.accounts.domain.model.VirtualAccount;
 import com.atlaspay.accounts.domain.repository.VirtualAccountDomainRepository;
@@ -12,6 +14,7 @@ import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.accounts.domain.exception.AccountsErrorCode;
 
 @RequiredArgsConstructor
+@Service
 public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountCommand, Long> {
 
     private final VirtualAccountDomainRepository repository;
@@ -19,6 +22,7 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
     private final DomainEventPublisher eventPublisher;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Long execute(IssueVirtualAccountCommand command) {
         
         if (queryService.countByIntegration(command.integration()) >= 2) {
@@ -43,3 +47,6 @@ public class IssueVirtualAccountUseCase extends BaseUseCase<IssueVirtualAccountC
         return savedAccount.getId();
     }
 }
+
+
+
