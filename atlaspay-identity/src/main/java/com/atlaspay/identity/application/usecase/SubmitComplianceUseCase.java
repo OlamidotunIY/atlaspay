@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
+@Service
 public class SubmitComplianceUseCase extends BaseUseCase<SubmitComplianceCommand, Void> {
     private static final Logger log = LoggerFactory.getLogger(SubmitComplianceUseCase.class);
 
@@ -26,6 +29,7 @@ public class SubmitComplianceUseCase extends BaseUseCase<SubmitComplianceCommand
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Void execute(SubmitComplianceCommand command) {
         log.info("Executing SubmitComplianceUseCase");
 
@@ -40,3 +44,6 @@ public class SubmitComplianceUseCase extends BaseUseCase<SubmitComplianceCommand
         return null;
     }
 }
+
+
+

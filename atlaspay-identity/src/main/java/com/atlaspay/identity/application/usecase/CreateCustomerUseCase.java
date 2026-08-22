@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,7 @@ import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.ConflictException;
 
+@Service
 public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, CreateCustomerResult> {
     private static final Logger log = LoggerFactory.getLogger(CreateCustomerUseCase.class);
 
@@ -29,6 +32,7 @@ public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, Cr
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public CreateCustomerResult execute(CreateCustomerCommand command) {
         log.info("Executing CreateCustomerUseCase");
 
@@ -53,3 +57,6 @@ public class CreateCustomerUseCase extends BaseUseCase<CreateCustomerCommand, Cr
         return new CreateCustomerResult(customer.getId());
     }
 }
+
+
+

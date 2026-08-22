@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
+@Service
 public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteComplianceAccountCommand, ComplianceStatus> {
     private static final Logger log = LoggerFactory.getLogger(CompleteComplianceAccountUseCase.class);
 
@@ -35,6 +38,7 @@ public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteCompli
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ComplianceStatus execute(CompleteComplianceAccountCommand command) {
         log.info("Executing CompleteComplianceAccountUseCase");
 
@@ -55,3 +59,6 @@ public class CompleteComplianceAccountUseCase extends BaseUseCase<CompleteCompli
         return merchant.getComplianceStatus();
     }
 }
+
+
+

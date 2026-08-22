@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,6 @@ import com.atlaspay.identity.application.command.GenerateTestApiKeyPairCommand;
 import com.atlaspay.shared.usecase.BaseUseCase;
 
 import com.atlaspay.identity.application.dto.ApiKeyPairResult;
-import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
 import com.atlaspay.identity.domain.model.KeyType;
@@ -17,21 +18,21 @@ import com.atlaspay.shared.event.DomainEventPublisher;
 
 import java.util.UUID;
 
+@Service
 public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKeyPairCommand, ApiKeyPairResult> {
     private static final Logger log = LoggerFactory.getLogger(GenerateTestApiKeyPairUseCase.class);
 
 
     private final ApiKeyRepository apiKeyRepository;
-    private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher eventPublisher;
 
-    public GenerateTestApiKeyPairUseCase(ApiKeyRepository apiKeyRepository, PasswordEncoder passwordEncoder, DomainEventPublisher eventPublisher) {
+    public GenerateTestApiKeyPairUseCase(ApiKeyRepository apiKeyRepository, DomainEventPublisher eventPublisher) {
         this.apiKeyRepository = apiKeyRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.eventPublisher = eventPublisher;
+                this.eventPublisher = eventPublisher;
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ApiKeyPairResult execute(GenerateTestApiKeyPairCommand command) {
         log.info("Executing GenerateTestApiKeyPairUseCase");
 
@@ -68,3 +69,7 @@ public class GenerateTestApiKeyPairUseCase extends BaseUseCase<GenerateTestApiKe
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
     }
 }
+
+
+
+

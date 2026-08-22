@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ import com.atlaspay.shared.domain.valueobject.PhoneNumber;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
+@Service
 public class CompleteComplianceContactUseCase extends BaseUseCase<CompleteComplianceContactCommand, Void> {
     private static final Logger log = LoggerFactory.getLogger(CompleteComplianceContactUseCase.class);
 
@@ -28,6 +31,7 @@ public class CompleteComplianceContactUseCase extends BaseUseCase<CompleteCompli
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Void execute(CompleteComplianceContactCommand command) {
         log.info("Executing CompleteComplianceContactUseCase");
 
@@ -55,3 +59,6 @@ public class CompleteComplianceContactUseCase extends BaseUseCase<CompleteCompli
         return null;
     }
 }
+
+
+

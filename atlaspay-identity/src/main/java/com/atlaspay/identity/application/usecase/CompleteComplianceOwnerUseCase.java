@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
+@Service
 public class CompleteComplianceOwnerUseCase extends BaseUseCase<CompleteComplianceOwnerCommand, Void> {
     private static final Logger log = LoggerFactory.getLogger(CompleteComplianceOwnerUseCase.class);
 
@@ -26,6 +29,7 @@ public class CompleteComplianceOwnerUseCase extends BaseUseCase<CompleteComplian
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Void execute(CompleteComplianceOwnerCommand command) {
         log.info("Executing CompleteComplianceOwnerUseCase");
 
@@ -48,3 +52,6 @@ public class CompleteComplianceOwnerUseCase extends BaseUseCase<CompleteComplian
         return null;
     }
 }
+
+
+

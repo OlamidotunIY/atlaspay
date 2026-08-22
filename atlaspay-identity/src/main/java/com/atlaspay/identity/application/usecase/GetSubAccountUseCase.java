@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,7 @@ import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.exception.NotFoundException;
 import com.atlaspay.shared.usecase.BaseUseCase;
 
+@Service
 public class GetSubAccountUseCase extends BaseUseCase<GetSubAccountQuery, SubAccountDto> {
     private static final Logger log = LoggerFactory.getLogger(GetSubAccountUseCase.class);
 
@@ -28,3 +31,5 @@ public class GetSubAccountUseCase extends BaseUseCase<GetSubAccountQuery, SubAcc
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.SUBACCOUNT_NOT_FOUND, "SubAccount not found"));
     }
 }
+
+

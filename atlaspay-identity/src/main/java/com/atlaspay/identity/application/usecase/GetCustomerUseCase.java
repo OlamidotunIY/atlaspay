@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,7 @@ import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.shared.exception.NotFoundException;
 import com.atlaspay.shared.usecase.BaseUseCase;
 
+@Service
 public class GetCustomerUseCase extends BaseUseCase<GetCustomerQuery, CustomerDto> {
     private static final Logger log = LoggerFactory.getLogger(GetCustomerUseCase.class);
 
@@ -28,3 +31,5 @@ public class GetCustomerUseCase extends BaseUseCase<GetCustomerQuery, CustomerDt
                 .orElseThrow(() -> new NotFoundException(IdentityErrorCode.CUSTOMER_NOT_FOUND, "Customer not found"));
     }
 }
+
+

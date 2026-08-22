@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.atlaspay.identity.domain.repository.ApiKeyRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.NotFoundException;
 
+@Service
 public class RevokeApiKeyUseCase extends BaseUseCase<RevokeApiKeyCommand, Void> {
     private static final Logger log = LoggerFactory.getLogger(RevokeApiKeyUseCase.class);
 
@@ -26,6 +29,7 @@ public class RevokeApiKeyUseCase extends BaseUseCase<RevokeApiKeyCommand, Void> 
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Void execute(RevokeApiKeyCommand command) {
         log.info("Executing RevokeApiKeyUseCase");
 
@@ -44,3 +48,6 @@ public class RevokeApiKeyUseCase extends BaseUseCase<RevokeApiKeyCommand, Void> 
         return null;
     }
 }
+
+
+

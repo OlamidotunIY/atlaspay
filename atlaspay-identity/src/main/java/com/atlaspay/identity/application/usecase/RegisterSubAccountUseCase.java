@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.atlaspay.identity.application.dto.RegisterSubAccountResult;
 
 @Component
+@Service
 public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCommand, RegisterSubAccountResult> {
     private static final Logger log = LoggerFactory.getLogger(RegisterSubAccountUseCase.class);
 
@@ -32,6 +35,7 @@ public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCom
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public RegisterSubAccountResult execute(RegisterSubAccountCommand input) {
         log.info("Executing RegisterSubAccountUseCase");
 
@@ -51,3 +55,6 @@ public class RegisterSubAccountUseCase extends BaseUseCase<RegisterSubAccountCom
         return new RegisterSubAccountResult(subAccount.getId(), accountName);
     }
 }
+
+
+

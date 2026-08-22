@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,7 +9,6 @@ import com.atlaspay.identity.application.command.RegenerateApiKeyCommand;
 
 import com.atlaspay.shared.usecase.BaseUseCase;
 
-import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.exception.IdentityErrorCode;
 import com.atlaspay.identity.domain.model.ApiEnvironment;
 import com.atlaspay.identity.domain.model.ApiKey;
@@ -21,27 +22,26 @@ import com.atlaspay.shared.exception.NotFoundException;
 
 import java.util.UUID;
 
+@Service
 public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand, String> {
     private static final Logger log = LoggerFactory.getLogger(RegenerateApiKeyUseCase.class);
 
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
-    private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher eventPublisher;
 
     public RegenerateApiKeyUseCase(
             MerchantRepository merchantRepository,
             ApiKeyRepository apiKeyRepository,
-            PasswordEncoder passwordEncoder,
             DomainEventPublisher eventPublisher) {
         this.merchantRepository = merchantRepository;
         this.apiKeyRepository = apiKeyRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.eventPublisher = eventPublisher;
+                this.eventPublisher = eventPublisher;
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public String execute(RegenerateApiKeyCommand command) {
         log.info("Executing RegenerateApiKeyUseCase");
 
@@ -94,3 +94,7 @@ public class RegenerateApiKeyUseCase extends BaseUseCase<RegenerateApiKeyCommand
         return rawKey;
     }
 }
+
+
+
+

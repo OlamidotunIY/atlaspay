@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,31 +20,29 @@ import com.atlaspay.identity.domain.repository.MerchantRepository;
 import com.atlaspay.shared.event.DomainEventPublisher;
 import com.atlaspay.shared.exception.BusinessRuleException;
 import com.atlaspay.shared.exception.NotFoundException;
-import com.atlaspay.identity.application.port.PasswordEncoder;
 
 import java.util.UUID;
 
+@Service
 public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKeyPairCommand, ApiKeyPairResult> {
     private static final Logger log = LoggerFactory.getLogger(GenerateLiveApiKeyPairUseCase.class);
 
 
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
-    private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher eventPublisher;
 
     public GenerateLiveApiKeyPairUseCase(
             MerchantRepository merchantRepository,
             ApiKeyRepository apiKeyRepository,
-            PasswordEncoder passwordEncoder,
             DomainEventPublisher eventPublisher) {
         this.merchantRepository = merchantRepository;
         this.apiKeyRepository = apiKeyRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.eventPublisher = eventPublisher;
+                this.eventPublisher = eventPublisher;
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ApiKeyPairResult execute(GenerateLiveApiKeyPairCommand command) {
         log.info("Executing GenerateLiveApiKeyPairUseCase");
 
@@ -86,3 +86,7 @@ public class GenerateLiveApiKeyPairUseCase extends BaseUseCase<GenerateLiveApiKe
         return new ApiKeyPairResult(rawPublicKey, rawSecretKey);
     }
 }
+
+
+
+

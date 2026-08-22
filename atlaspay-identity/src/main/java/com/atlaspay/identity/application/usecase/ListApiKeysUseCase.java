@@ -1,5 +1,7 @@
 package com.atlaspay.identity.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,7 @@ import com.atlaspay.shared.usecase.BaseUseCase;
 
 import java.util.List;
 
+@Service
 public class ListApiKeysUseCase extends BaseUseCase<ListApiKeysQuery, List<ApiKeyDto>> {
     private static final Logger log = LoggerFactory.getLogger(ListApiKeysUseCase.class);
 
@@ -25,3 +28,5 @@ public class ListApiKeysUseCase extends BaseUseCase<ListApiKeysQuery, List<ApiKe
         return queryService.findAllByIntegration(query.merchantId());
     }
 }
+
+
