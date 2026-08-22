@@ -1,5 +1,6 @@
 package com.atlaspay.notifications.infrastructure.messaging;
 
+import com.atlaspay.notifications.application.usecase.SendAdminWelcomeEmailUseCase;
 import com.atlaspay.shared.event.BaseKafkaEventListener;
 import com.atlaspay.shared.infrastructure.dlq.DeadLetterRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +24,16 @@ public class AdminCredentialsCreatedEventListener extends BaseKafkaEventListener
     private static final Logger log = LoggerFactory.getLogger(AdminCredentialsCreatedEventListener.class);
 
     private final DeadLetterRepository deadLetterRepository;
+    private final SendAdminWelcomeEmailUseCase sendAdminWelcomeEmailUseCase;
 
     public AdminCredentialsCreatedEventListener(
             ObjectMapper objectMapper,
-            DeadLetterRepository deadLetterRepository
+            DeadLetterRepository deadLetterRepository,
+            SendAdminWelcomeEmailUseCase sendAdminWelcomeEmailUseCase
     ) {
         super(objectMapper);
         this.deadLetterRepository = deadLetterRepository;
+        this.sendAdminWelcomeEmailUseCase = sendAdminWelcomeEmailUseCase;
     }
 
     @RetryableTopic(
@@ -44,7 +48,7 @@ public class AdminCredentialsCreatedEventListener extends BaseKafkaEventListener
             String tempPassword = root.path("payload").path("temporaryPassword").asText(null);
             
             if (email != null && tempPassword != null) {
-                // TODO: Call SendWelcomeEmailUseCase when it's available
+                sendAdminWelcomeEmailUseCase.execute(new SendAdminWelcomeEmailUseCase.Input(email, tempPassword));
                 log.info("Sent welcome email with temp password to admin at {}", email);
             }
         });
