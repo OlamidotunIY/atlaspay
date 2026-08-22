@@ -45,6 +45,11 @@ public class AuthAccountRepositoryAdapter implements AuthAccountRepository {
     public Optional<AuthAccount> findByPrincipalIdAndType(Long principalId, PrincipalType type) {
         return jpaRepository.findByPrincipalIdAndPrincipalType(principalId, type).map(mapper::toDomain);
     }
+    
+    @Override
+    public Optional<AuthAccount> findByIdentifier(String identifier) {
+        return jpaRepository.findByIdentifierOrSecondaryIdentifier(identifier, identifier).map(mapper::toDomain);
+    }
 
     @Override
     public boolean existsByPrincipalIdAndType(Long principalId, PrincipalType type) {
