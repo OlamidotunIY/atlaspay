@@ -18,7 +18,7 @@ public class AuthAccount extends AggregateRoot<Long> {
     private final Long principalId;
     private final PrincipalType principalType;
     private final String identifier;
-    private final String secondaryIdentifier;
+    private String secondaryIdentifier;
     private AuthProvider provider;
     private String credentialHash;
     private String scope;
@@ -151,8 +151,14 @@ public class AuthAccount extends AggregateRoot<Long> {
         this.updatedAt = ZonedDateTime.now();
     }
 
+    public void updateSecondaryIdentifier(String secondaryIdentifier) {
+        this.secondaryIdentifier = secondaryIdentifier;
+        this.updatedAt = ZonedDateTime.now();
+    }
+
     @Override
     public Long getId() {
         return id;
     }
 }
+

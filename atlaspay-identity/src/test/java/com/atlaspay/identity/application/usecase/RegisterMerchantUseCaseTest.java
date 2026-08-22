@@ -2,7 +2,6 @@ package com.atlaspay.identity.application.usecase;
 
 import com.atlaspay.identity.application.command.RegisterMerchantCommand;
 import com.atlaspay.identity.application.dto.RegisterMerchantResult;
-import com.atlaspay.identity.application.port.PasswordEncoder;
 import com.atlaspay.identity.domain.model.BusinessType;
 import com.atlaspay.identity.domain.model.Merchant;
 import com.atlaspay.identity.domain.repository.MerchantRepository;
@@ -39,8 +38,7 @@ import static org.mockito.Mockito.*;
 class RegisterMerchantUseCaseTest {
 
     @Mock private MerchantRepository merchantRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private DomainEventPublisher eventPublisher;
+        @Mock private DomainEventPublisher eventPublisher;
 
     private RegisterMerchantUseCase useCase;
 
@@ -51,15 +49,13 @@ class RegisterMerchantUseCaseTest {
             "Doe",
             "john@acme.com",
             "+2348012345678",
-            "secureP@ss123",
-            BusinessType.STARTER
+                        BusinessType.STARTER
     );
 
     @BeforeEach
     void setUp() {
         useCase = new RegisterMerchantUseCase(
                 merchantRepository,
-                passwordEncoder,
                 eventPublisher
         );
     }
@@ -71,8 +67,7 @@ class RegisterMerchantUseCaseTest {
     void shouldRegisterMerchantAndReturnId() {
         // Arrange
         when(merchantRepository.findByEmail(VALID_COMMAND.email())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(VALID_COMMAND.password())).thenReturn("hashed_password");
-
+        
         // Act
         RegisterMerchantResult result = useCase.execute(VALID_COMMAND);
 
@@ -85,20 +80,6 @@ class RegisterMerchantUseCaseTest {
 
         Merchant saved = captor.getValue();
         assertThat(saved.getId()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("should hash the merchant password before persisting")
-    void shouldHashPasswordBeforePersisting() {
-        // Arrange
-        when(merchantRepository.findByEmail(any())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("secureP@ss123")).thenReturn("bcrypt_hashed");
-
-        // Act
-        useCase.execute(VALID_COMMAND);
-
-        // Assert
-        verify(passwordEncoder).encode("secureP@ss123");
     }
 
     // ── Conflict ──────────────────────────────────────────────────────────────
@@ -120,3 +101,4 @@ class RegisterMerchantUseCaseTest {
         verifyNoInteractions(eventPublisher);
     }
 }
+
