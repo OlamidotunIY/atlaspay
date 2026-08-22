@@ -17,6 +17,8 @@ public class AuthAccount extends AggregateRoot<Long> {
     private final Long id;
     private final Long principalId;
     private final PrincipalType principalType;
+    private final String identifier;
+    private final String secondaryIdentifier;
     private AuthProvider provider;
     private String credentialHash;
     private String scope;
@@ -30,10 +32,12 @@ public class AuthAccount extends AggregateRoot<Long> {
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
 
-    public AuthAccount(Long id, Long principalId, PrincipalType principalType, AuthProvider provider, String credentialHash, String scope, AuthStatus status) {
+    public AuthAccount(Long id, Long principalId, PrincipalType principalType, String identifier, String secondaryIdentifier, AuthProvider provider, String credentialHash, String scope, AuthStatus status) {
         this.id = id;
         this.principalId = principalId;
         this.principalType = principalType;
+        this.identifier = identifier;
+        this.secondaryIdentifier = secondaryIdentifier;
         this.provider = provider;
         this.credentialHash = credentialHash;
         this.scope = scope;
@@ -43,10 +47,12 @@ public class AuthAccount extends AggregateRoot<Long> {
         this.updatedAt = ZonedDateTime.now();
     }
 
-    public AuthAccount(Long id, Long principalId, PrincipalType principalType, AuthProvider provider, String credentialHash, String scope, String accessToken, String refreshToken, ZonedDateTime accessTokenExpiresAt, ZonedDateTime refreshTokenExpiresAt, String totpSecret, Boolean totpEnabled, AuthStatus status, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+    public AuthAccount(Long id, Long principalId, PrincipalType principalType, String identifier, String secondaryIdentifier, AuthProvider provider, String credentialHash, String scope, String accessToken, String refreshToken, ZonedDateTime accessTokenExpiresAt, ZonedDateTime refreshTokenExpiresAt, String totpSecret, Boolean totpEnabled, AuthStatus status, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
         this.id = id;
         this.principalId = principalId;
         this.principalType = principalType;
+        this.identifier = identifier;
+        this.secondaryIdentifier = secondaryIdentifier;
         this.provider = provider;
         this.credentialHash = credentialHash;
         this.scope = scope;
@@ -61,8 +67,21 @@ public class AuthAccount extends AggregateRoot<Long> {
         this.updatedAt = updatedAt;
     }
 
-    public static AuthAccount create(Long id, Long principalId, PrincipalType principalType, AuthProvider provider, String credentialHash, String scope) {
-        AuthAccount authAccount = new AuthAccount(id, principalId, principalType, provider, credentialHash, scope, AuthStatus.ACTIVE);
+    public static AuthAccount create(Long id, Long principalId, PrincipalType principalType, String identifier, String secondaryIdentifier, AuthProvider provider, String credentialHash, String scope) {
+        AuthAccount authAccount = new AuthAccount(id, principalId, principalType, identifier, secondaryIdentifier, provider, credentialHash, scope, AuthStatus.ACTIVE);
+
+        authAccount.registerEvent(
+                new AuthAccountCreatedEvent(
+                        UUID.randomUUID().toString(),
+                        String.valueOf(id),
+                        ZonedDateTime.now(),
+                        null
+                ));
+        return authAccount;
+    }
+    
+    public static AuthAccount createWithStatus(Long id, Long principalId, PrincipalType principalType, String identifier, String secondaryIdentifier, AuthProvider provider, String credentialHash, String scope, AuthStatus status) {
+        AuthAccount authAccount = new AuthAccount(id, principalId, principalType, identifier, secondaryIdentifier, provider, credentialHash, scope, status);
 
         authAccount.registerEvent(
                 new AuthAccountCreatedEvent(
@@ -98,6 +117,15 @@ public class AuthAccount extends AggregateRoot<Long> {
 
     public void updateCredential(String newHash) {
         this.credentialHash = newHash;
+        this.status = AuthStatus.ACTIVE; // if it was requires password change or setup, it's now active
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    public void requirePasswordSetup() {
+        if (this.status != AuthStatus.PENDING_EMAIL_VERIFICATION) {
+            throw new BusinessRuleException(AuthErrorCode.INVALID_REQUEST, "Account must be pending email verification to require password setup");
+        }
+        this.status = AuthStatus.REQUIRES_PASSWORD_SETUP;
         this.updatedAt = ZonedDateTime.now();
     }
 

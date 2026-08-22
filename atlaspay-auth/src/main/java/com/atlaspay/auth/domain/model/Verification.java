@@ -42,7 +42,7 @@ public class Verification extends AggregateRoot<Long> {
         this.createdAt = ZonedDateTime.now();
     }
 
-    public static Verification create(Long id, Long authAccountId, String identifier, String value, String code, VerificationType type, ZonedDateTime expiresAt, int maxAttempts) {
+    public static Verification create(Long id, Long authAccountId, String identifier, String value, String code, String rawCode, VerificationType type, ZonedDateTime expiresAt, int maxAttempts) {
         Verification verification = new Verification(id, authAccountId, identifier, value, code, type, VerificationStatus.PENDING, expiresAt, 0, maxAttempts);
 
         verification.registerEvent(
@@ -50,7 +50,7 @@ public class Verification extends AggregateRoot<Long> {
                         UUID.randomUUID().toString(),
                         String.valueOf(id),
                         ZonedDateTime.now(),
-                        new VerificationPayload(identifier, value, type)
+                        new VerificationPayload(identifier, value, type, rawCode)
                 ));
         return verification;
     }
@@ -87,7 +87,7 @@ public class Verification extends AggregateRoot<Long> {
                         UUID.randomUUID().toString(),
                         String.valueOf(id),
                         ZonedDateTime.now(),
-                        new VerificationPayload(this.identifier, this.value, this.type)
+                        new VerificationPayload(this.identifier, this.value, this.type, null)
                 ));
     }
 
