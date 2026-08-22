@@ -20,7 +20,9 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "auth_accounts", indexes = {
-        @Index(name = "idx_auth_account_principal", columnList = "principalId, principalType")
+        @Index(name = "idx_auth_account_principal", columnList = "principalId, principalType"),
+        @Index(name = "idx_auth_account_identifier", columnList = "identifier"),
+        @Index(name = "idx_auth_account_secondary_identifier", columnList = "secondaryIdentifier")
 })
 @Getter
 @Builder
@@ -36,6 +38,12 @@ public class AuthAccountJpaEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PrincipalType principalType;
+    
+    @Column(length = 255)
+    private String identifier;
+    
+    @Column(length = 255)
+    private String secondaryIdentifier;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -60,7 +68,7 @@ public class AuthAccountJpaEntity {
     private boolean totpEnabled;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 50)
     private AuthStatus status;
 
     @Column(nullable = false, updatable = false)
@@ -69,4 +77,3 @@ public class AuthAccountJpaEntity {
     @Column(nullable = false)
     private ZonedDateTime updatedAt;
 }
-

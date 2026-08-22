@@ -14,6 +14,8 @@ public class AuthAccountMapper {
                 .id(domain.getId())
                 .principalId(domain.getPrincipalId())
                 .principalType(domain.getPrincipalType())
+                .identifier(domain.getIdentifier())
+                .secondaryIdentifier(domain.getSecondaryIdentifier())
                 .provider(domain.getProvider())
                 .credentialHash(domain.getCredentialHash())
                 .scope(domain.getScope())
@@ -36,6 +38,8 @@ public class AuthAccountMapper {
                 entity.getId(),
                 entity.getPrincipalId(),
                 entity.getPrincipalType(),
+                entity.getIdentifier(),
+                entity.getSecondaryIdentifier(),
                 entity.getProvider(),
                 entity.getCredentialHash(),
                 entity.getScope(),

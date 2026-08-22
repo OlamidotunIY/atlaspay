@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface SpringDataAuthAccountRepository extends JpaRepository<AuthAccountJpaEntity, Long> {
     Optional<AuthAccountJpaEntity> findByPrincipalIdAndPrincipalType(Long principalId, PrincipalType principalType);
+    Optional<AuthAccountJpaEntity> findByIdentifierOrSecondaryIdentifier(String identifier, String secondaryIdentifier);
     boolean existsByPrincipalIdAndPrincipalType(Long principalId, PrincipalType principalType);
 }
