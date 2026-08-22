@@ -53,6 +53,7 @@ public class CreateVerificationUseCase extends BaseUseCase<CreateVerificationCom
                 input.identifier(),
                 input.identifier(),
                 hashedCode,
+                rawCode,
                 input.type(),
                 ZonedDateTime.now().plusMinutes(expiresInMinutes),
                 maxAttempts
