@@ -1,7 +1,7 @@
 package com.atlaspay.app.security.filter;
 
 import com.atlaspay.app.security.authentication.AtlasPayAuthenticationToken;
-import com.atlaspay.identity.infrastructure.adapter.security.JwtService;
+import com.atlaspay.app.security.AuthTokenParser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,10 +17,10 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final AuthTokenParser authTokenParser;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public JwtAuthenticationFilter(AuthTokenParser authTokenParser) {
+        this.authTokenParser = authTokenParser;
     }
 
     @Override
@@ -40,10 +40,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwt = authHeader.substring(7);
         try {
-            merchantId = jwtService.extractMerchantId(jwt);
+            merchantId = authTokenParser.extractPrincipalId(jwt);
             
             if (merchantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtService.isTokenValid(jwt)) {
+                if (authTokenParser.isTokenValid(jwt)) {
                     AtlasPayAuthenticationToken authToken = new AtlasPayAuthenticationToken(
                             merchantId,
                             jwt,
@@ -60,3 +60,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+

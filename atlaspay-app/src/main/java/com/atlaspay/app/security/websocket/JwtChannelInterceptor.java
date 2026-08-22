@@ -1,7 +1,7 @@
 package com.atlaspay.app.security.websocket;
 
 import com.atlaspay.app.security.authentication.AtlasPayAuthenticationToken;
-import com.atlaspay.identity.infrastructure.adapter.security.JwtService;
+import com.atlaspay.app.security.AuthTokenParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
 
-    private final JwtService jwtService;
+    private final AuthTokenParser authTokenParser;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -25,9 +25,9 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
             String authHeader = accessor.getFirstNativeHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String jwt = authHeader.substring(7);
-                String merchantId = jwtService.extractMerchantId(jwt);
+                String merchantId = authTokenParser.extractPrincipalId(jwt);
                 
-                if (merchantId != null && jwtService.isTokenValid(jwt)) {
+                if (merchantId != null && authTokenParser.isTokenValid(jwt)) {
                     AtlasPayAuthenticationToken authToken = new AtlasPayAuthenticationToken(
                             merchantId,
                             jwt,
@@ -40,3 +40,4 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         return message;
     }
 }
+
