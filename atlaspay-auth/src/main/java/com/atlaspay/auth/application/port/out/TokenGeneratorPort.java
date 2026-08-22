@@ -7,6 +7,7 @@ public interface TokenGeneratorPort {
     TokenData generateAccessToken(Long principalId, String principalType, String scope);
     TokenData generateRefreshToken(Long principalId, String principalType, String jti);
     TokenData generatePreAuthToken(Long principalId, String principalType);
+    TokenData generateSetupToken(Long principalId, String principalType);
 
     record TokenData(String token, String jti, ZonedDateTime expiresAt) {}
 }

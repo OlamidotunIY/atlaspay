@@ -76,4 +76,23 @@ public class JwtTokenGeneratorAdapter implements TokenGeneratorPort {
 
         return new TokenData(token, jti, expiresAt);
     }
+
+    @Override
+    public TokenData generateSetupToken(Long principalId, String principalType) {
+        String jti = UUID.randomUUID().toString();
+        // Use the same expiration as pre-auth for simplicity, or we could add a new property
+        ZonedDateTime expiresAt = ZonedDateTime.now().plusNanos(jwtProperties.getPreAuthTokenExpirationMs() * 1000000);
+
+        String token = Jwts.builder()
+                .setId(jti)
+                .setSubject(String.valueOf(principalId))
+                .claim("type", principalType)
+                .claim("purpose", "setup")
+                .setIssuedAt(new Date())
+                .setExpiration(Date.from(expiresAt.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return new TokenData(token, jti, expiresAt);
+    }
 }
