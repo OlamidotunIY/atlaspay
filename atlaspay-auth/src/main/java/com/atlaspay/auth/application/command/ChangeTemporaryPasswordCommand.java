@@ -1,8 +1,9 @@
 package com.atlaspay.auth.application.command;
 
-public record AuthenticateCommand(
+public record ChangeTemporaryPasswordCommand(
         String identifier,
-        String rawCredential,
+        String oldPassword,
+        String newPassword,
         String ipAddress,
         String userAgent
 ) {}
