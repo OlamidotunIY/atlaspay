@@ -22,10 +22,8 @@ public class Merchant extends AggregateRoot<Long> {
     private String lastName;
     private final EmailAddress email;
     private PhoneNumber phone;
-    private String hashedPassword;
+    
     private final BusinessType businessType;
-    private boolean emailVerified;
-    private EmailVerificationCode emailVerificationCode;
     private ComplianceStatus complianceStatus;
     private ComplianceStep complianceStep;
     private MerchantCompliance compliance;
@@ -33,9 +31,9 @@ public class Merchant extends AggregateRoot<Long> {
     private ZonedDateTime updatedAt;
 
     public Merchant(Long id, Country country, String businessName, String firstName, String lastName,
-                    EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType) {
+                    EmailAddress email, PhoneNumber phone, BusinessType businessType) {
         
-        if (country == null || country != Country.NIGERIA) {
+        if (country != Country.NIGERIA) {
             throw new BusinessRuleException(IdentityErrorCode.UNSUPPORTED_COUNTRY, "Currently, only merchants in Nigeria (NG) are supported.");
         }
 
@@ -46,10 +44,8 @@ public class Merchant extends AggregateRoot<Long> {
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.hashedPassword = hashedPassword;
+        
         this.businessType = businessType;
-        this.emailVerified = false;
-        this.emailVerificationCode = new EmailVerificationCode();
         
         this.complianceStatus = ComplianceStatus.NOT_STARTED;
         this.complianceStep = null;
@@ -66,16 +62,15 @@ public class Merchant extends AggregateRoot<Long> {
                 this.businessName,
                 this.email.value(),
                 this.country.name(),
-                this.businessType,
-                this.emailVerificationCode.getCode()
+                this.businessType
             )
         ));
     }
 
     // Reconstitution constructor for Mappers
     public Merchant(Long id, Country country, String businessName, String firstName, String lastName,
-                    EmailAddress email, PhoneNumber phone, String hashedPassword, BusinessType businessType,
-                    boolean emailVerified, ComplianceStatus complianceStatus, ComplianceStep complianceStep,
+                    EmailAddress email, PhoneNumber phone, BusinessType businessType,
+                    ComplianceStatus complianceStatus, ComplianceStep complianceStep,
                     ZonedDateTime createdAt, ZonedDateTime updatedAt) {
         this.id = id;
         this.country = country;
@@ -84,55 +79,13 @@ public class Merchant extends AggregateRoot<Long> {
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.hashedPassword = hashedPassword;
+        
         this.businessType = businessType;
-        this.emailVerified = emailVerified;
-        this.emailVerificationCode = null; // Normally loaded from DB, simplified for MVP
         this.complianceStatus = complianceStatus;
         this.complianceStep = complianceStep;
         this.compliance = new MerchantCompliance();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-    }
-
-    public void verifyEmail(String code) {
-        if (this.emailVerified) {
-            throw new BusinessRuleException(IdentityErrorCode.EMAIL_ALREADY_VERIFIED, "Email is already verified");
-        }
-        if (this.emailVerificationCode == null) {
-            throw new BusinessRuleException(IdentityErrorCode.EMAIL_CODE_NOT_FOUND, "No verification code pending");
-        }
-        
-        this.emailVerificationCode.validate(code);
-        
-        this.emailVerified = true;
-        this.emailVerificationCode = null;
-        this.updatedAt = ZonedDateTime.now();
-
-        registerEvent(new MerchantEmailVerified(
-            UUID.randomUUID().toString(),
-            String.valueOf(id),
-            ZonedDateTime.now()
-        ));
-    }
-
-    public void regenerateEmailVerificationCode() {
-        if (this.emailVerified) {
-            throw new BusinessRuleException(IdentityErrorCode.EMAIL_ALREADY_VERIFIED, "Email is already verified");
-        }
-        
-        this.emailVerificationCode = new EmailVerificationCode();
-        this.updatedAt = ZonedDateTime.now();
-
-        registerEvent(new MerchantEmailVerificationResent(
-            UUID.randomUUID().toString(),
-            String.valueOf(id),
-            ZonedDateTime.now(),
-            new MerchantEmailVerificationResent.Payload(
-                this.email.value(),
-                this.emailVerificationCode.getCode()
-            )
-        ));
     }
     
     public void completeComplianceStep(ComplianceStep step) {
@@ -251,17 +204,6 @@ public class Merchant extends AggregateRoot<Long> {
         ));
     }
     
-    public void changePassword(String newHashedPassword) {
-        this.hashedPassword = newHashedPassword;
-        this.updatedAt = ZonedDateTime.now();
-        
-        registerEvent(new MerchantPasswordChanged(
-            UUID.randomUUID().toString(),
-            String.valueOf(id),
-            ZonedDateTime.now()
-        ));
-    }
-    
     public void ban(String reason) {
         if (this.complianceStatus == ComplianceStatus.REJECTED) {
             throw new BusinessRuleException(IdentityErrorCode.COMPLIANCE_NOT_SUBMITTED, "Merchant is already rejected/banned");
@@ -285,3 +227,4 @@ public class Merchant extends AggregateRoot<Long> {
     }
 
 }
+

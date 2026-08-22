@@ -15,7 +15,6 @@ public record MerchantRegistered(
         String businessName,
         String email,
         String country,
-        BusinessType businessType,
-        String verificationCode
+        BusinessType businessType
     ) {}
 }

@@ -28,7 +28,6 @@ public class MerchantController {
 
     private final RegisterMerchantUseCase registerMerchantUseCase;
     private final GetMerchantProfileUseCase getMerchantProfileUseCase;
-    private final VerifyMerchantEmailUseCase verifyMerchantEmailUseCase;
     private final CompleteComplianceProfileUseCase completeComplianceProfileUseCase;
     private final CompleteComplianceContactUseCase completeComplianceContactUseCase;
     private final CompleteComplianceOwnerUseCase completeComplianceOwnerUseCase;
@@ -39,7 +38,6 @@ public class MerchantController {
     public MerchantController(
             RegisterMerchantUseCase registerMerchantUseCase, 
             GetMerchantProfileUseCase getMerchantProfileUseCase,
-            VerifyMerchantEmailUseCase verifyMerchantEmailUseCase,
             CompleteComplianceProfileUseCase completeComplianceProfileUseCase,
             CompleteComplianceContactUseCase completeComplianceContactUseCase,
             CompleteComplianceOwnerUseCase completeComplianceOwnerUseCase,
@@ -48,7 +46,6 @@ public class MerchantController {
             SubmitComplianceUseCase submitComplianceUseCase) {
         this.registerMerchantUseCase = registerMerchantUseCase;
         this.getMerchantProfileUseCase = getMerchantProfileUseCase;
-        this.verifyMerchantEmailUseCase = verifyMerchantEmailUseCase;
         this.completeComplianceProfileUseCase = completeComplianceProfileUseCase;
         this.completeComplianceContactUseCase = completeComplianceContactUseCase;
         this.completeComplianceOwnerUseCase = completeComplianceOwnerUseCase;
@@ -68,7 +65,6 @@ public class MerchantController {
                 request.lastName(),
                 request.email(),
                 request.phone(),
-                request.password(),
                 request.businessType()
         );
         RegisterMerchantResult result = registerMerchantUseCase.execute(command);
@@ -84,18 +80,6 @@ public class MerchantController {
         GetMerchantProfileQuery query = new GetMerchantProfileQuery(Long.valueOf(merchantIdStr));
         MerchantProfileDto result = getMerchantProfileUseCase.execute(query);
         return ResponseEntity.ok(result);
-    }
-    
-    @PostMapping("/verify-email")
-    @Operation(summary = "Verify merchant email")
-    public ResponseEntity<Map<String, Boolean>> verifyEmail(@Valid @RequestBody VerifyMerchantEmailRequest request, Principal principal) {
-        String merchantIdStr = principal != null ? principal.getName() : "anonymous";
-        VerifyMerchantEmailCommand command = new VerifyMerchantEmailCommand(
-            Long.valueOf(merchantIdStr),
-            request.code()
-        );
-        verifyMerchantEmailUseCase.execute(command);
-        return ResponseEntity.ok(Map.of("verified", true));
     }
     
     @GetMapping("/compliance")
@@ -199,3 +183,4 @@ public class MerchantController {
         return ResponseEntity.ok().build();
     }
 }
+

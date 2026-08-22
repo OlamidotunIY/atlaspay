@@ -9,6 +9,6 @@ public record RegisterMerchantCommand(
     String lastName,
     String email,
     String phone,
-    String password,
     BusinessType businessType
 ) {}
+

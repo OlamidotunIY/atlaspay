@@ -47,17 +47,9 @@ public class MerchantJpaEntity {
 
     @Column(name = "phone", nullable = false)
     private String phone;
-
-    @Column(name = "hashed_password", nullable = false)
-    private String hashedPassword;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "business_type", nullable = false)
     private BusinessType businessType;
-
-    @Setter
-    @Column(name = "email_verified", nullable = false)
-    private boolean emailVerified;
 
     @Setter
     @Enumerated(EnumType.STRING)
@@ -75,3 +67,4 @@ public class MerchantJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
 }
+

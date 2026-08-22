@@ -23,9 +23,7 @@ public class MerchantMapper {
                 domain.getLastName(),
                 domain.getEmail().value(),
                 domain.getPhone() != null ? domain.getPhone().value() : null,
-                domain.getHashedPassword(),
                 domain.getBusinessType(),
-                domain.isEmailVerified(),
                 domain.getComplianceStatus(),
                 domain.getComplianceStep() != null ? domain.getComplianceStep().name() : null,
                 domain.getCreatedAt(),
@@ -44,9 +42,7 @@ public class MerchantMapper {
                 entity.getLastName(),
                 new EmailAddress(entity.getEmail()),
                 entity.getPhone() != null ? new PhoneNumber(entity.getPhone()) : null,
-                entity.getHashedPassword(),
                 entity.getBusinessType(),
-                entity.isEmailVerified(),
                 entity.getComplianceStatus() != null ? ComplianceStatus.valueOf(entity.getComplianceStatus().name()) : ComplianceStatus.NOT_STARTED,
                 entity.getComplianceStep() != null ? ComplianceStep.valueOf(entity.getComplianceStep()) : null,
                 entity.getCreatedAt(),
@@ -59,3 +55,4 @@ public class MerchantMapper {
         return country != null ? country : Country.NIGERIA;
     }
 }
+
